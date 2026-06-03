@@ -3,306 +3,556 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pau-Brasil: O Escambo em Pernambuco</title>
+    <title>Pernambuco Colonial: O Escambo</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #2c3e50;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
+            background-color: #1a1a1a;
+            font-family: 'Georgia', serif;
+            color: #f5f5f5;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            user-select: none;
         }
 
         h1 {
-            margin-bottom: 10px;
-            color: #f1c40f;
+            margin: 5px 0;
+            color: #d4a373;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            font-size: 28px;
         }
 
-        #game-container {
+        #game-wrapper {
             position: relative;
-            border: 4px solid #34495e;
-            border-radius: 8px;
-            overflow: hidden;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.7);
+            border: 6px solid #4a3728;
+            border-radius: 4px;
         }
 
         canvas {
-            background-color: #27ae60; /* Solo de Pernambuco */
             display: block;
+            background-color: #2d4a22;
         }
 
-        #ui-panel {
-            width: 800px;
-            background-color: #34495e;
-            padding: 15px;
-            box-sizing: border-box;
+        /* Interface de Status Superior */
+        #status-hud {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.65);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #6b533c;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 200px;
+        }
+
+        .bar-container span { width: 50px; font-weight: bold; }
+
+        .bar {
+            flex-grow: 1;
+            height: 14px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+            border: 1px solid #555;
+        }
+
+        .fill { height: 100%; width: 100%; transition: width 0.1s ease; }
+        #fill-fome { background: linear-gradient(90deg, #d35400, #e67e22); }
+        #fill-sede { background: linear-gradient(90deg, #2980b9, #3498db); }
+
+        /* Menu de Escambo (Loja do Feitor) */
+        #escambo-menu {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2c1e15;
+            border: 4px solid #d4a373;
+            padding: 20px;
+            width: 320px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+
+        #escambo-menu h3 { margin-top: 0; color: #faedcd; border-bottom: 2px solid #6b533c; padding-bottom: 8px; }
+
+        .loja-item {
             display: flex;
             justify-content: space-between;
-            font-size: 16px;
-            border-bottom: 4px solid #2c3e50;
+            align-items: center;
+            background: #3d2b1f;
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #5c4028;
         }
 
-        .status-bar {
-            background-color: #7f8c8d;
-            width: 150px;
-            height: 20px;
-            border-radius: 10px;
-            display: inline-block;
-            overflow: hidden;
-            vertical-align: middle;
+        .loja-item button {
+            background: #8b5a2b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-weight: bold;
         }
 
-        .progress {
-            height: 100%;
-            width: 100%;
-            transition: width 0.2s;
-        }
-
-        #fome-bar { background-color: #e67e22; }
-        #sede-bar { background-color: #3498db; }
-
-        #instrucoes {
+        .loja-item button:hover { background: #a06b3e; }
+        
+        #btn-fechar-loja {
             margin-top: 15px;
-            max-width: 800px;
-            text-align: center;
-            background-color: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 14px;
+            background: #c0392b;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        /* Hotbar Inferior */
+        #hotbar {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            background: rgba(20, 15, 10, 0.85);
+            padding: 6px;
+            border-radius: 6px;
+            border: 2px solid #6b533c;
+        }
+
+        .slot {
+            width: 50px;
+            height: 50px;
+            background: #3d2b1f;
+            border: 2px solid #5c4028;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+        }
+
+        .slot.selected { border-color: #e67e22; background: #533b2b; }
+        .slot .qtd { position: absolute; bottom: 2px; right: 4px; font-weight: bold; color: #fff; }
+        .slot .tecla { position: absolute; top: 1px; left: 3px; color: #888; font-size: 9px; }
+        .slot .nome { font-size: 9px; text-align: center; color: #faedcd; word-break: break-all; padding: 0 2px;}
+
+        #dica-contexto {
+            position: absolute;
+            bottom: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            border: 1px solid #d4a373;
+            display: none;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-    <h1>Pau-Brasil: Escambo em Pernambuco</h1>
+    <h1>Mata de Pernambuco - Século XVI</h1>
 
-    <div id="game-container">
-        <div id="ui-panel">
-            <div>
-                <strong>Fome:</strong> <div class="status-bar"><div id="fome-bar" class="progress"></div></div> |
-                <strong>Sede:</strong> <div class="status-bar"><div id="sede-bar" class="progress"></div></div>
+    <div id="game-wrapper">
+        <canvas id="gameCanvas" width="900" height="550"></canvas>
+
+        <div id="status-hud">
+            <div class="bar-container">
+                <span>Fome:</span>
+                <div class="bar"><div id="fill-fome" class="fill"></div></div>
             </div>
-            <div>
-                <strong>Machado:</strong> <span id="txt-machado">Pedra Polida</span> |
-                <strong>Inventário:</strong> <span id="txt-inventario">0</span> Pau-Brasil
+            <div class="bar-container">
+                <span>Sede:</span>
+                <div class="bar"><div id="fill-sede" class="fill"></div></div>
+            </div>
+            <div style="color: #faedcd; margin-top: 5px;">
+                Machado: <span id="txt-machado" style="color:#fff;">Pedra Lascada</span>
             </div>
         </div>
-        
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+        <div id="dica-contexto">Aperte ESPAÇO para interagir</div>
+
+        <div id="escambo-menu">
+            <h3>Feitoria de Escambo</h3>
+            <p style="font-size: 12px; color: #bdc3c7; margin-top:-8px;">Troque seu Pau-Brasil</p>
+            
+            <div class="loja-item">
+                <div>
+                    <span class="nome">Água Potável</span><br>
+                    <small style="color: #f1c40f;">Custo: 2 Madeiras</small>
+                </div>
+                <button onclick="comprarItem('Agua', 2)">Trocar</button>
+            </div>
+
+            <div class="loja-item">
+                <div>
+                    <span class="nome">Carne de Caça</span><br>
+                    <small style="color: #f1c40f;">Custo: 3 Madeiras</small>
+                </div>
+                <button onclick="comprarItem('Comida', 3)">Trocar</button>
+            </div>
+
+            <div class="loja-item">
+                <div>
+                    <span class="nome">Machado de Ferro</span><br>
+                    <small style="color: #f1c40f;">Custo: 8 Madeiras</small>
+                </div>
+                <button id="btn-machado-loja" onclick="comprarMachado()">Trocar</button>
+            </div>
+
+            <button id="btn-fechar-loja" onclick="fecharLoja()">Sair do Escambo</button>
+        </div>
+
+        <div id="hotbar">
+            <div class="slot" id="slot-0"><span class="tecla">1</span><span class="nome">Pau-Brasil</span><span class="qtd" id="qtd-madeira">0</span></div>
+            <div class="slot" id="slot-1"><span class="tecla">2</span><span class="nome">Água</span><span class="qtd" id="qtd-agua">0</span></div>
+            <div class="slot" id="slot-2"><span class="tecla">3</span><span class="nome">Comida</span><span class="qtd" id="qtd-comida">0</span></div>
+            <div class="slot" id="slot-3"><span class="tecla">4</span><span class="nome">Vazio</span><span class="qtd">-</span></div>
+        </div>
     </div>
 
-    <div id="instrucoes">
-        <strong>Controles:</strong> Movimente-se com <b>W, A, S, D</b>. <br>
-        Chegue perto de uma árvore de Pau-Brasil (Vermelha) e aperte <b>ESPAÇO</b> repetidamente para usar o machado.<br>
-        Vá até o Feitor (NPC Azul) para trocar seu Pau-Brasil por comida, água ou um machado melhor de metal.
-    </div>
+    <p style="font-size: 13px; color: #888; max-width: 600px; text-align: center; margin-top: 10px;">
+        Use <b>WASD</b> para andar. Perto de árvores vermelhas, segure ou aperte <b>ESPAÇO</b> para golpear. Use as teclas <b>2</b> ou <b>3</b> para consumir os itens comprados na Hotbar.
+    </p>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Elementos do HTML para atualizar a interface
-        const fomeBar = document.getElementById("fome-bar");
-        const sedeBar = document.getElementById("sede-bar");
+        // UI DOM Elements
+        const fomeFill = document.getElementById("fill-fome");
+        const sedeFill = document.getElementById("fill-sede");
         const txtMachado = document.getElementById("txt-machado");
-        const txtInventario = document.getElementById("txt-inventario");
+        const dicaContexto = document.getElementById("dica-contexto");
+        const menuEscambo = document.getElementById("escambo-menu");
 
-        // Configurações do Jogador
+        // Game State
+        let jogoPausado = false;
+
         const jogador = {
-            x: 100,
-            y: 250,
-            velocidade: 4,
-            tamanho: 30,
-            fome: 100,
-            sede: 100,
-            pauBrasil: 0,
-            tipoMachado: "Pedra", // Pedra ou Metal
-            poderCorte: 10
+            x: 150, y: 300,
+            vel: 3.2,
+            raio: 16,
+            fome: 100, sede: 100,
+            inventario: { madeira: 0, agua: 0, comida: 0 },
+            machadoNivel: 1, // 1 = Pedra, 2 = Ferro
+            poderCorte: 1.2
         };
 
-        // Configurações do NPC (Feitor)
-        const npc = {
-            x: 700,
-            y: 250,
-            tamanho: 35,
-            raioInteracao: 60
-        };
+        const feitor = { x: 750, y: 280, raio: 22 };
 
-        // Configurações das Árvores (Pau-Brasil)
+        // Geração procedural de árvores realistas
         let arvores = [
-            { x: 300, y: 100, vida: 100, maxVida: 100, viva: true },
-            { x: 500, y: 150, vida: 100, maxVida: 100, viva: true },
-            { x: 250, y: 350, vida: 100, maxVida: 100, viva: true },
-            { x: 450, y: 380, vida: 100, maxVida: 100, viva: true }
+            {x: 320, y: 150, vida: 100, max: 100, viva: true, seed: Math.random()*100},
+            {x: 520, y: 120, vida: 100, max: 100, viva: true, seed: Math.random()*100},
+            {x: 380, y: 420, vida: 100, max: 100, viva: true, seed: Math.random()*100},
+            {x: 580, y: 390, vida: 100, max: 100, viva: true, seed: Math.random()*100},
+            {x: 180, y: 130, vida: 100, max: 100, viva: true, seed: Math.random()*100}
         ];
 
-        // Controle de Teclas
-        const teclas = {};
+        // Geração do solo realista via canvas em memória para performance
+        const bgCanvas = document.createElement('canvas');
+        bgCanvas.width = canvas.width; bgCanvas.height = canvas.height;
+        const bgCtx = bgCanvas.getContext('2d');
+        gerarSoloRealista();
 
-        window.addEventListener("keydown", (e) => {
-            teclas[e.key.toLowerCase()] = true;
+        function gerarSoloRealista() {
+            // Base verde escura
+            bgCtx.fillStyle = '#243b18';
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
             
-            // Ação de quebrar a madeira com ESPAÇO
-            if (e.key === " ") {
-                tentarCortarMadeira();
-                tentarEscambo();
-            }
-        });
-
-        window.addEventListener("keyup", (e) => {
-            teclas[e.key.toLowerCase()] = false;
-        });
-
-        // Função para calcular distância entre dois pontos
-        function obterDistancia(x1, y1, x2, y2) {
-            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-        }
-
-        // Função de corte do Pau-Brasil
-        function tentarCortarMadeira() {
-            arvores.forEach(arvore => {
-                if (arvore.viva) {
-                    let dist = obterDistancia(jogador.x, jogador.y, arvore.x, arvore.y);
-                    if (dist < 50) { // Próximo o suficiente para cortar
-                        arvore.vida -= jogador.poderCorte;
-                        if (arvore.vida <= 0) {
-                            arvore.viva = false;
-                            jogador.pauBrasil += Math.floor(Math.random() * 3) + 2; // Ganha entre 2 e 4 madeiras
-                            txtInventario.innerText = jogador.pauBrasil;
-                            
-                            // Renasce a árvore após 5 segundos
-                            setTimeout(() => {
-                                arvore.viva = true;
-                                arvore.vida = arvore.maxVida;
-                            }, 5000);
-                        }
-                    }
-                }
-            });
-        }
-
-        // Função de Interação e Escambo com o NPC
-        function tentarEscambo() {
-            let dist = obterDistancia(jogador.x, jogador.y, npc.x, npc.y);
-            if (dist < npc.raioInteracao) {
-                if (jogador.pauBrasil >= 3) {
-                    // Prioriza comprar o machado melhor se ainda não tiver
-                    if (jogador.tipoMachado === "Pedra" && jogador.pauBrasil >= 8) {
-                        jogador.pauBrasil -= 8;
-                        jogador.tipoMachado = "Metal Ferro";
-                        jogador.poderCorte = 25; // Corta bem mais rápido
-                        txtMachado.innerText = "Metal de Ferro";
-                        alert("Escambo Feito! Você trocou 8 Madeiras por um Machado de Metal.");
-                    } else {
-                        // Se não, troca por sobrevivência (Comida e Água)
-                        jogador.pauBrasil -= 3;
-                        jogador.fome = Math.min(100, jogador.fome + 40);
-                        jogador.sede = Math.min(100, jogador.sede + 40);
-                        alert("Escambo Feito! Você trocou 3 Madeiras por Água e Alimentos.");
-                    }
-                    txtInventario.innerText = jogador.pauBrasil;
+            // Renderiza manchas de terra batida e variações de mato
+            for (let i = 0; i < 450; i++) {
+                let x = Math.random() * bgCanvas.width;
+                let y = Math.random() * bgCanvas.height;
+                let tamanho = Math.random() * 40 + 20;
+                
+                let m = Math.random();
+                if (m < 0.35) {
+                    bgCtx.fillStyle = 'rgba(74, 55, 40, 0.25)'; // Manchas de Terra
+                } else if (m < 0.7) {
+                    bgCtx.fillStyle = 'rgba(27, 50, 18, 0.4)';  // Mato Denso escuro
                 } else {
-                    alert("O Feitor diz: Traga pelo menos 3 toras de Pau-Brasil para trocar por suprimentos, ou 8 para um machado melhor!");
+                    bgCtx.fillStyle = 'rgba(46, 76, 32, 0.3)';  // Relva clara
                 }
+                bgCtx.beginPath();
+                bgCtx.arc(x, y, tamanho, 0, Math.PI * 2);
+                bgCtx.fill();
+            }
+
+            // Pequenos detalhes de raízes/folhas secas espalhadas
+            bgCtx.strokeStyle = 'rgba(50, 30, 10, 0.15)';
+            bgCtx.lineWidth = 2;
+            for(let i=0; i<80; i++){
+                bgCtx.beginPath();
+                let rx = Math.random()*bgCanvas.width;
+                let ry = Math.random()*bgCanvas.height;
+                bgCtx.moveTo(rx, ry);
+                bgCtx.lineTo(rx + Math.random()*15, ry + Math.random()*10);
+                bgCtx.stroke();
             }
         }
 
-        // Atualização da lógica do jogo
-        function atualizar() {
-            // Movimentação WASD
-            if (teclas['w'] && jogador.y > 0) jogador.y -= jogador.velocidade;
-            if (teclas['s'] && jogador.y < canvas.height - jogador.tamanho) jogador.y += jogador.velocidade;
-            if (teclas['a'] && jogador.x > 0) jogador.x -= jogador.velocidade;
-            if (teclas['d'] && jogador.x < canvas.width - jogador.tamanho) jogador.x += jogador.velocidade;
-
-            // Sistema de Sobrevivência (Sede e Fome caem com o tempo)
-            jogador.fome -= 0.03;
-            jogador.sede -= 0.05;
-
-            // Atualiza as barras visuais
-            fomeBar.style.width = Math.max(0, jogador.fome) + "%";
-            sedeBar.style.width = Math.max(0, jogador.sede) + "%";
-
-            // Fim de jogo básico se morrer de fome ou sede
-            if (jogador.fome <= 0 || jogador.sede <= 0) {
-                alert("Você ficou exausto e sem forças. Tente balancear melhor o corte e o escambo!");
-                jogador.fome = 100;
-                jogador.sede = 100;
-                jogador.pauBrasil = 0;
-                jogador.x = 100;
-                jogador.y = 250;
-                txtInventario.innerText = 0;
+        // Teclado
+        const teclas = {};
+        window.addEventListener("keydown", e => { 
+            if(jogoPausado && e.key !== "Escape") return;
+            teclas[e.key.toLowerCase()] = true; 
+            
+            // Atalhos de consumo da hotbar (Teclas 2 e 3)
+            if(e.key === "2") usarConsumivel('agua');
+            if(e.key === "3") usarConsumivel('comida');
+            
+            // Interações com Espaço
+            if(e.key === " ") {
+                interagirArvore();
+                interagirFeitor();
             }
+        });
+        window.addEventListener("keyup", e => { teclas[e.key.toLowerCase()] = false; });
+
+        function dist(x1, y1, x2, y2) { return Math.sqrt((x2 - x1)**2 + (y2 - y1)**2); }
+
+        function atualizarUI() {
+            fomeFill.style.width = Math.max(0, jogador.fome) + "%";
+            sedeFill.style.width = Math.max(0, jogador.sede) + "%";
+            
+            document.getElementById("qtd-madeira").innerText = jogador.inventario.madeira;
+            document.getElementById("qtd-agua").innerText = jogador.inventario.agua;
+            document.getElementById("qtd-comida").innerText = jogador.inventario.comida;
+            
+            txtMachado.innerText = jogador.machadoNivel === 1 ? "Pedra Lascada" : "Aço de Ferro Coado";
         }
 
-        // Renderização dos gráficos no Canvas
-        function desenhar() {
-            // Limpa a tela
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Desenha as árvores de Pau-Brasil (Tronco marrom, folhas avermelhadas/densas)
-            arvores.forEach(arvore => {
-                if (arvore.viva) {
-                    // Tronco
-                    ctx.fillStyle = "#795548";
-                    ctx.fillRect(arvore.x - 5, arvore.y, 10, 30);
-                    // Copa Avermelhada (Pau-Brasil característico)
-                    ctx.fillStyle = "#c0392b";
-                    ctx.beginPath();
-                    ctx.arc(arvore.x, arvore.y - 10, 20, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    // Barra de vida da árvore
-                    if (arvore.vida < arvore.maxVida) {
-                        ctx.fillStyle = "#bdc3c7";
-                        ctx.fillRect(arvore.x - 20, arvore.y - 40, 40, 5);
-                        ctx.fillStyle = "#2ecc71";
-                        ctx.fillRect(arvore.x - 20, arvore.y - 40, (arvore.vida / arvore.maxVida) * 40, 5);
+        function interagirArvore() {
+            arvores.forEach(a => {
+                if(a.viva && dist(jogador.x, jogador.y, a.x, a.y) < 55) {
+                    a.vida -= jogador.machadoNivel === 1 ? 15 : 35; // Machado de ferro corta muito mais rápido
+                    if(a.vida <= 0) {
+                        a.viva = false;
+                        jogador.inventario.madeira += Math.floor(Math.random() * 2) + 2;
+                        atualizarUI();
+                        setTimeout(() => { a.viva = true; a.vida = a.max; }, 8000); // Respewn estruturado
                     }
                 }
             });
+        }
 
-            // Desenha o NPC (Feitor Colonial)
-            ctx.fillStyle = "#2980b9"; // Azul
-            ctx.fillRect(npc.x, npc.y, npc.tamanho, npc.tamanho);
-            // Chapéu do NPC para detalhe
-            ctx.fillStyle = "#34495e";
-            ctx.fillRect(npc.x - 5, npc.y, npc.tamanho + 10, 8);
-            
-            // Texto indicativo no NPC
-            ctx.fillStyle = "white";
-            ctx.font = "12px Arial";
-            ctx.fillText("Feitor (Escambo)", npc.x - 20, npc.y - 10);
-
-            // Desenha o Personagem Principal (Indígena)
-            ctx.fillStyle = "#d35400"; // Tom de pele bronzeado/ocre
-            ctx.fillRect(jogador.x, jogador.y, jogador.tamanho, jogador.tamanho);
-            
-            // Pintura de guerra/Cacique (Detalhe visual simples)
-            ctx.fillStyle = "#e74c3c";
-            ctx.fillRect(jogador.x + 5, jogador.y + 10, 20, 4);
-
-            // Mostra o raio de interação se estiver perto do NPC
-            if (obterDistancia(jogador.x, jogador.y, npc.x, npc.y) < npc.raioInteracao) {
-                ctx.fillStyle = "white";
-                ctx.font = "14px Arial";
-                ctx.fillText("Aperte ESPAÇO para negociar", npc.x - 50, npc.y + 60);
+        function interagirFeitor() {
+            if(dist(jogador.x, jogador.y, feitor.x, feitor.y) < 60) {
+                jogoPausado = true;
+                menuEscambo.style.display = "block";
             }
         }
 
-        // Loop Principal do Jogo
-        function loop() {
+        function fecharLoja() {
+            jogoPausado = false;
+            menuEscambo.style.display = "none";
+            // Limpa o pulso do teclado para evitar travar andando
+            for (let key in teclas) teclas[key] = false;
+        }
+
+        function comprarItem(tipo, custo) {
+            if(jogador.inventario.madeira >= custo) {
+                jogador.inventario.madeira -= custo;
+                if(tipo === 'Agua') jogador.inventario.agua++;
+                if(tipo === 'Comida') jogador.inventario.comida++;
+                atualizarUI();
+            } else {
+                alert("Toras de Pau-Brasil insuficientes para esta troca!");
+            }
+        }
+
+        function comprarMachado() {
+            if(jogador.machadoNivel >= 2) {
+                alert("Você já possui a melhor ferramenta disponível.");
+                return;
+            }
+            if(jogador.inventario.madeira >= 8) {
+                jogador.inventario.madeira -= 8;
+                jogador.machadoNivel = 2;
+                document.getElementById("btn-machado-loja").innerText = "Obtido";
+                document.getElementById("btn-machado-loja").disabled = true;
+                atualizarUI();
+            } else {
+                alert("O Feitor exige 8 toras pelo machado de metal.");
+            }
+        }
+
+        function usarConsumivel(tipo) {
+            if(tipo === 'agua' && jogador.inventario.agua > 0) {
+                jogador.inventario.agua--;
+                jogador.sede = Math.min(100, jogador.sede + 35);
+            } else if(tipo === 'comida' && jogador.inventario.comida > 0) {
+                jogador.inventario.comida--;
+                jogador.fome = Math.min(100, jogador.fome + 40);
+            }
+            atualizarUI();
+        }
+
+        function atualizar() {
+            if (jogoPausado) return;
+
+            // Movimento fluido com colisões nas bordas
+            let dx = 0, dy = 0;
+            if (teclas['w'] || teclas['arrowup']) dy -= jogador.vel;
+            if (teclas['s'] || teclas['arrowdown']) dy += jogador.vel;
+            if (teclas['a'] || teclas['arrowleft']) dx -= jogador.vel;
+            if (teclas['d'] || teclas['arrowright']) dx += jogador.vel;
+
+            jogador.x = Math.max(jogador.raio, Math.min(canvas.width - jogador.raio, jogador.x + dx));
+            jogador.y = Math.max(jogador.raio, Math.min(canvas.height - jogador.raio, jogador.y + dy));
+
+            // Metabolismo
+            jogador.fome -= 0.025;
+            jogador.sede -= 0.04;
+
+            // Gerencia UI de Proximidade (Balão indicativo)
+            let pertoDeAlgo = false;
+            arvores.forEach(a => { if(a.viva && dist(jogador.x, jogador.y, a.x, a.y) < 55) pertoDeAlgo = "Cortar Pau-Brasil [Espaço]"; });
+            if(dist(jogador.x, jogador.y, feitor.x, feitor.y) < 60) pertoDeAlgo = "Negociar Escambo [Espaço]";
+
+            if(pertoDeAlgo) {
+                dicaContexto.style.display = "block";
+                dicaContexto.innerText = pertoDeAlgo;
+            } else {
+                dicaContexto.style.display = "none";
+            }
+
+            // Condição de Derrota
+            if(jogador.fome <= 0 || jogador.sede <= 0) {
+                alert("As forças do nativo se esgotaram na imensidão da mata. Tente equilibrar mais as suas trocas!");
+                jogador.fome = 100; jogador.sede = 100;
+                jogador.inventario = { madeira: 0, agua: 0, comida: 0 };
+                jogador.x = 150; jogador.y = 300;
+                atualizarUI();
+            }
+
+            // Atualização visual das seleções da Hotbar baseado no estoque
+            document.getElementById("slot-1").className = jogador.inventario.agua > 0 ? "slot selected" : "slot";
+            document.getElementById("slot-2").className = jogador.inventario.comida > 0 ? "slot selected" : "slot";
+        }
+
+        function desenhar() {
+            // 1. Desenha o chão renderizado em memória (Solo Realista)
+            ctx.drawImage(bgCanvas, 0, 0);
+
+            // 2. Desenha o Feitor (NPC) com estética de colonizador seiscentista
+            // Sombra
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath(); ctx.arc(feitor.x, feitor.y + 12, 18, 0, Math.PI*2); ctx.fill();
+            // Corpo/Casaco
+            ctx.fillStyle = "#2b3d52"; 
+            ctx.beginPath(); ctx.arc(feitor.x, feitor.y, feitor.raio, 0, Math.PI*2); ctx.fill();
+            // Colete Interno
+            ctx.fillStyle = "#cca43b"; 
+            ctx.beginPath(); ctx.arc(feitor.x, feitor.y, feitor.raio - 7, 0, Math.PI); ctx.fill();
+            // Chapéu de abas largas colonial
+            ctx.fillStyle = "#1c140e";
+            ctx.beginPath(); ctx.arc(feitor.x, feitor.y - 4, 15, 0, Math.PI*2); ctx.fill();
+            ctx.fillRect(feitor.x - 26, feitor.y - 6, 52, 5); // Aba do chapéu
+
+            // 3. Desenha as Árvores Realistas (Pau-Brasil)
+            arvores.forEach(a => {
+                if(!a.viva) {
+                    // Cepa/Toco da árvore cortada
+                    ctx.fillStyle = '#4a2f13';
+                    ctx.fillRect(a.x - 6, a.y - 4, 12, 12);
+                    ctx.fillStyle = '#d4a373';
+                    ctx.beginPath(); ctx.arc(a.x, a.y - 4, 6, 0, Math.PI*2); ctx.fill();
+                    return;
+                }
+
+                // Sombra da copa
+                ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                ctx.beginPath(); ctx.arc(a.x, a.y + 25, 35, 0, Math.PI*2); ctx.fill();
+
+                // Tronco rugoso e texturizado
+                ctx.fillStyle = '#513829';
+                ctx.fillRect(a.x - 8, a.y - 10, 16, 40);
+                ctx.fillStyle = '#3a261c'; // Sombra interna do tronco
+                ctx.fillRect(a.x - 8, a.y - 10, 5, 40);
+
+                // Copa Realista em camadas (Camada de Folhas avermelhadas e verdes misturadas)
+                let numCamadas = 6;
+                for(let i = 0; i < numCamadas; i++) {
+                    let offsetCores = Math.sin(a.seed + i) * 8;
+                    // Gradiente característico do Pau-Brasil (Verde oliva com brotos e flores vermelho-sangue)
+                    ctx.fillStyle = `rgb(${140 + offsetCores * 4}, ${40 + offsetCores * 2}, 30)`;
+                    
+                    ctx.beginPath();
+                    let cx = a.x + Math.cos(a.seed + i) * 12;
+                    let cy = a.y - 25 + Math.sin(a.seed + i) * 10;
+                    ctx.arc(cx, cy, 28 - i * 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Indicador de Vida discreto (Estilo barra flutuante sobre as árvores atingidas)
+                if(a.vida < a.max) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    ctx.fillRect(a.x - 20, a.y - 65, 40, 6);
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.fillRect(a.x - 20, a.y - 65, (a.vida / a.max) * 40, 6);
+                }
+            });
+
+            // 4. Desenha o Personagem Jogador (Nativo Indígena)
+            // Sombra projetada
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath(); ctx.arc(jogador.x, jogador.y + 10, 14, 0, Math.PI*2); ctx.fill();
+            
+            // Corpo / Pele Ocre
+            ctx.fillStyle = "#bd6a3f"; 
+            ctx.beginPath(); ctx.arc(jogador.x, jogador.y, jogador.raio, 0, Math.PI*2); ctx.fill();
+            
+            // Pinturas Corporais (Urucum)
+            ctx.fillStyle = "#900c3f";
+            ctx.fillRect(jogador.x - 10, jogador.y - 4, 20, 3);
+            ctx.fillRect(jogador.x - 6, jogador.y + 4, 12, 2);
+
+            // Cabelo preto liso típico
+            ctx.fillStyle = "#111";
+            ctx.beginPath(); ctx.arc(jogador.x, jogador.y - 6, 11, Math.PI, 0); ctx.fill();
+            ctx.fillRect(jogador.x - 11, jogador.y - 6, 4, 10);
+            ctx.fillRect(jogador.x + 7, jogador.y - 6, 4, 10);
+        }
+
+        function loopPrincipal() {
             atualizar();
             desenhar();
-            requestAnimationFrame(loop);
+            requestAnimationFrame(loopPrincipal);
         }
 
-        // Inicia o jogo
-        loop();
+        // Inicialização
+        atualizarUI();
+        loopPrincipal();
     </script>
 </body>
 </html>
