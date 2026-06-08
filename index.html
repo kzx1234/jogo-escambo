@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pernambuco Colonial: Expansão e Conflito</title>
+    <title>Pernambuco Colonial: Fronteiras em Expansão</title>
     <style>
         body {
             margin: 0;
@@ -24,7 +24,7 @@
             margin: 5px 0;
             color: #d4a373;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            font-size: 24px;
+            font-size: 22px;
         }
 
         #game-wrapper {
@@ -33,11 +33,10 @@
             border: 6px solid #4a3728;
             border-radius: 4px;
             background: #2d4a22;
-            width: 900px;
-            height: 550px;
+            width: 950px;
+            height: 580px;
         }
 
-        /* Ajustes para o modo Tela Cheia nativo do navegador */
         #game-wrapper:fullscreen {
             width: 100vw;
             height: 100vh;
@@ -56,7 +55,7 @@
             display: block;
         }
 
-        /* Interface de Status Superior */
+        /* HUD Superior */
         #status-hud {
             position: absolute;
             top: 15px;
@@ -64,7 +63,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8);
             padding: 12px;
             border-radius: 6px;
             border: 1px solid #6b533c;
@@ -77,7 +76,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            width: 180px;
+            width: 190px;
         }
 
         .bar-container span { width: 60px; font-weight: bold; }
@@ -91,12 +90,16 @@
             border: 1px solid #444;
         }
 
-        .fill { height: 100%; width: 100%; transition: width 0.1s ease; }
+        .fill { 
+            height: 100%; 
+            width: 100%; 
+            transition: width 0.2s ease-out; 
+        }
         #fill-fome { background: linear-gradient(90deg, #d35400, #e67e22); }
         #fill-sede { background: linear-gradient(90deg, #2980b9, #3498db); }
         #fill-vida { background: linear-gradient(90deg, #c0392b, #e74c3c); }
 
-        /* Menu de Escambo Expandido */
+        /* Menu de Escambo */
         #escambo-menu {
             display: none;
             position: absolute;
@@ -106,23 +109,21 @@
             background: #231710;
             border: 4px solid #d4a373;
             padding: 15px;
-            width: 380px;
-            max-height: 85vh;
+            width: 400px;
+            max-height: 80vh;
             overflow-y: auto;
             border-radius: 8px;
             box-shadow: 0 0 25px rgba(0,0,0,0.9);
-            text-align: center;
             z-index: 20;
         }
 
-        #escambo-menu h3 { margin: 0 0 5px 0; color: #faedcd; border-bottom: 2px solid #6b533c; padding-bottom: 5px; }
+        #escambo-menu h3 { margin: 0 0 5px 0; text-align: center; color: #faedcd; border-bottom: 2px solid #6b533c; padding-bottom: 5px; }
 
         .loja-secao {
             font-size: 11px;
             text-transform: uppercase;
             color: #a06b3e;
             margin: 8px 0 3px 0;
-            text-align: left;
             font-weight: bold;
         }
 
@@ -135,7 +136,6 @@
             padding: 6px 10px;
             border-radius: 4px;
             border: 1px solid #4a3320;
-            text-align: left;
         }
 
         .loja-item font { font-size: 13px; color: #faedcd; font-weight: bold; }
@@ -166,6 +166,61 @@
             width: 100%;
         }
 
+        /* Mochila Menu (E) */
+        #mochila-menu {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(35, 23, 16, 0.95);
+            border: 3px solid #a06b3e;
+            padding: 20px;
+            width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px #000;
+            z-index: 25;
+            text-align: center;
+        }
+
+        /* Painel ADM */
+        #btn-adm-trigger {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(40,40,40,0.8);
+            border: 1px solid #444;
+            color: #888;
+            font-size: 10px;
+            padding: 4px 8px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        #adm-panel {
+            display: none;
+            position: absolute;
+            bottom: 50px;
+            left: 15px;
+            background: #1e272e;
+            border: 2px solid #3c6382;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 30;
+            width: 200px;
+        }
+
+        #adm-panel button {
+            width: 100%;
+            background: #3c6382;
+            color: white;
+            border: none;
+            margin: 3px 0;
+            padding: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
         /* Hotbar */
         #hotbar {
             position: absolute;
@@ -182,8 +237,8 @@
         }
 
         .slot {
-            width: 48px;
-            height: 48px;
+            width: 50px;
+            height: 50px;
             background: #2e2016;
             border: 2px solid #473222;
             border-radius: 4px;
@@ -193,14 +248,42 @@
             justify-content: center;
             position: relative;
             font-family: Arial, sans-serif;
+            font-size: 11px;
         }
 
-        .slot.selected { border-color: #d4a373; background: #473222; }
-        .slot .qtd { position: absolute; bottom: 2px; right: 4px; font-weight: bold; font-size: 11px; color: #fff; }
+        .slot.active { border-color: #ff9f43; background: #5d4037; }
+        .slot .qtd { position: absolute; bottom: 2px; right: 4px; font-weight: bold; font-size: 10px; color: #fff; }
         .slot .tecla { position: absolute; top: 1px; left: 3px; color: #a06b3e; font-size: 9px; }
-        .slot .nome { font-size: 8px; text-align: center; color: #faedcd; padding: 0 1px; }
+        .slot .nome { font-size: 8px; text-align: center; color: #faedcd; }
 
-        /* Botão de Tela Cheia */
+        /* Alerta de Guerra */
+        #alerta-guerra {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(150, 45, 34, 0.95);
+            border: 2px solid #ff4757;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            width: 220px;
+            z-index: 10;
+        }
+
+        #btn-antecipar {
+            display: none;
+            margin-top: 6px;
+            background: #fff;
+            color: #962d22;
+            border: none;
+            padding: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 3px;
+        }
+
         #btn-fullscreen {
             position: absolute;
             bottom: 15px;
@@ -216,7 +299,6 @@
             font-weight: bold;
             z-index: 10;
         }
-        #btn-fullscreen:hover { background: #4a3728; }
 
         #dica-contexto {
             position: absolute;
@@ -229,33 +311,16 @@
             font-size: 13px;
             border: 1px solid #d4a373;
             display: none;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        /* Alerta de Guerra */
-        #alerta-guerra {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(150, 45, 34, 0.9);
-            border: 2px solid #ff4757;
-            padding: 10px;
-            border-radius: 6px;
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            width: 220px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
             z-index: 10;
         }
     </style>
 </head>
 <body>
 
-    <h1>Pernambuco Colonial: Fronteiras em Expansão</h1>
+    <h1>Mata e Litoral de Pernambuco - Século XVI</h1>
 
-    <div id="game-wrapper" id="fullscreen-target">
-        <canvas id="gameCanvas" width="900" height="550"></canvas>
+    <div id="game-wrapper">
+        <canvas id="gameCanvas" width="950" height="580"></canvas>
 
         <div id="status-hud">
             <div class="bar-container">
@@ -270,17 +335,18 @@
                 <span>Sede:</span>
                 <div class="bar"><div id="fill-sede" class="fill"></div></div>
             </div>
-            <div style="color: #faedcd; margin-top: 3px; font-size:11px; line-height: 1.4;">
-                Machado: <span id="txt-machado" style="color:#fff;">Pedra Lascada</span><br>
-                Combate: <span id="txt-combate" style="color:#ff4757;">Punhos Nu</span><br>
-                Defesa: <span id="txt-defesa" style="color:#2ecc71;">Nenhuma</span>
+            <div style="color: #faedcd; margin-top: 3px; font-size:11px; line-height: 1.3;">
+                Machado: <span id="txt-machado" style="color:#fff;">Pedra Lascada</span> (<span id="dur-machado">100</span>%)<br>
+                Mochila: <span id="txt-mochila" style="color:#fff;">Não Possui (E)</span><br>
+                Aliados: <span id="txt-aliados" style="color:#2ecc71;">0 guerreiros</span>
             </div>
         </div>
 
         <div id="alerta-guerra">
-            <b style="font-size:13px; color:#fff;">Tensionamento Colonial</b><br>
+            <b style="font-size:13px; color:#fff;">Tensionamento Litoral</b><br>
             Tempo de Preparo: <span id="tempo-guerra">05:00</span><br>
-            Nível de Ameaça Previsto: <span id="nivel-ameaca" style="color:#f1c40f;">Baixo</span>
+            Invasão Prevista: <span id="nivel-ameaca" style="color:#f1c40f;">Baixa</span>
+            <button id="btn-antecipar" onclick="anteciparGuerra()">Iniciar Guerra Agora!</button>
         </div>
 
         <div id="dica-contexto">Aperte ESPAÇO</div>
@@ -298,30 +364,61 @@
                 <button onclick="comprarItem('Comida', 3)">Trocar</button>
             </div>
 
-            <div class="loja-secao">Ferramentas de Trabalho</div>
+            <div class="loja-secao">Ferramentas e Expansão</div>
             <div class="loja-item">
-                <div><font>Machado de Ferro</font><small>Custo: 8 Madeiras</small></div>
+                <div><font>Machado de Ferro</font><small>Custo: 8 Madeiras (Muito Forte)</small></div>
                 <button id="btn-machado-loja" onclick="comprarMachado()">Trocar</button>
             </div>
-
-            <div class="loja-secao">Equipamento de Guerra</div>
             <div class="loja-item">
-                <div><font>Espada de Bronze</font><small>Custo: 12 Madeiras (Dano +20)</small></div>
-                <button id="btn-espada-loja" onclick="comprarArma(2, 12)">Trocar</button>
+                <div><font>Mochila de Couro</font><small>Custo: 6 Madeiras (Libera Tecla E)</small></div>
+                <button id="btn-mochila-loja" onclick="comprarMochila()">Trocar</button>
+            </div>
+
+            <div class="loja-secao">Equipamento Militar</div>
+            <div class="loja-item">
+                <div><font>Espada de Bronze</font><small>Custo: 12 Madeiras (Ataque de Perto)</small></div>
+                <button id="btn-espada-loja" onclick="comprarArma('espada', 12)">Trocar</button>
             </div>
             <div class="loja-item">
-                <div><font>Armadura de Couro</font><small>Custo: 15 Madeiras (Absorve 30%)</small></div>
-                <button id="btn-armadura-loja" onclick="comprarArmadura(15)">Trocar</button>
+                <div><font>Arco e Flechas</font><small>Custo: 10 Madeiras (Mira com Mouse)</small></div>
+                <button id="btn-arco-loja" onclick="comprarArma('arco', 10)">Trocar</button>
+            </div>
+            <div class="loja-item">
+                <div><font>Armadura de Couro</font><small>Custo: 15 Madeiras (Defesa +30%)</small></div>
+                <button id="btn-armadura-loja" onclick="comprarArmadura()">Trocar</button>
+            </div>
+
+            <div class="loja-secao">Diplomacia / Exército</div>
+            <div class="loja-item">
+                <div><font>Recrutar Guerreiro Aliado</font><small>Custo: 20 Madeiras</small></div>
+                <button onclick="recrutarAliado()">Recrutar</button>
             </div>
 
             <button id="btn-fechar-loja" onclick="fecharLoja()">Voltar ao Mapa</button>
         </div>
 
+        <div id="mochila-menu">
+            <h3 style="color:#d4a373; margin:0 0 10px 0;">Mochila do Guerreiro</h3>
+            <p style="font-size:14px; text-align:left;">🪵 Toras de Pau-Brasil: <span id="mochila-madeira">0</span></p>
+            <p style="font-size:14px; text-align:left;">💧 Cantis de Água: <span id="mochila-agua">0</span></p>
+            <p style="font-size:14px; text-align:left;">🍖 Porções de Comida: <span id="mochila-comida">0</span></p>
+            <button id="btn-fechar-loja" onclick="alternarMochila()" style="background:#555;">Fechar (E)</button>
+        </div>
+
+        <button id="btn-adm-trigger" onclick="abrirPainelAdm()">ADM Panel</button>
+        <div id="adm-panel">
+            <b style="font-size:12px; color:#ff4757;">Controles de Administrador</b>
+            <button onclick="admCheat('madeira')">+99 Madeiras</button>
+            <button onclick="admCheat('guerra')">Forçar Guerra Imediata</button>
+            <button onclick="admCheat('vida')">Imortalidade / Full HP</button>
+            <button onclick="fecharPainelAdm()" style="background:#444;">Fechar</button>
+        </div>
+
         <div id="hotbar">
-            <div class="slot" id="slot-0"><span class="tecla">1</span><span class="nome">Pau-Brasil</span><span class="qtd" id="qtd-madeira">0</span></div>
-            <div class="slot" id="slot-1"><span class="tecla">2</span><span class="nome">Água</span><span class="qtd" id="qtd-agua">0</span></div>
-            <div class="slot" id="slot-2"><span class="tecla">3</span><span class="nome">Comida</span><span class="qtd" id="qtd-comida">0</span></div>
-            <div class="slot" id="slot-3"><span class="tecla">4</span><span class="nome">Ataque</span><span class="qtd" style="font-size:9px; color:#ff4757;">Espaço</span></div>
+            <div class="slot" id="slot-0"><span class="tecla">1</span><span class="nome">Mão/Mach.</span><span class="qtd">-</span></div>
+            <div class="slot" id="slot-1" onclick="usarConsumivel('agua')"><span class="tecla">2</span><span class="nome">Água</span><span class="qtd" id="qtd-agua">0</span></div>
+            <div class="slot" id="slot-2" onclick="usarConsumivel('comida')"><span class="tecla">3</span><span class="nome">Comida</span><span class="qtd" id="qtd-comida">0</span></div>
+            <div class="slot" id="slot-3"><span class="tecla">4</span><span class="nome">Arco/Esp.</span><span class="qtd" id="txt-arma-equipada">Nenhuma</span></div>
         </div>
 
         <button id="btn-fullscreen" onclick="alternarTelaCheia()">Tela Cheia ⛶</button>
@@ -332,102 +429,153 @@
         const ctx = canvas.getContext("2d");
         const wrapper = document.getElementById("game-wrapper");
 
-        // Dimensões do Mapa Expandido
+        // Dimensões do Mapa (Praia no topo Y=0 a Y=400, Mata abaixo)
         const MAPA_LARGURA = 2500;
-        const MAPA_ALTURA = 1600;
+        const MAPA_ALTURA = 1800;
 
         // HUD DOM
         const fomeFill = document.getElementById("fill-fome");
         const sedeFill = document.getElementById("fill-sede");
         const vidaFill = document.getElementById("fill-vida");
         const txtMachado = document.getElementById("txt-machado");
-        const txtCombate = document.getElementById("txt-combate");
-        const txtDefesa = document.getElementById("txt-defesa");
+        const durMachadoTxt = document.getElementById("dur-machado");
         const dicaContexto = document.getElementById("dica-contexto");
         const menuEscambo = document.getElementById("escambo-menu");
+        const mochilaMenu = document.getElementById("mochila-menu");
+        const admPanel = document.getElementById("adm-panel");
         const tempoGuerraTxt = document.getElementById("tempo-guerra");
         const nivelAmeacaTxt = document.getElementById("nivel-ameaca");
+        const btnAntecipar = document.getElementById("btn-antecipar");
 
-        // Estado do Jogo e Guerra Progressiva
+        // Game States
         let jogoPausado = false;
-        let tempoDecorrido = 0; // Em segundos
-        let tempoParaGuerra = 300; // 5 minutos de preparação livre inicial
+        let mochilaAberta = false;
+        let tempoDecorrido = 0;
+        let tempoParaGuerra = 300;
         let emGuerra = false;
         let nivelDificuldadeGuerra = 1;
+        let inimigosRestantesNaOnda = 0;
 
         const jogador = {
-            x: 400, y: 400,
+            x: 500, y: 700,
             vel: 4, raio: 16,
             vida: 100, fome: 100, sede: 100,
             inventario: { madeira: 0, agua: 0, comida: 0 },
-            machadoNivel: 1, 
-            armaNivel: 1, // 1 = Punhos, 2 = Espada
+            machadoNivel: 1, // 1 = Madeira/Pedra, 2 = Ferro
+            machadoDurabilidade: 100,
+            armaEquipada: 'nenhuma', // 'espada' ou 'arco'
+            temMochila: false,
             temArmadura: false,
-            poderCorte: 15
+            invencivel: false
         };
 
-        const feitor = { x: 350, y: 320, raio: 22 };
-
-        // Câmera do Jogo
+        const feitor = { x: 400, y: 600, raio: 22 };
         const camera = { x: 0, y: 0 };
+        const mouse = { x: 0, y: 0, mundoX: 0, mundoY: 0 };
 
-        // Listas dinâmicas do ambiente grande
         let arvores = [];
         let inimigos = [];
+        let aliados = [];
+        let flechas = [];
 
-        // Inicializa Árvores espalhadas pelo mapa gigante
         function inicializarAmbiente() {
-            for(let i=0; i<35; i++) {
+            // Árvores geradas estritamente na parte de mata (Y > 450)
+            for(let i=0; i<40; i++) {
                 arvores.push({
                     x: Math.random() * (MAPA_LARGURA - 200) + 100,
-                    y: Math.random() * (MAPA_ALTURA - 200) + 100,
+                    y: Math.random() * (MAPA_ALTURA - 600) + 500,
                     vida: 100, max: 100, viva: true, seed: Math.random()*100
                 });
             }
         }
 
-        // Desenho procedural do Solo estendido
+        // Desenho do Fundo Procedural (Mar, Praia e Mata)
         const bgCanvas = document.createElement('canvas');
         bgCanvas.width = MAPA_LARGURA; bgCanvas.height = MAPA_ALTURA;
         const bgCtx = bgCanvas.getContext('2d');
 
-        function renderizarSoloGigante() {
+        function renderizarCenarioEstatico() {
+            // 1. Oceano (Topo)
+            bgCtx.fillStyle = '#1e3799';
+            bgCtx.fillRect(0, 0, MAPA_LARGURA, 250);
+            
+            // 2. Linha da Areia / Praia
+            bgCtx.fillStyle = '#f6e58d';
+            bgCtx.fillRect(0, 250, MAPA_LARGURA, 180);
+
+            // Detalhes da transição da areia
+            for(let i=0; i<300; i++){
+                bgCtx.fillStyle = 'rgba(240, 210, 120, 0.6)';
+                bgCtx.beginPath();
+                bgCtx.arc(Math.random()*MAPA_LARGURA, 250 + Math.random()*180, Math.random()*20+10, 0, Math.PI*2);
+                bgCtx.fill();
+            }
+
+            // 3. Floresta Tropical (Resto do Mapa)
             bgCtx.fillStyle = '#1e3312';
-            bgCtx.fillRect(0, 0, MAPA_LARGURA, MAPA_ALTURA);
-            for (let i = 0; i < 1500; i++) {
+            bgCtx.fillRect(0, 430, MAPA_LARGURA, MAPA_ALTURA - 430);
+            for (let i = 0; i < 1200; i++) {
                 let x = Math.random() * MAPA_LARGURA;
-                let y = Math.random() * MAPA_ALTURA;
-                let tam = Math.random() * 60 + 30;
-                bgCtx.fillStyle = Math.random() < 0.4 ? 'rgba(64,48,32,0.2)' : 'rgba(23,43,15,0.35)';
+                let y = Math.random() * (MAPA_ALTURA - 450) + 450;
+                let tam = Math.random() * 50 + 25;
+                bgCtx.fillStyle = Math.random() < 0.3 ? 'rgba(54,40,25,0.25)' : 'rgba(20,38,12,0.4)';
                 bgCtx.beginPath(); bgCtx.arc(x, y, tam, 0, Math.PI*2); bgCtx.fill();
             }
         }
 
-        // Teclado
+        // Eventos e Input de Controles
         const teclas = {};
         window.addEventListener("keydown", e => {
-            if(jogoPausado && e.key !== "Escape") return;
+            if(jogoPausado && e.key !== "Escape" && e.key.toLowerCase() !== "e") return;
             teclas[e.key.toLowerCase()] = true;
+            
+            if(e.key.toLowerCase() === "e") alternarMochila();
             if(e.key === "2") usarConsumivel('agua');
             if(e.key === "3") usarConsumivel('comida');
+            
             if(e.key === " ") {
-                if(!interagirFeitor() && !interagirArvore()) {
-                    atacarInimigos(); // Se não estiver coletando/negociando, ataca
+                e.preventDefault(); // Impede ativação indesejada de botões focados
+                if(!interagirFeitor() && !tentarCortarPauBrasil()) {
+                    if(jogador.armaEquipada === 'espada') atacarDePerto();
                 }
             }
         });
         window.addEventListener("keyup", e => { teclas[e.key.toLowerCase()] = false; });
+        
+        canvas.addEventListener("mousemove", e => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+            mouse.mundoX = mouse.x + camera.x;
+            mouse.mundoY = mouse.y + camera.y;
+        });
+
+        canvas.addEventListener("mousedown", e => {
+            if(jogoPausado || emGuerra === false) return;
+            if(jogador.armaEquipada === 'arco' && e.button === 0) {
+                dispararFlecha();
+            }
+        });
 
         function dist(x1, y1, x2, y2) { return Math.sqrt((x2 - x1)**2 + (y2 - y1)**2); }
 
-        // Ativa o Modo Tela Cheia de forma nativa e limpa
         function alternarTelaCheia() {
             if (!document.fullscreenElement) {
-                wrapper.requestFullscreen().catch(err => {
-                    alert(`Erro ao ativar tela cheia: ${err.message}`);
-                });
+                wrapper.requestFullscreen().catch(err => alert(err.message));
             } else {
                 document.exitFullscreen();
+            }
+        }
+
+        function alternarMochila() {
+            if(!jogador.temMochila) return;
+            mochilaAberta = !mochilaAberta;
+            jogoPausado = mochilaAberta;
+            mochilaMenu.style.display = mochilaAberta ? "block" : "none";
+            if(mochilaAberta) {
+                document.getElementById("mochila-madeira").innerText = jogador.inventario.madeira;
+                document.getElementById("mochila-agua").innerText = jogador.inventario.agua;
+                document.getElementById("mochila-comida").innerText = jogador.inventario.comida;
             }
         }
 
@@ -436,31 +584,41 @@
             sedeFill.style.width = Math.max(0, jogador.sede) + "%";
             vidaFill.style.width = Math.max(0, jogador.vida) + "%";
             
-            document.getElementById("qtd-madeira").innerText = jogador.inventario.madeira;
             document.getElementById("qtd-agua").innerText = jogador.inventario.agua;
             document.getElementById("qtd-comida").innerText = jogador.inventario.comida;
+            durMachadoTxt.innerText = Math.floor(jogador.machadoDurabilidade);
             
-            txtMachado.innerText = jogador.machadoNivel === 1 ? "Pedra Lascada" : "Aço de Ferro Coado";
-            txtCombate.innerText = jogador.armaNivel === 1 ? "Punhos Nus" : "Espada de Bronze (+20)";
-            txtDefesa.innerText = jogador.temArmadura ? "Couro Batido (30%)" : "Nenhuma";
+            txtMachado.innerText = jogador.machadoNivel === 1 ? "Machado Frágil" : "Machado de Ferro";
+            document.getElementById("txt-arma-equipada").innerText = jogador.armaEquipada.toUpperCase();
+            document.getElementById("txt-mochila").innerText = jogador.temMochila ? "Adquirida (E)" : "Não Possui";
+            document.getElementById("txt-aliados").innerText = `${aliados.length} guerreiros`;
         }
 
-        function interagirArvore() {
-            let cortou = false;
+        function tentarCortarPauBrasil() {
+            let acertou = false;
+            if(jogador.machadoDurabilidade <= 0) return false;
+
             arvores.forEach(a => {
-                if(a.viva && dist(jogador.x, jogador.y, a.x, a.y) < 60) {
-                    a.vida -= jogador.machadoNivel === 1 ? 20 : 45;
-                    cortou = true;
+                if(a.viva && dist(jogador.x, playerYVisual(), a.x, a.y) < 60) {
+                    acertou = true;
+                    // Velocidade regulada e cadenciada de corte
+                    let danoCorte = jogador.machadoNivel === 1 ? 12 : 25;
+                    a.vida -= danoCorte;
+                    jogador.machadoDurabilidade -= jogador.machadoNivel === 1 ? 3 : 0.8;
+
                     if(a.vida <= 0) {
                         a.viva = false;
                         jogador.inventario.madeira += Math.floor(Math.random() * 2) + 2;
                         atualizarUI();
-                        setTimeout(() => { a.viva = true; a.vida = a.max; }, 10000);
+                        setTimeout(() => { a.viva = true; a.vida = a.max; }, 12000);
                     }
                 }
             });
-            return cortou;
+            atualizarUI();
+            return acertou;
         }
+
+        function playerYVisual() { return jogador.y; }
 
         function interagirFeitor() {
             if(dist(jogador.x, jogador.y, feitor.x, feitor.y) < 65) {
@@ -471,21 +629,13 @@
             return false;
         }
 
-        function atacarInimigos() {
-            inimigos.forEach(i => {
-                if(dist(jogador.x, jogador.y, i.x, i.y) < 65) {
-                    let dano = jogador.armaNivel === 1 ? 15 : 40;
-                    i.vida -= dano;
-                }
-            });
-        }
-
         function fecharLoja() {
             jogoPausado = false;
             menuEscambo.style.display = "none";
             for (let k in teclas) teclas[k] = false;
         }
 
+        // Funções da Loja
         function comprarItem(tipo, custo) {
             if(jogador.inventario.madeira >= custo) {
                 jogador.inventario.madeira -= custo;
@@ -499,28 +649,50 @@
             if(jogador.inventario.madeira >= 8 && jogador.machadoNivel === 1) {
                 jogador.inventario.madeira -= 8;
                 jogador.machadoNivel = 2;
+                jogador.machadoDurabilidade = 100;
                 document.getElementById("btn-machado-loja").disabled = true;
-                document.getElementById("btn-machado-loja").innerText = "Adquirido";
                 atualizarUI();
             }
         }
 
-        function comprarArma(nivel, custo) {
-            if(jogador.inventario.madeira >= custo && jogador.armaNivel < nivel) {
-                jogador.inventario.madeira -= custo;
-                jogador.armaNivel = nivel;
-                document.getElementById("btn-espada-loja").disabled = true;
-                document.getElementById("btn-espada-loja").innerText = "Adquirida";
+        function comprarMochila() {
+            if(jogador.inventario.madeira >= 6 && !jogador.temMochila) {
+                jogador.inventario.madeira -= 6;
+                jogador.temMochila = true;
+                document.getElementById("btn-mochila-loja").disabled = true;
                 atualizarUI();
             }
         }
 
-        function comprarArmadura(custo) {
-            if(jogador.inventario.madeira >= custo && !jogador.temArmadura) {
+        function comprarArma(tipo, custo) {
+            if(jogador.inventario.madeira >= custo) {
                 jogador.inventario.madeira -= custo;
+                jogador.armaEquipada = tipo;
+                if(tipo === 'espada') document.getElementById("btn-espada-loja").disabled = true;
+                if(tipo === 'arco') document.getElementById("btn-arco-loja").disabled = true;
+                atualizarUI();
+            }
+        }
+
+        function comprarArmadura() {
+            if(jogador.inventario.madeira >= 15 && !jogador.temArmadura) {
+                jogador.inventario.madeira -= 15;
                 jogador.temArmadura = true;
                 document.getElementById("btn-armadura-loja").disabled = true;
-                document.getElementById("btn-armadura-loja").innerText = "Equipada";
+                atualizarUI();
+            }
+        }
+
+        function recrutarAliado() {
+            if(jogador.inventario.madeira >= 20) {
+                jogador.inventario.madeira -= 20;
+                aliados.push({
+                    x: feitor.x + Math.random()*40 - 20,
+                    y: feitor.y + 40,
+                    vel: 3.5,
+                    alvo: null,
+                    cooldownAtaque: 0
+                });
                 atualizarUI();
             }
         }
@@ -534,63 +706,106 @@
             atualizarUI();
         }
 
-        // Sistema de Ondas Adaptativas baseado no tempo jogado
-        function gerenciarCronometroEInvasoes() {
-            if(jogoPausado) return;
-            
-            tempoDecorrido++;
-
-            if(tempoParaGuerra > 0) {
-                tempoParaGuerra--;
-                let mins = Math.floor(tempoParaGuerra / 60).toString().padStart(2, '0');
-                let segs = (tempoParaGuerra % 60).toString().padStart(2, '0');
-                tempoGuerraTxt.innerText = `${mins}:${segs}`;
-                
-                // Define preventivamente o nível da ameaça conforme o preparo/tempo livre gasto
-                if(tempoDecorrido > 180) {
-                    nivelDificuldadeGuerra = 2;
-                    nivelAmeacaTxt.innerText = "Moderado";
-                    nivelAmeacaTxt.style.color = "#e67e22";
-                }
-            } else {
-                // Inicia ou mantém a Guerra dos Confinados ativa
-                emGuerra = true;
-                tempoGuerraTxt.innerText = "CONFLITO ATIVO";
-                
-                // A cada 45 segundos em guerra, o nível aumenta se o jogador sobreviver muito tempo
-                if(tempoDecorrido % 45 === 0) {
-                    nivelDificuldadeGuerra++;
-                    nivelAmeacaTxt.innerText = `Crítico (Nível ${nivelDificuldadeGuerra})`;
-                    nivelAmeacaTxt.style.color = "#ff4757";
-                }
-
-                // Invoca novos invasores de tempos em tempos se houver poucos no mapa
-                if(inimigos.length < nivelDificuldadeGuerra * 2) {
-                    invocarInvasor();
-                }
-            }
-        }
-
-        function invocarInvasor() {
-            // Nascem fora da visão imediata da câmera, mas perto do jogador
-            let angulo = Math.random() * Math.PI * 2;
-            let raioSpawn = 450;
-            inimigos.push({
-                x: Math.max(50, Math.min(MAPA_LARGURA-50, jogador.x + Math.cos(angulo) * raioSpawn)),
-                y: Math.max(50, Math.min(MAPA_ALTURA-50, jogador.y + Math.sin(angulo) * raioSpawn)),
-                vida: 40 + (nivelDificuldadeGuerra * 15),
-                maxVida: 40 + (nivelDificuldadeGuerra * 15),
-                vel: 1.5 + (Math.min(1.5, nivelDificuldadeGuerra * 0.2)),
-                dano: 8 + nivelDificuldadeGuerra
+        // Arco e Flecha Mechanics
+        function dispararFlecha() {
+            let angulo = Math.atan2(mouse.mundoY - jogador.y, mouse.mundoX - jogador.x);
+            flechas.push({
+                x: jogador.x,
+                y: jogador.y,
+                vx: Math.cos(angulo) * 10,
+                vy: Math.sin(angulo) * 10,
+                ativa: true
             });
         }
 
-        setInterval(gerenciarCronometroEInvasoes, 1000);
+        function atacarDePerto() {
+            inimigos.forEach(i => {
+                if(dist(jogador.x, jogador.y, i.x, i.y) < 70) {
+                    i.vida -= 35;
+                }
+            });
+        }
+
+        // Loop Temporal e Lógica Adaptativa de Invasão
+        function processarSegundos() {
+            if(jogoPausado) return;
+            tempoDecorrido++;
+
+            if(!emGuerra) {
+                if(tempoParaGuerra > 0) {
+                    tempoParaGuerra--;
+                    let m = Math.floor(tempoParaGuerra / 60).toString().padStart(2, '0');
+                    let s = (tempoParaGuerra % 60).toString().padStart(2, '0');
+                    tempoGuerraTxt.innerText = `${m}:${s}`;
+
+                    if(tempoParaGuerra <= 240) {
+                        btnAntecipar.style.display = "block"; // Habilita antecipação a partir dos 4 minutos
+                    }
+
+                    if(tempoDecorrido > 150) {
+                        nivelDificuldadeGuerra = 2;
+                        nivelAmeacaTxt.innerText = "Moderada";
+                        nivelAmeacaTxt.style.color = "#e67e22";
+                    }
+                } else {
+                    iniciarGuerraEfetiva();
+                }
+            }
+        }
+        setInterval(processarSegundos, 1000);
+
+        function anteciparGuerra() {
+            tempoParaGuerra = 0;
+            iniciarGuerraEfetiva();
+        }
+
+        function iniciarGuerraEfetiva() {
+            emGuerra = true;
+            btnAntecipar.style.display = "none";
+            tempoGuerraTxt.innerText = "GUERRA ATIVA";
+            nivelAmeacaTxt.innerText = `Onda ${nivelDificuldadeGuerra}`;
+            nivelAmeacaTxt.style.color = "#ef5350";
+            
+            // Quantidade de inimigos proporcional ao tempo que o jogador demorou para engajar
+            inimigosRestantesNaOnda = nivelDificuldadeGuerra * 4;
+            for(let i=0; i < inimigosRestantesNaOnda; i++) {
+                setTimeout(spawnInvasorMaritimo, i * 1500);
+            }
+        }
+
+        function spawnInvasorMaritimo() {
+            inimigos.push({
+                x: Math.random() * (MAPA_LARGURA - 400) + 200,
+                y: 50, // Nascem nos barcos / água
+                vida: 50 + (nivelDificuldadeGuerra * 10),
+                maxVida: 50 + (nivelDificuldadeGuerra * 10),
+                vel: 1.8 + (nivelDificuldadeGuerra * 0.1),
+                dano: 10,
+                cooldownDano: 0
+            });
+        }
+
+        // Painel Administrativo
+        function abrirPainelAdm() {
+            let senha = prompt("Insira a senha de Administrador:");
+            if(senha === "kaua@2024") {
+                admPanel.style.display = "block";
+            } else {
+                alert("Senha incorreta!");
+            }
+        }
+        function fecharPainelAdm() { admPanel.style.display = "none"; }
+        
+        function admCheat(tipo) {
+            if(tipo === 'madeira') { jogador.inventario.madeira += 99; atualizarUI(); }
+            if(tipo === 'guerra') { anteciparGuerra(); fecharPainelAdm(); }
+            if(tipo === 'vida') { jogador.vida = 100; jogador.fome = 100; jogador.sede = 100; jogador.invencivel = true; atualizarUI(); }
+        }
 
         function atualizar() {
             if (jogoPausado) return;
 
-            // Movimentação
+            // Movimento do Jogador
             let dx = 0, dy = 0;
             if (teclas['w']) dy -= jogador.vel;
             if (teclas['s']) dy += jogador.vel;
@@ -600,174 +815,210 @@
             jogador.x = Math.max(jogador.raio, Math.min(MAPA_LARGURA - jogador.raio, jogador.x + dx));
             jogador.y = Math.max(jogador.raio, Math.min(MAPA_ALTURA - jogador.raio, jogador.y + dy));
 
-            // Câmera segue o jogador centralizado
+            // Ajuste Dinâmico da Câmera
             camera.x = jogador.x - canvas.width / 2;
             camera.y = jogador.y - canvas.height / 2;
             camera.x = Math.max(0, Math.min(MAPA_LARGURA - canvas.width, camera.x));
             camera.y = Math.max(0, Math.min(MAPA_ALTURA - canvas.height, camera.y));
 
-            // Metabolismo passivo
-            jogador.fome -= 0.02;
-            jogador.sede -= 0.03;
+            // Metabolismo
+            jogador.fome -= 0.015;
+            jogador.sede -= 0.025;
 
-            // IA dos Inimigos (Seguir e atacar jogador)
+            // Processamento de Projéteis (Flechas)
+            for(let f = flechas.length-1; f >= 0; f--) {
+                let fl = flechas[f];
+                fl.x += fl.vx; fl.y += fl.vy;
+                
+                // Colisão Flecha vs Inimigo
+                for(let i=0; i<inimigos.length; i++) {
+                    let inem = inimigos[i];
+                    if(dist(fl.x, fl.y, inem.x, inem.y) < 20) {
+                        inem.vida -= 25;
+                        fl.ativa = false;
+                        break;
+                    }
+                }
+                if(!fl.ativa || fl.x < 0 || fl.x > MAPA_LARGURA || fl.y < 0 || fl.y > MAPA_ALTURA) {
+                    flechas.splice(f, 1);
+                }
+            }
+
+            // Lógica e Movimentação dos Aliados (Exército)
+            aliados.forEach(al => {
+                let maisProximo = null;
+                let menorDist = Infinity;
+                inimigos.forEach(i => {
+                    let d = dist(al.x, al.y, i.x, i.y);
+                    if(d < menorDist) { menorDist = d; maisProximo = i; }
+                });
+
+                if(maisProximo && menorDist < 400) {
+                    // Segue e combate o inimigo
+                    let a = Math.atan2(maisProximo.y - al.y, maisProximo.x - al.x);
+                    al.x += Math.cos(a) * al.vel;
+                    al.y += Math.sin(a) * al.vel;
+                    
+                    if(menorDist < 30) {
+                        maisProximo.vida -= 0.5; // Dano contínuo equilibrado
+                    }
+                } else {
+                    // Retorna ou escolta o jogador principal
+                    let dPlayer = dist(al.x, al.y, jogador.x, jogador.y);
+                    if(dPlayer > 60) {
+                        let a = Math.atan2(jogador.y - al.y, jogador.x - al.x);
+                        al.x += Math.cos(a) * al.vel;
+                        al.y += Math.sin(a) * al.vel;
+                    }
+                }
+            });
+
+            // Processamento Inteligente de Inimigos
             for (let i = inimigos.length - 1; i >= 0; i--) {
                 let enemy = inimigos[i];
                 if(enemy.vida <= 0) {
                     inimigos.splice(i, 1);
+                    // Verificação de Vitória da Onda
+                    if(emGuerra && inimigos.length === 0) {
+                        jogador.inventario.madeira += 15; // Recompensa de Vitória!
+                        alert("Vitória! Você repeliu a onda invasora e ganhou +15 toras de Pau-Brasil de recompensa.");
+                        emGuerra = false;
+                        tempoParaGuerra = 180; // Nova contagem de paz regulada
+                        nivelDificuldadeGuerra++;
+                        atualizarUI();
+                    }
                     continue;
                 }
 
                 let d = dist(enemy.x, enemy.y, jogador.x, jogador.y);
-                if(d > 20) {
-                    enemy.x += ((jogador.x - enemy.x) / d) * enemy.vel;
-                    enemy.y += ((jogador.y - enemy.y) / d) * enemy.vel;
-                } else {
-                    // Ataque ao jogador
-                    let danoAplicado = enemy.dano;
-                    if(jogador.temArmadura) danoAplicado *= 0.7; // Absorção de 30%
-                    jogador.vida -= danoAplicado * 0.03; // Dano contínuo por frame de contato
+                
+                // Segue o jogador
+                let a = Math.atan2(jogador.y - enemy.y, jogador.x - enemy.x);
+                enemy.x += Math.cos(a) * enemy.vel;
+                enemy.y += Math.sin(a) * enemy.vel;
+
+                // Sistema Antidebug de Ataque (Evita morte instantânea do player)
+                if(enemy.cooldownDano > 0) enemy.cooldownDano--;
+                if(d < 25 && enemy.cooldownDano === 0) {
+                    let totalDano = enemy.dano;
+                    if(jogador.temArmadura) totalDano *= 0.7; // Absorção balanceada
+                    if(!jogador.invencivel) jogador.vida -= totalDano;
+                    enemy.cooldownDano = 45; // Intervalo seguro de ataque por frames
+                    atualizarUI();
                 }
             }
 
-            // Interface de dicas contextuais
-            let textoDica = false;
-            arvores.forEach(a => { if(a.viva && dist(jogador.x, jogador.y, a.x, a.y) < 60) textoDica = "Golpear Pau-Brasil [Espaço]"; });
-            if(dist(jogador.x, jogador.y, feitor.x, feitor.y) < 65) textoDica = "Abrir Linha de Escambo [Espaço]";
-            inimigos.forEach(i => { if(dist(jogador.x, jogador.y, i.x, i.y) < 65) textoDica = "Batalhar / Atacar Invasor [Espaço]"; });
-
-            if(textoDica) {
-                dicaContexto.style.display = "block";
-                dicaContexto.innerText = textoDica;
+            // Gerenciador de Contextos textuais na tela
+            let txtContexto = false;
+            arvores.forEach(a => { if(a.viva && dist(jogador.x, jogador.y, a.x, a.y) < 60) txtContexto = "Coletar Pau-Brasil [Espaço]"; });
+            if(dist(jogador.x, jogador.y, feitor.x, feitor.y) < 65) txtContexto = "Negociar na Feitoria [Espaço]";
+            
+            if(txtContexto) {
+                dicaContexto.style.display = "block"; dicaContexto.innerText = txtContexto;
             } else {
                 dicaContexto.style.display = "none";
             }
 
-            // Condição de Derrota Reestruturada
+            // Condições de Derrota Ajustadas (Sem mortes injustas)
             if(jogador.fome <= 0 || jogador.sede <= 0 || jogador.vida <= 0) {
-                alert("O guerreiro tombou em combate ou exaustão nas terras de Pernambuco. O progresso foi reiniciado.");
+                alert("Fim de Jogo! Suas forças se esgotaram em Pernambuco.");
                 jogador.vida = 100; jogador.fome = 100; jogador.sede = 100;
                 jogador.inventario = { madeira: 0, agua: 0, comida: 0 };
-                jogador.x = 400; jogador.y = 400;
-                inimigos = [];
-                tempoParaGuerra = 300;
-                emGuerra = false;
-                nivelDificuldadeGuerra = 1;
+                jogador.machadoDurabilidade = 100;
+                jogador.x = 500; jogador.y = 700;
+                inimigos = []; aliados = []; flechas = [];
+                emGuerra = false; tempoParaGuerra = 300; nivelDificuldadeGuerra = 1;
                 atualizarUI();
             }
         }
 
         function desenhar() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             ctx.save();
-            // Aplica a translação da câmera para criar o efeito de mapa grande rolável
             ctx.translate(-camera.x, -camera.y);
 
-            // 1. Desenha o chão estendido pré-renderizado
+            // 1. Desenha o Solo Geral Estendido (Mar, Areia, Grama)
             ctx.drawImage(bgCanvas, 0, 0);
 
-            // Cabana de Feitoria (Ponto de referência visual do NPC)
+            // Barcos e Caravelas Ancoradas na Zona de Mar (Y = 80)
             ctx.fillStyle = "#5c4033";
-            ctx.fillRect(feitor.x - 40, feitor.y - 50, 80, 50);
-            ctx.fillStyle = "#a67b5b";
-            ctx.beginPath();
-            ctx.moveTo(feitor.x - 50, feitor.y - 50);
-            ctx.lineTo(feitor.x, feitor.y - 80);
-            ctx.lineTo(feitor.x + 50, feitor.y - 50);
-            ctx.fill();
+            ctx.fillRect(300, 60, 110, 45); // Caravela 1
+            ctx.fillRect(1200, 70, 110, 45); // Caravela 2
+            ctx.fillRect(2000, 65, 110, 45); // Caravela 3
+            // Velas dos barcos
+            ctx.fillStyle = "#f5f5f5";
+            ctx.fillRect(350, 15, 5, 45); ctx.fillRect(330, 20, 20, 25);
+            ctx.fillRect(1250, 25, 5, 45); ctx.fillRect(1230, 30, 20, 25);
 
-            // 2. Desenha o Feitor NPC
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
-            ctx.beginPath(); ctx.arc(feitor.x, feitor.y + 10, 18, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#2b3d52"; 
-            ctx.beginPath(); ctx.arc(feitor.x, feitor.y, feitor.raio, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#cca43b"; 
-            ctx.beginPath(); ctx.arc(feitor.x, feitor.y, feitor.raio - 7, 0, Math.PI); ctx.fill();
-            ctx.fillStyle = "#1c140e";
-            ctx.beginPath(); ctx.arc(feitor.x, feitor.y - 4, 15, 0, Math.PI*2); ctx.fill();
-            ctx.fillRect(feitor.x - 26, feitor.y - 6, 52, 5);
+            // Cabana da Feitoria
+            ctx.fillStyle = "#5c4033"; ctx.fillRect(feitor.x - 40, feitor.y - 50, 80, 50);
+            ctx.fillStyle = "#a67b5b"; ctx.beginPath(); ctx.moveTo(feitor.x - 50, feitor.y - 50); ctx.lineTo(feitor.x, feitor.y - 80); ctx.lineTo(feitor.x + 50, feitor.y - 50); ctx.fill();
 
-            // 3. Desenha Árvores
+            // 2. Desenha o NPC Feitor
+            ctx.fillStyle = "#2b3d52"; ctx.beginPath(); ctx.arc(feitor.x, feitor.y, feitor.raio, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#1c140e"; ctx.fillRect(feitor.x - 24, feitor.y - 6, 48, 5);
+
+            // 3. Desenha Árvores de Pau-Brasil
             arvores.forEach(a => {
                 if(!a.viva) {
-                    ctx.fillStyle = '#4a2f13'; ctx.fillRect(a.x - 6, a.y - 4, 12, 12);
-                    return;
+                    ctx.fillStyle = '#4a2f13'; ctx.fillRect(a.x - 6, a.y - 4, 12, 12); return;
                 }
-                ctx.fillStyle = 'rgba(0,0,0,0.2)';
-                ctx.beginPath(); ctx.arc(a.x, a.y + 25, 30, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#513829'; ctx.fillRect(a.x - 8, a.y - 10, 16, 40);
-
                 let numCamadas = 5;
                 for(let i = 0; i < numCamadas; i++) {
                     let off = Math.sin(a.seed + i) * 6;
-                    ctx.fillStyle = `rgb(${150 + off * 4}, ${45 + off * 2}, 35)`;
-                    ctx.beginPath();
-                    ctx.arc(a.x + Math.cos(a.seed + i) * 10, a.y - 25 + Math.sin(a.seed + i) * 8, 26 - i * 2, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-
-                if(a.vida < a.max) {
-                    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(a.x - 20, a.y - 60, 40, 5);
-                    ctx.fillStyle = '#ff4757'; ctx.fillRect(a.x - 20, a.y - 60, (a.vida / a.max) * 40, 5);
+                    ctx.fillStyle = `rgb(${160 + off * 4}, 45, 35)`;
+                    ctx.beginPath(); ctx.arc(a.x + Math.cos(a.seed + i)*10, a.y - 22, 24 - i*2, 0, Math.PI*2); ctx.fill();
                 }
             });
 
-            // 4. Desenha Inimigos (Invasores rivais / Bandeirantes hostis)
+            // 4. Desenha Aliados (Exército Nativos)
+            aliados.forEach(al => {
+                ctx.fillStyle = "#bd6a3f"; ctx.beginPath(); ctx.arc(al.x, al.y, 14, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#2ecc71"; ctx.fillRect(al.x - 6, al.y - 4, 12, 3); // Pintura verde aliada
+            });
+
+            // 5. Desenha Inimigos
             inimigos.forEach(e => {
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.beginPath(); ctx.arc(e.x, e.y + 12, 12, 0, Math.PI*2); ctx.fill();
-                
-                // Corpo do Invasor (Tons cinzentos/militar colonial)
-                ctx.fillStyle = "#57606f";
-                ctx.beginPath(); ctx.arc(e.x, e.y, 14, 0, Math.PI*2); ctx.fill();
-                
-                // Capacete metálico reluzente
-                ctx.fillStyle = "#f1f2f6";
-                ctx.beginPath(); ctx.arc(e.x, e.y - 4, 9, Math.PI, 0); ctx.fill();
-
-                // Vida do Inimigo
-                ctx.fillStyle = 'rgba(0,0,0,0.7)'; ctx.fillRect(e.x - 15, e.y - 24, 30, 4);
-                ctx.fillStyle = '#2ecc71'; ctx.fillRect(e.x - 15, e.y - 24, (e.vida / e.maxVida) * 30, 4);
+                ctx.fillStyle = "#57606f"; ctx.beginPath(); ctx.arc(e.x, e.y, 15, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#d1ccc0"; ctx.beginPath(); ctx.arc(e.x, e.y - 4, 9, Math.PI, 0); ctx.fill(); // Capacete
+                // Barra de Vida do Inimigo
+                ctx.fillStyle = "black"; ctx.fillRect(e.x - 15, e.y - 25, 30, 4);
+                ctx.fillStyle = "red"; ctx.fillRect(e.x - 15, e.y - 25, (e.vida / e.maxVida) * 30, 4);
             });
 
-            // 5. Desenha o Jogador
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
-            ctx.beginPath(); ctx.arc(jogador.x, jogador.y + 10, 14, 0, Math.PI*2); ctx.fill();
-            
-            // Alteração de cor do corpo caso use Armadura de Couro
-            ctx.fillStyle = jogador.temArmadura ? "#704420" : "#bd6a3f"; 
-            ctx.beginPath(); ctx.arc(jogador.x, jogador.y, jogador.raio, 0, Math.PI*2); ctx.fill();
-            
-            // Detalhe do cabelo e pintura de guerra
-            ctx.fillStyle = "#111";
-            ctx.beginPath(); ctx.arc(jogador.x, jogador.y - 6, 11, Math.PI, 0); ctx.fill();
-            ctx.fillStyle = "#900c3f"; ctx.fillRect(jogador.x - 8, jogador.y, 16, 3);
+            // 6. Desenha Flechas em Movimento
+            ctx.fillStyle = "#f5f5f5";
+            flechas.forEach(fl => {
+                ctx.fillRect(fl.x, fl.y, 5, 5);
+            });
 
-            // Desenha a espada na mão se tiver comprado
-            if(jogador.armaNivel === 2) {
-                ctx.strokeStyle = "#f1f2f6";
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(jogador.x + 10, jogador.y);
-                ctx.lineTo(jogador.x + 26, jogador.y - 12);
-                ctx.stroke();
+            // 7. Desenha o Personagem Principal (Nativo Indígena)
+            ctx.fillStyle = jogador.temArmadura ? "#704420" : "#bd6a3f";
+            ctx.beginPath(); ctx.arc(jogador.x, jogador.y, jogador.raio, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(jogador.x, jogador.y - 6, 11, Math.PI, 0); ctx.fill(); // Cabelo
+            ctx.fillStyle = "#900c3f"; ctx.fillRect(jogador.x - 8, jogador.y, 16, 3); // Pintura
+
+            // Retícula da Mira do Arco
+            if(jogador.armaEquipada === 'arco') {
+                ctx.strokeStyle = "rgba(255, 234, 167, 0.5)";
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.arc(mouse.mundoX, mouse.mundoY, 8, 0, Math.PI*2); ctx.stroke();
             }
 
-            ctx.restore(); // Restaura contexto sem translação de câmera
+            ctx.restore();
         }
 
-        function loop() {
+        function loopPrincipal() {
             atualizar();
             desenhar();
-            requestAnimationFrame(loop);
+            requestAnimationFrame(loopPrincipal);
         }
 
-        // Inicialização Geral
         inicializarAmbiente();
-        renderizarSoloGigante();
+        renderizarCenarioEstatico();
         atualizarUI();
-        loop();
+        loopPrincipal();
     </script>
 </body>
 </html>
