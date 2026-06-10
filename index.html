@@ -107,8 +107,8 @@
             background: #231710;
             border: 4px solid #d4a373;
             padding: 15px;
-            width: 400px;
-            max-height: 80vh;
+            width: 420px;
+            max-height: 85vh;
             overflow-y: auto;
             border-radius: 8px;
             box-shadow: 0 0 25px rgba(0,0,0,0.9);
@@ -121,8 +121,10 @@
             font-size: 11px;
             text-transform: uppercase;
             color: #a06b3e;
-            margin: 8px 0 3px 0;
+            margin: 12px 0 4px 0;
             font-weight: bold;
+            border-left: 3px solid #ff9f43;
+            padding-left: 5px;
         }
 
         .loja-item {
@@ -147,7 +149,7 @@
             cursor: pointer;
             border-radius: 3px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .loja-item button:hover { background: #915c32; }
@@ -226,6 +228,36 @@
             padding: 4px 8px;
             cursor: pointer;
             z-index: 10;
+        }
+
+        /* Modal Interno de Senha ADM - CORREÇÃO DA TELA CHEIA */
+        #adm-auth-modal {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e272e;
+            border: 3px solid #3c6382;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 25px #000;
+            z-index: 40;
+            text-align: center;
+            width: 280px;
+        }
+        #adm-auth-modal input {
+            width: 85%;
+            padding: 6px;
+            margin: 12px 0;
+            background: #2f3542;
+            border: 1px solid #3c6382;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+        }
+        #adm-auth-modal button {
+            background: #3c6382; color: #fff; border: none; padding: 6px 14px; margin: 4px; cursor: pointer; border-radius: 4px; font-weight: bold;
         }
 
         #adm-panel {
@@ -331,7 +363,8 @@
                 <div class="bar"><div id="fill-sede" class="fill"></div></div>
             </div>
             <div style="color: #faedcd; margin-top: 3px; font-size:11px; line-height: 1.3;">
-                Machado: <span id="txt-machado" style="color:#fff;">Pedra Lascada</span> (<span id="dur-machado">100</span>%)<br>
+                Machado: <span id="txt-machado" style="color:#fff;">Nível 1</span> (<span id="dur-machado">100</span>%)<br>
+                Armadura: <span id="txt-armadura-hud" style="color:#2ecc71;">Nenhuma</span><br>
                 Mochila: <span id="txt-mochila" style="color:#fff;">Não Possui (E)</span><br>
                 Aliados Vivos: <span id="txt-aliados" style="color:#2ecc71;">0 guerreiros</span><br>
                 Nível da Loja: <span id="txt-loja-lvl" style="color:#f1c40f;">1 (Básico)</span>
@@ -360,36 +393,78 @@
                 <button onclick="comprarItem('Comida', 3)">Trocar</button>
             </div>
 
-            <div class="loja-secao">Ferramentas e Expansão</div>
-            <div class="loja-item">
-                <div><font>Machado de Ferro</font><small>Custo: 8 Madeiras</small></div>
-                <button id="btn-machado-loja" onclick="comprarMachado()">Trocar</button>
+            <div class="loja-secao">5 Melhorias de Ferramentas (Machados)</div>
+            <div class="loja-item" id="item-machado-2">
+                <div><font>Machado de Ferro (Lvl 2)</font><small>Custo: 8 Madeiras</small></div>
+                <button onclick="comprarMachado(2, 8)">Trocar</button>
             </div>
-            <div class="loja-item" id="item-machado-aco" style="display:none;">
-                <div><font>Machado de Aço Max</font><small>Custo: 16 Madeiras</small></div>
-                <button onclick="comprarMachadoAco()">Trocar</button>
+            <div class="loja-item" id="item-machado-3" style="display:none;">
+                <div><font>Machado de Aço (Lvl 3)</font><small>Custo: 15 Madeiras</small></div>
+                <button onclick="comprarMachado(3, 15)">Trocar</button>
             </div>
+            <div class="loja-item" id="item-machado-4" style="display:none;">
+                <div><font>Machado Titânio Colonial (Lvl 4)</font><small>Custo: 25 Madeiras</small></div>
+                <button onclick="comprarMachado(4, 25)">Trocar</button>
+            </div>
+            <div class="loja-item" id="item-machado-5" style="display:none;">
+                <div><font>Machado Mestre Real (Lvl 5)</font><small>Custo: 40 Madeiras</small></div>
+                <button onclick="comprarMachado(5, 40)">Trocar</button>
+            </div>
+
+            <div class="loja-secao">Mochila</div>
             <div class="loja-item">
                 <div><font>Mochila de Couro</font><small>Custo: 6 Madeiras</small></div>
                 <button id="btn-mochila-loja" onclick="comprarMochila()">Trocar</button>
             </div>
 
-            <div class="loja-secao">Equipamento Militar</div>
-            <div class="loja-item">
-                <div><font>Espada de Bronze</font><small>Custo: 12 Madeiras</small></div>
-                <button id="btn-espada-loja" onclick="comprarArma('espada', 12)">Trocar</button>
+            <div class="loja-secao">5 Melhorias de Armas (Espadas)</div>
+            <div class="loja-item" id="item-espada-1">
+                <div><font>Espada de Bronze (Lvl 1)</font><small>Custo: 12 Madeiras</small></div>
+                <button onclick="comprarEspada(1, 12)">Trocar</button>
             </div>
-            <div class="loja-item" id="item-espada-ferro" style="display:none;">
-                <div><font>Espada de Ferro Real</font><small>Custo: 22 Madeiras</small></div>
-                <button onclick="comprarEspadaFerro()">Trocar</button>
+            <div class="loja-item" id="item-espada-2" style="display:none;">
+                <div><font>Espada de Ferro Real (Lvl 2)</font><small>Custo: 20 Madeiras</small></div>
+                <button onclick="comprarEspada(2, 20)">Trocar</button>
             </div>
+            <div class="loja-item" id="item-espada-3" style="display:none;">
+                <div><font>Espada Aço Damasceno (Lvl 3)</font><small>Custo: 32 Madeiras</small></div>
+                <button onclick="comprarEspada(3, 32)">Trocar</button>
+            </div>
+            <div class="loja-item" id="item-espada-4" style="display:none;">
+                <div><font>Espada de Toledo Toledo (Lvl 4)</font><small>Custo: 45 Madeiras</small></div>
+                <button onclick="comprarEspada(4, 45)">Trocar</button>
+            </div>
+            <div class="loja-item" id="item-espada-5" style="display:none;">
+                <div><font>Lâmina Imperial Sagrada (Lvl 5)</font><small>Custo: 60 Madeiras</small></div>
+                <button onclick="comprarEspada(5, 60)">Trocar</button>
+            </div>
+
+            <div class="loja-secao">Arco Flecha</div>
             <div class="loja-item">
                 <div><font>Arco e Flechas</font><small>Custo: 10 Madeiras</small></div>
-                <button id="btn-arco-loja" onclick="comprarArma('arco', 10)">Trocar</button>
+                <button id="btn-arco-loja" onclick="comprarArco()">Trocar</button>
             </div>
-            <div class="loja-item">
-                <div><font>Armadura de Couro</font><small>Custo: 15 Madeiras</small></div>
-                <button id="btn-armadura-loja" onclick="comprarArmadura()">Trocar</button>
+
+            <div class="loja-secao">5 Tipos de Armaduras</div>
+            <div class="loja-item" id="item-armadura-1">
+                <div><font>Armadura de Couro (Lvl 1)</font><small>Proteção: 15% | Custo: 12 Mad.</small></div>
+                <button onclick="comprarArmadura(1, 12)">Adquirir</button>
+            </div>
+            <div class="loja-item" id="item-armadura-2" style="display:none;">
+                <div><font>Algodão Acochoado (Lvl 2)</font><small>Proteção: 30% | Custo: 20 Mad.</small></div>
+                <button onclick="comprarArmadura(2, 20)">Adquirir</button>
+            </div>
+            <div class="loja-item" id="item-armadura-3" style="display:none;">
+                <div><font>Couraça de Bronze (Lvl 3)</font><small>Proteção: 50% | Custo: 30 Mad.</small></div>
+                <button onclick="comprarArmadura(3, 30)">Adquirir</button>
+            </div>
+            <div class="loja-item" id="item-armadura-4" style="display:none;">
+                <div><font>Ferro Batido (Lvl 4)</font><small>Proteção: 70% | Custo: 45 Mad.</small></div>
+                <button onclick="comprarArmadura(4, 45)">Adquirir</button>
+            </div>
+            <div class="loja-item" id="item-armadura-5" style="display:none;">
+                <div><font>Placas de Aço Imperial (Lvl 5)</font><small>Proteção: 85% | Custo: 65 Mad.</small></div>
+                <button onclick="comprarArmadura(5, 65)">Adquirir</button>
             </div>
 
             <div class="loja-secao">Diplomacia / Exército</div>
@@ -417,7 +492,16 @@
             <button id="btn-fechar-loja" onclick="alternarMochila()" style="background:#555;">Fechar (E)</button>
         </div>
 
-        <button id="btn-adm-trigger" onclick="abrirPainelAdm()">ADM Panel</button>
+        <div id="adm-auth-modal">
+            <b style="color: #3c6382; font-size:14px;">Acesso de Administrador</b><br>
+            <span style="font-size:11px; color:#aaa;">Insira a chave de segurança interna:</span>
+            <input type="password" id="adm-pass-input" placeholder="••••••••">
+            <br>
+            <button onclick="confirmarAutenticacaoAdm()">Confirmar</button>
+            <button onclick="fecharModalAutenticacao()" style="background:#444;">Cancelar</button>
+        </div>
+
+        <button id="btn-adm-trigger" onclick="abrirPainelAdmAutenticar()">ADM Panel</button>
         <div id="adm-panel">
             <b style="font-size:12px; color:#ff4757;">Controles de Administrador</b>
             <button onclick="admCheat('madeira')">+99 Madeiras</button>
@@ -448,6 +532,7 @@
         const menuEscambo = document.getElementById("escambo-menu");
         const mochilaMenu = document.getElementById("mochila-menu");
         const admPanel = document.getElementById("adm-panel");
+        const authModal = document.getElementById("adm-auth-modal");
         const tempoGuerraTxt = document.getElementById("tempo-guerra");
         const nivelAmeacaTxt = document.getElementById("nivel-ameaca");
         const btnAntecipar = document.getElementById("btn-antecipar");
@@ -461,7 +546,6 @@
         let slotSelecionado = 0;
         let nivelLoja = 1;
 
-        // Custom Canvas Alerts System (Evita quebras de tela cheia)
         let customAlerts = [];
         function dispararAlertaVisual(msg, cor = "#2ecc71") {
             customAlerts.push({ texto: msg, timer: 180, cor: cor });
@@ -472,13 +556,12 @@
             vel: 4, raio: 16,
             vida: 100, fome: 100, sede: 100,
             inventario: { madeira: 0, agua: 0, comida: 0 },
-            machadoNivel: 1, // 1: Pedra, 2: Ferro, 3: Aço
+            machadoNivel: 1, 
             machadoDurabilidade: 100,
             temEspada: false,
-            espadaNivel: 1, // 1: Bronze, 2: Ferro
+            espadaNivel: 0, 
             temArco: false,
-            temMochila: false,
-            temArmadura: false,
+            armaduraNivel: 0,
             invencivel: false
         };
 
@@ -493,7 +576,7 @@
 
         function inicializarAmbiente() {
             arvores = [];
-            for(let i=0; i<40; i++) {
+            for(let i=0; i<45; i++) {
                 arvores.push({
                     x: Math.random() * (MAPA_LARGURA - 200) + 100,
                     y: Math.random() * (MAPA_ALTURA - 600) + 500,
@@ -533,7 +616,7 @@
 
         const teclas = {};
         window.addEventListener("keydown", e => {
-            if(jogoPausado && e.key !== "Escape" && e.key.toLowerCase() !== "e") return;
+            if(jogoPausado && e.key !== "Escape" && e.key.toLowerCase() !== "e" && document.activeElement.id !== "adm-pass-input") return;
             teclas[e.key.toLowerCase()] = true;
             
             if(e.key.toLowerCase() === "e") alternarMochila();
@@ -544,6 +627,7 @@
             if(e.key === "5" && jogador.temArco) selecionarSlot(4);
             
             if(e.key === " ") {
+                if(document.activeElement.id === "adm-pass-input") return;
                 e.preventDefault();
                 if(!interagirFeitor() && !tentarCortarPauBrasil()) {
                     if(slotSelecionado === 3 && jogador.temEspada) atacarDePerto();
@@ -602,6 +686,17 @@
             }
         }
 
+        function obterNomeArmadura(lvl) {
+            switch(lvl) {
+                case 1: return "Couro (15%)";
+                case 2: return "Algodão Acoch. (30%)";
+                case 3: return "Bronze (50%)";
+                case 4: return "Ferro Batido (70%)";
+                case 5: return "Aço Imperial (85%)";
+                default: return "Nenhuma";
+            }
+        }
+
         function atualizarUI() {
             fomeFill.style.width = Math.max(0, jogador.fome) + "%";
             sedeFill.style.width = Math.max(0, jogador.sede) + "%";
@@ -611,12 +706,11 @@
             document.getElementById("qtd-comida").innerText = jogador.inventario.comida;
             durMachadoTxt.innerText = Math.floor(jogador.machadoDurabilidade);
             
-            if(jogador.machadoNivel === 1) txtMachado.innerText = "Frágil";
-            else if(jogador.machadoNivel === 2) txtMachado.innerText = "Ferro";
-            else if(jogador.machadoNivel === 3) txtMachado.innerText = "Aço Max";
+            txtMachado.innerText = "Lvl " + jogador.machadoNivel;
+            document.getElementById("txt-armadura-hud").innerText = obterNomeArmadura(jogador.armaduraNivel);
 
             if(jogador.temEspada) {
-                document.getElementById("status-espada").innerText = jogador.espadaNivel === 1 ? "Bronze" : "Ferro";
+                document.getElementById("status-espada").innerText = "Lvl " + jogador.espadaNivel;
             } else {
                 document.getElementById("status-espada").innerText = "Não";
             }
@@ -634,18 +728,17 @@
             arvores.forEach(a => {
                 if(a.viva && dist(jogador.x, jogador.y, a.x, a.y) < 60) {
                     acertou = true;
-                    let danoCorte = 10;
-                    if(jogador.machadoNivel === 2) danoCorte = 22;
-                    if(jogador.machadoNivel === 3) danoCorte = 40;
+                    let danos = [0, 10, 20, 35, 55, 100];
+                    let danoCorte = danos[jogador.machadoNivel] || 10;
 
                     a.vida -= danoCorte;
-                    jogador.machadoDurabilidade -= jogador.machadoNivel === 1 ? 4 : (jogador.machadoNivel === 2 ? 1 : 0.4);
+                    jogador.machadoDurabilidade -= jogador.machadoNivel >= 3 ? 0.3 : 1.5;
 
                     if(a.vida <= 0) {
                         a.viva = false;
-                        jogador.inventario.madeira += Math.floor(Math.random() * 2) + 2;
+                        jogador.inventario.madeira += Math.floor(Math.random() * 3) + 3;
                         atualizarUI();
-                        setTimeout(() => { a.viva = true; a.vida = a.max; }, 12000);
+                        setTimeout(() => { a.viva = true; a.vida = a.max; }, 10000);
                     }
                 }
             });
@@ -672,26 +765,18 @@
             if(jogador.inventario.madeira >= custo) {
                 jogador.inventario.madeira -= custo;
                 if(tipo === 'Agua') jogador.inventario.agua++;
-                if(tipo === 'Comida') jogador.inventario.comida++;
+                if(tipo === 'Comida') skeleton = jogador.inventario.comida++;
                 atualizarUI();
             }
         }
 
-        function comprarMachado() {
-            if(jogador.inventario.madeira >= 8 && jogador.machadoNivel === 1) {
-                jogador.inventario.madeira -= 8;
-                jogador.machadoNivel = 2;
+        // Sistema de 5 upgrades de machados
+        function comprarMachado(lvl, custo) {
+            if(jogador.inventario.madeira >= custo && jogador.machadoNivel === lvl - 1) {
+                jogador.inventario.madeira -= custo;
+                jogador.machadoNivel = lvl;
                 jogador.machadoDurabilidade = 100;
-                document.getElementById("btn-machado-loja").disabled = true;
-                atualizarUI();
-            }
-        }
-
-        function comprarMachadoAco() {
-            if(jogador.inventario.madeira >= 16 && jogador.machadoNivel === 2) {
-                jogador.inventario.madeira -= 16;
-                jogador.machadoNivel = 3;
-                jogador.machadoDurabilidade = 100;
+                document.getElementById(`item-machado-${lvl}`).style.display = "none";
                 atualizarUI();
             }
         }
@@ -705,28 +790,32 @@
             }
         }
 
-        function comprarArma(tipo, custo) {
-            if(jogador.inventario.madeira >= custo) {
+        // Sistema de 5 upgrades de espadas
+        function comprarEspada(lvl, custo) {
+            if(jogador.inventario.madeira >= custo && jogador.espadaNivel === lvl - 1) {
                 jogador.inventario.madeira -= custo;
-                if(tipo === 'espada') { jogador.temEspada = true; document.getElementById("btn-espada-loja").disabled = true; }
-                if(tipo === 'arco') { jogador.temArco = true; document.getElementById("btn-arco-loja").disabled = true; }
+                jogador.temEspada = true;
+                jogador.espadaNivel = lvl;
+                document.getElementById(`item-espada-${lvl}`).style.display = "none";
                 atualizarUI();
             }
         }
 
-        function comprarEspadaFerro() {
-            if(jogador.inventario.madeira >= 22 && jogador.espadaNivel === 1) {
-                jogador.inventario.madeira -= 22;
-                jogador.espadaNivel = 2;
+        function comprarArco() {
+            if(jogador.inventario.madeira >= 10 && !jogador.temArco) {
+                jogador.inventario.madeira -= 10;
+                jogador.temArco = true;
+                document.getElementById("btn-arco-loja").disabled = true;
                 atualizarUI();
             }
         }
 
-        function comprarArmadura() {
-            if(jogador.inventario.madeira >= 15 && !jogador.temArmadura) {
-                jogador.inventario.madeira -= 15;
-                jogador.temArmadura = true;
-                document.getElementById("btn-armadura-loja").disabled = true;
+        // Sistema de 5 upgrades de armaduras
+        function comprarArmadura(lvl, custo) {
+            if(jogador.inventario.madeira >= custo && jogador.armaduraNivel === lvl - 1) {
+                jogador.inventario.madeira -= custo;
+                jogador.armaduraNivel = lvl;
+                document.getElementById(`item-armadura-${lvl}`).style.display = "none";
                 atualizarUI();
             }
         }
@@ -734,13 +823,12 @@
         function recrutarAliado() {
             if(jogador.inventario.madeira >= 20) {
                 jogador.inventario.madeira -= 20;
-                // BUG CORRIGIDO: Nascem perto da cabana visivelmente dentro da mata
                 aliados.push({
                     x: feitor.x + Math.random() * 60 - 30,
-                    y: feitor.y + 60 + Math.random() * 20,
+                    y: feitor.y + 70,
                     vida: 100,
                     maxVida: 100,
-                    vel: 3.0,
+                    vel: 2.8,
                     cooldownAtaque: 0
                 });
                 atualizarUI();
@@ -768,10 +856,11 @@
         }
 
         function atacarDePerto() {
-            let danoEspada = jogador.espadaNivel === 1 ? 35 : 60;
+            let danosEspada = [0, 30, 45, 65, 90, 150];
+            let danoFinal = danosEspada[jogador.espadaNivel] || 25;
             inimigos.forEach(i => {
                 if(dist(jogador.x, jogador.y, i.x, i.y) < 75) {
-                    i.vida -= danoEspada;
+                    i.vida -= danoFinal;
                 }
             });
         }
@@ -811,11 +900,9 @@
             
             let quantidadeMinions = nivelDificuldadeGuerra * 4;
             
-            // Inicia o spawn das tropas normais
             for(let i=0; i < quantidadeMinions; i++) {
                 setTimeout(spawnInvasorMaritimo, i * 1300);
             }
-            // O Chefão (Boss) sempre é escalado para entrar como o último reforço da leva
             setTimeout(spawnBossInvasor, quantidadeMinions * 1300);
         }
 
@@ -824,8 +911,8 @@
             inimigos.push({
                 x: Math.random() * (MAPA_LARGURA - 400) + 200,
                 y: LINHA_DA_AGUA + 10,
-                vida: 60 + (nivelDificuldadeGuerra * 10),
-                maxVida: 60 + (nivelDificuldadeGuerra * 10),
+                vida: 60 + (nivelDificuldadeGuerra * 12),
+                maxVida: 60 + (nivelDificuldadeGuerra * 12),
                 vel: 1.6 + (nivelDificuldadeGuerra * 0.1),
                 dano: 8,
                 cooldownDano: 0,
@@ -838,32 +925,50 @@
             inimigos.push({
                 x: MAPA_LARGURA / 2,
                 y: LINHA_DA_AGUA + 15,
-                vida: 250 + (nivelDificuldadeGuerra * 150),
-                maxVida: 250 + (nivelDificuldadeGuerra * 150),
-                vel: 1.2,
-                dano: 22,
+                vida: 250 + (nivelDificuldadeGuerra * 160),
+                maxVida: 250 + (nivelDificuldadeGuerra * 160),
+                vel: 1.1,
+                dano: 24,
                 cooldownDano: 0,
                 isBoss: true
             });
             dispararAlertaVisual("O GENERAL DOS CONFINADOS DESEMBARCOU!", "#d32f2f");
         }
 
-        function abrirPainelAdm() {
-            let senha = prompt("Insira a senha de Administrador:");
-            if(senha === "kaua@2024") {
+        // SISTEMA DE INTERFACE ADM INTERNA (CORRIGIDO SEM PROMPT)
+        function abrirPainelAdmAutenticar() {
+            jogoPausado = true;
+            authModal.style.display = "block";
+            document.getElementById("adm-pass-input").value = "";
+            document.getElementById("adm-pass-input").focus();
+        }
+
+        function fecharModalAutenticacao() {
+            authModal.style.display = "none";
+            jogoPausado = false;
+        }
+
+        function confirmarAutenticacaoAdm() {
+            const pass = document.getElementById("adm-pass-input").value;
+            if(pass === "kaua@2024") {
+                authModal.style.display = "none";
                 admPanel.style.display = "block";
             } else {
                 dispararAlertaVisual("Senha incorreta!", "#e74c3c");
+                fecharModalAutenticacao();
             }
         }
-        function fecharPainelAdm() { admPanel.style.display = "none"; }
+
+        function fecharPainelAdm() { 
+            admPanel.style.display = "none"; 
+            jogoPausado = false;
+        }
         
         function admCheat(tipo) {
             if(tipo === 'madeira') { jogador.inventario.madeira += 99; atualizarUI(); }
             if(tipo === 'guerra') { anteciparGuerra(); fecharPainelAdm(); }
             if(tipo === 'vida') { jogador.vida = 100; jogador.fome = 100; jogador.sede = 100; jogador.invencivel = true; atualizarUI(); }
             if(tipo === 'killall') {
-                // Executa todos os inimigos e bosses da tela coletando os espólios
                 if(inimigos.length > 0) {
                     inimigos.forEach(i => i.vida = 0);
                 }
@@ -914,7 +1019,7 @@
                 }
             }
 
-            // BALANCEAMENTO: Aliados causam dano reduzido e tomam dano real
+            // BALANCEAMENTO DOS GUERREIROS (Dano super baixo para agir como suporte)
             for (let alIndex = aliados.length - 1; alIndex >= 0; alIndex--) {
                 let al = aliados[alIndex];
                 if(al.vida <= 0) {
@@ -937,8 +1042,8 @@
                     
                     if(al.cooldownAtaque > 0) al.cooldownAtaque--;
                     if(menorDist < 35 && al.cooldownAtaque === 0) {
-                        maisProximo.vida -= 5; // Dano moderado corrigido
-                        al.cooldownAtaque = 60; 
+                        maisProximo.vida -= 3; // Reduzido drasticamente para 3 de dano tático
+                        al.cooldownAtaque = 70; // Ataca mais devagar
                     }
                 } else {
                     let dPlayer = dist(al.x, al.y, jogador.x, jogador.y);
@@ -958,15 +1063,33 @@
                     inimigos.splice(i, 1);
                     
                     if(foiBoss) {
-                        nivelLoja = 2; // Desbloqueia novas tecnologias na loja
-                        document.getElementById("item-machado-aco").style.display = "flex";
-                        document.getElementById("item-espada-ferro").style.display = "flex";
-                        dispararAlertaVisual("BOSS DERROTADO! A feitoria liberou armas de Ferro/Aço!", "#f1c40f");
+                        nivelLoja++;
+                        // Libera progressivamente os tiers mais altos da loja conforme vence os bosses
+                        if(nivelLoja >= 2) {
+                            document.getElementById("item-machado-3").style.display = "flex";
+                            document.getElementById("item-espada-2").style.display = "flex";
+                            document.getElementById("item-armadura-2").style.display = "flex";
+                        }
+                        if(nivelLoja >= 3) {
+                            document.getElementById("item-machado-4").style.display = "flex";
+                            document.getElementById("item-espada-3").style.display = "flex";
+                            document.getElementById("item-armadura-3").style.display = "flex";
+                        }
+                        if(nivelLoja >= 4) {
+                            document.getElementById("item-machado-5").style.display = "flex";
+                            document.getElementById("item-espada-4").style.display = "flex";
+                            document.getElementById("item-armadura-4").style.display = "flex";
+                        }
+                        if(nivelLoja >= 5) {
+                            document.getElementById("item-espada-5").style.display = "flex";
+                            document.getElementById("item-armadura-5").style.display = "flex";
+                        }
+                        dispararAlertaVisual(`CHEFE BATIDO! Tecnologias nível ${nivelLoja} liberadas!`, "#f1c40f");
                     }
 
                     if(emGuerra && inimigos.length === 0) {
-                        jogador.inventario.madeira += 25;
-                        dispararAlertaVisual("Vitória da Onda! +25 Madeiras obtidas.", "#2ecc71");
+                        jogador.inventario.madeira += 30;
+                        dispararAlertaVisual("Vitória! Linha costeira defendida (+30 Madeiras).", "#2ecc71");
                         emGuerra = false;
                         tempoParaGuerra = 180;
                         nivelDificuldadeGuerra++;
@@ -996,10 +1119,14 @@
                 if(menorDistAlvo < (enemy.isBoss ? 45 : 28) && enemy.cooldownDano === 0) {
                     if(alvoAlvo === jogador) {
                         let totalDano = enemy.dano;
-                        if(jogador.temArmadura) totalDano *= 0.65;
+                        // REDUÇÃO DE DANO CALCULADA COM BASE NOS 5 NÍVEIS DE ARMADURA
+                        let reducoes = [1.0, 0.85, 0.70, 0.50, 0.30, 0.15];
+                        let multiplicador = reducoes[jogador.armaduraNivel] || 1.0;
+                        totalDano *= multiplicador;
+
                         if(!jogador.invencivel) jogador.vida -= totalDano;
                     } else {
-                        alvoAlvo.vida -= enemy.dano * 1.2;
+                        alvoAlvo.vida -= enemy.dano * 1.1; // Aliados tomam dano normal dos inimigos
                     }
                     enemy.cooldownDano = enemy.isBoss ? 70 : 55;
                     atualizarUI();
@@ -1017,7 +1144,7 @@
             }
 
             if(jogador.fome <= 0 || jogador.sede <= 0 || jogador.vida <= 0) {
-                dispararAlertaVisual("Você desmaiou! Recursos perdidos.", "#c0392b");
+                dispararAlertaVisual("Inconsciente! Território recuado.", "#c0392b");
                 jogador.vida = 100; jogador.fome = 100; jogador.sede = 100;
                 jogador.inventario = { madeira: 0, agua: 0, comida: 0 };
                 jogador.machadoDurabilidade = 100;
@@ -1036,7 +1163,7 @@
 
             ctx.drawImage(bgCanvas, 0, 0);
 
-            // Caravelas Inofensivas estéticas
+            // Caravelas
             ctx.fillStyle = "#5c4033";
             ctx.fillRect(300, 60, 110, 45);
             ctx.fillRect(1200, 70, 110, 45);
@@ -1045,7 +1172,7 @@
             ctx.fillRect(350, 15, 5, 45); ctx.fillRect(330, 20, 20, 25);
             ctx.fillRect(1250, 25, 5, 45); ctx.fillRect(1230, 30, 20, 25);
 
-            // Feitoria
+            // Cabana Feitoria
             ctx.fillStyle = "#5c4033"; ctx.fillRect(feitor.x - 40, feitor.y - 50, 80, 50);
             ctx.fillStyle = "#a67b5b"; ctx.beginPath(); ctx.moveTo(feitor.x - 50, feitor.y - 50); ctx.lineTo(feitor.x, feitor.y - 80); ctx.lineTo(feitor.x + 50, feitor.y - 50); ctx.fill();
 
@@ -1053,7 +1180,7 @@
             ctx.fillStyle = "#2b3d52"; ctx.beginPath(); ctx.arc(feitor.x, feitor.y, feitor.raio, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = "#1c140e"; ctx.fillRect(feitor.x - 24, feitor.y - 6, 48, 5);
 
-            // Árvores com RETORNO DA BARRA DE VIDA
+            // Árvores com barra de vida
             arvores.forEach(a => {
                 if(!a.viva) {
                     ctx.fillStyle = '#4a2f13'; ctx.fillRect(a.x - 6, a.y - 4, 12, 12); return;
@@ -1066,7 +1193,6 @@
                     ctx.beginPath(); ctx.arc(a.x + Math.cos(a.seed + i)*10, a.y - 22, 24 - i*2, 0, Math.PI*2); ctx.fill();
                 }
 
-                // Renderização da barra de vida da árvore se golpeada
                 if (a.vida < a.max) {
                     ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(a.x - 20, a.y - 60, 40, 5);
                     ctx.fillStyle = "#2ecc71"; ctx.fillRect(a.x - 20, a.y - 60, (a.vida / a.max) * 40, 5);
@@ -1082,7 +1208,7 @@
                 ctx.fillStyle = "#2ecc71"; ctx.fillRect(al.x - 12, al.y - 22, (al.vida / al.maxVida) * 24, 3);
             });
 
-            // Inimigos Soldados e BOSS
+            // Inimigos
             inimigos.forEach(e => {
                 let tam = e.isBoss ? 28 : 15;
                 ctx.fillStyle = e.isBoss ? "#3c40c6" : "#57606f"; 
@@ -1091,7 +1217,6 @@
                 ctx.fillStyle = e.isBoss ? "#ffd32a" : "#d1ccc0"; 
                 ctx.beginPath(); ctx.arc(e.x, e.y - (e.isBoss ? 8 : 4), e.isBoss ? 16 : 9, Math.PI, 0); ctx.fill();
                 
-                // Barras de Status
                 ctx.fillStyle = "black"; ctx.fillRect(e.x - tam, e.y - tam - 10, tam * 2, e.isBoss ? 7 : 4);
                 ctx.fillStyle = e.isBoss ? "#ef5350" : "red"; ctx.fillRect(e.x - tam, e.y - tam - 10, (e.vida / e.maxVida) * (tam * 2), e.isBoss ? 7 : 4);
             });
@@ -1100,15 +1225,18 @@
             ctx.fillStyle = "#f5f5f5";
             flechas.forEach(fl => { ctx.fillRect(fl.x, fl.y, 5, 5); });
 
-            // Jogador Principal
-            ctx.fillStyle = jogador.temArmadura ? "#704420" : "#bd6a3f";
+            // Cores baseadas nos 5 níveis de armadura do jogador
+            let coresArmaduras = ["#bd6a3f", "#8a5329", "#d291bc", "#cd7f32", "#747d8c", "#f1c40f"];
+            ctx.fillStyle = coresArmaduras[jogador.armaduraNivel] || "#bd6a3f";
+
             ctx.beginPath(); ctx.arc(jogador.x, jogador.y, jogador.raio, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(jogador.x, jogador.y - 6, 11, Math.PI, 0); ctx.fill();
             ctx.fillStyle = "#900c3f"; ctx.fillRect(jogador.x - 8, jogador.y, 16, 3);
 
-            // Desenho Dinâmico das Armas Selecionadas no Inventário
+            // Cores das espadas
+            let coresEspadas = ["#cd7f32", "#d1ccc0", "#341f97", "#ffb142", "#74b9ff"];
             if(slotSelecionado === 3 && jogador.temEspada) {
-                ctx.strokeStyle = jogador.espadaNivel === 1 ? "#cd7f32" : "#d1ccc0"; 
+                ctx.strokeStyle = coresEspadas[jogador.espadaNivel - 1] || "#fff"; 
                 ctx.lineWidth = 3.5;
                 ctx.beginPath(); ctx.moveTo(jogador.x + 8, jogador.y); ctx.lineTo(jogador.x + 26, jogador.y - 10); ctx.stroke();
             } else if(slotSelecionado === 4 && jogador.temArco) {
@@ -1116,7 +1244,6 @@
                 ctx.beginPath(); ctx.arc(jogador.x + 8, jogador.y, 11, -Math.PI/3, Math.PI/3); ctx.stroke();
             }
 
-            // Retícula da mira
             if(slotSelecionado === 4 && jogador.temArco) {
                 ctx.strokeStyle = "rgba(255, 159, 67, 0.9)";
                 ctx.lineWidth = 1.5;
@@ -1127,7 +1254,7 @@
 
             ctx.restore();
 
-            // Desenho do Sistema de Alertas customizados integrados ao Canvas
+            // Mensagens internas de Alerta (Sem interromper a tela cheia)
             for(let a = customAlerts.length - 1; a >= 0; a--) {
                 let alertObj = customAlerts[a];
                 ctx.fillStyle = "rgba(0,0,0,0.85)";
