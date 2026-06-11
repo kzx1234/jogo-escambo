@@ -1,0 +1,13 @@
+{
+  "name": "jogo-escambo-multiplayer",
+  "version": "1.0.0",
+  "description": "Servidor multiplayer para o jogo escambo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
