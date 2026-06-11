@@ -9,36 +9,32 @@ const io = new Server(server, {
     cors: { origin: "*" }
 });
 
-// Serve os arquivos da pasta atual (como o index.html) automaticamente
 app.use(express.static(path.join(__dirname, '.')));
 
 const MAPA_LARGURA = 2500;
 const MAPA_ALTURA = 1800;
+const LINHA_DA_AGUA = 250;
 
 let jogadores = {};
 let arvores = [];
 
-// Inicializa as 45 árvores diretamente no servidor
-// Isso garante que todos os jogadores vejam as mesmas árvores nos mesmos lugares
-for(let i = 0; i < 45; i++) {
+// Inicializa as árvores no servidor para que sejam iguais para todos
+for(let i=0; i<45; i++) {
     arvores.push({
         id: i,
         x: Math.random() * (MAPA_LARGURA - 200) + 100,
         y: Math.random() * (MAPA_ALTURA - 600) + 500,
-        vida: 100, 
-        max: 100, 
-        viva: true, 
-        seed: Math.random() * 100
+        vida: 100, max: 100, viva: true, seed: Math.random()*100
     });
 }
 
 io.on('connection', (socket) => {
-    console.log(`Colono conectado ao servidor: ${socket.id}`);
+    console.log(`Jogador conectado: ${socket.id}`);
 
-    // Configura o estado inicial do novo jogador
+    // Cria o novo jogador no servidor
     jogadores[socket.id] = {
         id: socket.id,
-        x: 500 + (Math.random() * 50 - 25), // Pequena variação para não nascerem exatamente colados
+        x: 500 + (Math.random() * 40 - 20),
         y: 700,
         raio: 16,
         armaduraNivel: 0,
@@ -48,13 +44,13 @@ io.on('connection', (socket) => {
         temArco: false
     };
 
-    // Envia os dados do mapa e dos jogadores atuais apenas para o jogador que acabou de conectar
+    // Envia o estado inicial para quem acabou de entrar
     socket.emit('inicializar', { id: socket.id, jogadores, arvores });
 
-    // Avisa todos os outros jogadores que um novo colono entrou
+    // Avisa os outros que alguém entrou
     socket.broadcast.emit('novoJogador', jogadores[socket.id]);
 
-    // Atualiza e replica a posição e os equipamentos de um jogador para os demais
+    // Atualiza a posição e estado do jogador
     socket.on('movimento', (dados) => {
         if (jogadores[socket.id]) {
             jogadores[socket.id].x = dados.x;
@@ -65,48 +61,40 @@ io.on('connection', (socket) => {
             jogadores[socket.id].espadaNivel = dados.espadaNivel;
             jogadores[socket.id].temArco = dados.temArco;
 
-            // Transmite as modificações para os outros usuários conectados
+            // Replica para os outros jogadores
             socket.broadcast.emit('atualizarJogador', jogadores[socket.id]);
         }
     });
 
-    // Gerencia o sistema de colheita e corte de Pau-Brasil compartilhado
+    // Sincroniza o corte de árvore
     socket.on('cortarArvore', (dados) => {
         let arvore = arvores.find(a => a.id === dados.id);
         if (arvore && arvore.viva) {
             arvore.vida -= dados.dano;
-            
             if (arvore.vida <= 0) {
                 arvore.viva = false;
-                // Notifica todo mundo que a árvore caiu
-                io.emit('arvoreDerrubada', { id: arvore.id });
+                io.emit('arvoreDerrubada', { id: arvore.id, qtdMadeira: Math.floor(Math.random() * 3) + 3 });
                 
-                // Configura o tempo de ressurgimento (10 segundos) gerenciado pelo servidor
+                // Renasce a árvore após 10 segundos
                 setTimeout(() => {
                     arvore.viva = true;
                     arvore.vida = arvore.max;
                     io.emit('arvoreRenasceu', { id: arvore.id });
                 }, 10000);
             } else {
-                // Se ainda tiver vida, atualiza a barra de vida dela para todos
                 io.emit('atualizarArvore', { id: arvore.id, vida: arvore.vida });
             }
         }
     });
 
-    // Remove o jogador do mapa mundial quando ele fecha a aba ou desconecta
     socket.on('disconnect', () => {
-        console.log(`Colono desconectado: ${socket.id}`);
+        console.log(`Jogador desconectado: ${socket.id}`);
         delete jogadores[socket.id];
         io.emit('removerJogador', socket.id);
     });
 });
 
-// O servidor vai rodar na porta de ambiente (ex: Render/Heroku) ou na porta 3000 localmente
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`====================================================`);
-    console.log(` SERVIDOR MULTIPLAYER RODANDO COM SUCESSO!`);
-    console.log(` Endereço Local: http://localhost:${PORT}`);
-    console.log(`====================================================`);
+    console.log(`Servidor multiplayer rodando na porta ${PORT}`);
 });
