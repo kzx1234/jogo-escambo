@@ -32,7 +32,7 @@
             box-shadow: 0px 10px 30px rgba(0,0,0,0.8);
             border: 6px solid #4a3728;
             border-radius: 4px;
-            background: #2d4a22;
+            background: #1e3799;
             width: 950px;
             height: 580px;
         }
@@ -62,7 +62,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             padding: 12px;
             border-radius: 6px;
             border: 1px solid #6b533c;
@@ -97,6 +97,21 @@
         #fill-fome { background: linear-gradient(90deg, #d35400, #e67e22); }
         #fill-sede { background: linear-gradient(90deg, #2980b9, #3498db); }
         #fill-vida { background: linear-gradient(90deg, #c0392b, #e74c3c); }
+
+        #minimap-container {
+            margin-top: 8px;
+            border: 2px solid #6b533c;
+            background: #111;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 190px;
+            height: 120px;
+            position: relative;
+        }
+
+        #minimapCanvas {
+            display: block;
+        }
 
         #escambo-menu {
             display: none;
@@ -230,7 +245,6 @@
             z-index: 10;
         }
 
-        /* Modal Interno de Senha ADM - CORREÇÃO DA TELA CHEIA */
         #adm-auth-modal {
             display: none;
             position: absolute;
@@ -344,7 +358,7 @@
 </head>
 <body>
 
-    <h1>Mata e Litoral de Pernambuco - Século XVI</h1>
+    <h1>Mata, Oceano Expandido e Ilha Inimiga - Século XVI</h1>
 
     <div id="game-wrapper">
         <canvas id="gameCanvas" width="950" height="580"></canvas>
@@ -367,7 +381,11 @@
                 Armadura: <span id="txt-armadura-hud" style="color:#2ecc71;">Nenhuma</span><br>
                 Mochila: <span id="txt-mochila" style="color:#fff;">Não Possui (E)</span><br>
                 Aliados Vivos: <span id="txt-aliados" style="color:#2ecc71;">0 guerreiros</span><br>
-                Nível da Loja: <span id="txt-loja-lvl" style="color:#f1c40f;">1 (Básico)</span>
+                Nível da Loja: <span id="txt-loja-lvl" style="color:#f1c40f;">1 (Básico)</span><br>
+                Estado: <span id="txt-estado" style="color:#54a0ff;">A Pé</span>
+            </div>
+            <div id="minimap-container">
+                <canvas id="minimapCanvas" width="190" height="120"></canvas>
             </div>
         </div>
 
@@ -517,11 +535,15 @@
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
+        const minimapCanvas = document.getElementById("minimapCanvas");
+        const mctx = minimapCanvas.getContext("2d");
         const wrapper = document.getElementById("game-wrapper");
 
+        // MAPA EXPANDIDO PARA CIMA (O mar agora vai do y:0 ao y:900, dando espaço massivo para viagem)
         const MAPA_LARGURA = 2500;
-        const MAPA_ALTURA = 1800;
-        const LINHA_DA_AGUA = 250;
+        const MAPA_ALTURA = 2300;
+        const LINHA_DA_AGUA = 900; 
+        const ALTURA_PRAIA = 180;
 
         const fomeFill = document.getElementById("fill-fome");
         const sedeFill = document.getElementById("fill-sede");
@@ -536,6 +558,7 @@
         const tempoGuerraTxt = document.getElementById("tempo-guerra");
         const nivelAmeacaTxt = document.getElementById("nivel-ameaca");
         const btnAntecipar = document.getElementById("btn-antecipar");
+        const txtEstado = document.getElementById("txt-estado");
 
         let jogoPausado = false;
         let mochilaAberta = false;
@@ -552,7 +575,7 @@
         }
 
         const jogador = {
-            x: 500, y: 700,
+            x: 1200, y: 1400,
             vel: 4, raio: 16,
             vida: 100, fome: 100, sede: 100,
             inventario: { madeira: 0, agua: 0, comida: 0 },
@@ -565,7 +588,26 @@
             invencivel: false
         };
 
-        const feitor = { x: 400, y: 600, raio: 22 };
+        // SISTEMA DE BARCO PILOTÁVEL
+        const barco = {
+            x: 1200,
+            y: LINHA_DA_AGUA - 60,
+            largura: 70,
+            altura: 35,
+            pilotando: false,
+            vel: 6.5,
+            raioInteracao: 70
+        };
+
+        // ILHA INIMIGA REPROJETADA NO MEIO DO GRANDE OCEANO SUPERIOR esquerdo
+        const ilhaInimiga = {
+            x: 450,
+            y: 350,
+            raio: 260,
+            guerreirosGerados: false
+        };
+
+        const feitor = { x: 1100, y: 1200, raio: 22 };
         const camera = { x: 0, y: 0 };
         const mouse = { x: 0, y: 0, mundoX: 0, mundoY: 0 };
 
@@ -573,16 +615,20 @@
         let inimigos = [];
         let aliados = [];
         let flechas = [];
+        let tesourosSqueados = []; // Itens de valor derrubados pelos inimigos da ilha
 
         function inicializarAmbiente() {
             arvores = [];
-            for(let i=0; i<45; i++) {
+            // Árvores da mata nativa (abaixo da praia)
+            for(let i=0; i<55; i++) {
                 arvores.push({
                     x: Math.random() * (MAPA_LARGURA - 200) + 100,
-                    y: Math.random() * (MAPA_ALTURA - 600) + 500,
+                    y: Math.random() * (MAPA_ALTURA - (LINHA_DA_AGUA + ALTURA_PRAIA + 100)) + (LINHA_DA_AGUA + ALTURA_PRAIA + 50),
                     vida: 100, max: 100, viva: true, seed: Math.random()*100
                 });
             }
+            tesourosSqueados = [];
+            ilhaInimiga.guerreirosGerados = false;
         }
 
         const bgCanvas = document.createElement('canvas');
@@ -590,24 +636,51 @@
         const bgCtx = bgCanvas.getContext('2d');
 
         function renderizarCenarioEstatico() {
+            // Grande oceano expandido
             bgCtx.fillStyle = '#1e3799';
             bgCtx.fillRect(0, 0, MAPA_LARGURA, LINHA_DA_AGUA);
             
+            // Ondas estilizadas no oceano aberto
+            for(let i=0; i<250; i++){
+                bgCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+                bgCtx.fillRect(Math.random()*MAPA_LARGURA, Math.random()*LINHA_DA_AGUA, Math.random()*60+20, 3);
+            }
+
+            // Ilha Inimiga desenhada estaticamente no topo esquerdo do mar
+            bgCtx.fillStyle = '#f6e58d'; // Areia da ilha inimiga
+            bgCtx.beginPath();
+            bgCtx.arc(ilhaInimiga.x, ilhaInimiga.y, ilhaInimiga.raio, 0, Math.PI*2);
+            bgCtx.fill();
+
+            bgCtx.fillStyle = '#27ae60'; // Centro de selva da ilha inimiga
+            bgCtx.beginPath();
+            bgCtx.arc(ilhaInimiga.x, ilhaInimiga.y, ilhaInimiga.raio - 40, 0, Math.PI*2);
+            bgCtx.fill();
+
+            // Detalhes da fortaleza inimiga na ilha
+            bgCtx.fillStyle = '#7f8c8d';
+            bgCtx.fillRect(ilhaInimiga.x - 50, ilhaInimiga.y - 50, 100, 70);
+            bgCtx.fillStyle = '#2c3e50';
+            bgCtx.fillRect(ilhaInimiga.x - 35, ilhaInimiga.y - 75, 20, 25);
+            bgCtx.fillRect(ilhaInimiga.x + 15, ilhaInimiga.y - 75, 20, 25);
+
+            // Praia continental
             bgCtx.fillStyle = '#f6e58d';
-            bgCtx.fillRect(0, LINHA_DA_AGUA, MAPA_LARGURA, 180);
+            bgCtx.fillRect(0, LINHA_DA_AGUA, MAPA_LARGURA, ALTURA_PRAIA);
 
             for(let i=0; i<300; i++){
                 bgCtx.fillStyle = 'rgba(240, 210, 120, 0.6)';
                 bgCtx.beginPath();
-                bgCtx.arc(Math.random()*MAPA_LARGURA, LINHA_DA_AGUA + Math.random()*180, Math.random()*20+10, 0, Math.PI*2);
+                bgCtx.arc(Math.random()*MAPA_LARGURA, LINHA_DA_AGUA + Math.random()*ALTURA_PRAIA, Math.random()*20+10, 0, Math.PI*2);
                 bgCtx.fill();
             }
 
+            // Mata fechada de Pernambuco
             bgCtx.fillStyle = '#1e3312';
-            bgCtx.fillRect(0, 430, MAPA_LARGURA, MAPA_ALTURA - 430);
-            for (let i = 0; i < 1200; i++) {
+            bgCtx.fillRect(0, LINHA_DA_AGUA + ALTURA_PRAIA, MAPA_LARGURA, MAPA_ALTURA - (LINHA_DA_AGUA + ALTURA_PRAIA));
+            for (let i = 0; i < 1500; i++) {
                 let x = Math.random() * MAPA_LARGURA;
-                let y = Math.random() * (MAPA_ALTURA - 450) + 450;
+                let y = Math.random() * (MAPA_ALTURA - (LINHA_DA_AGUA + ALTURA_PRAIA + 20)) + (LINHA_DA_AGUA + ALTURA_PRAIA + 20);
                 let tam = Math.random() * 50 + 25;
                 bgCtx.fillStyle = Math.random() < 0.3 ? 'rgba(54,40,25,0.25)' : 'rgba(20,38,12,0.4)';
                 bgCtx.beginPath(); bgCtx.arc(x, y, tam, 0, Math.PI*2); bgCtx.fill();
@@ -623,9 +696,14 @@
             if(e.key === "1") selecionarSlot(0);
             if(e.key === "2") { selecionarSlot(1); usarConsumivel('agua'); }
             if(e.key === "3") { selecionarSlot(2); usarConsumivel('comida'); }
-            if(e.key === "4") { if(jogador.temEspada) selecionarSlot(3); }
-            if(e.key === "5") { if(jogador.temArco) selecionarSlot(4); }
+            if(e.key === "4" && jogador.temEspada) selecionarSlot(3);
+            if(e.key === "5" && jogador.temArco) selecionarSlot(4);
             
+            // ENTRAR OU SAIR DO BARCO COM A TECLA 'F'
+            if(e.key.toLowerCase() === "f") {
+                alternarUsoBarco();
+            }
+
             if(e.key === " ") {
                 if(document.activeElement.id === "adm-pass-input") return;
                 e.preventDefault();
@@ -648,7 +726,7 @@
         });
 
         window.addEventListener("mousedown", e => {
-            if(jogoPausado || !emGuerra) return;
+            if(jogoPausado) return;
             if(slotSelecionado === 4 && jogador.temArco && e.button === 0) {
                 dispararFlecha();
             }
@@ -686,7 +764,7 @@
             }
         }
 
-        function obtenerNomeArmadura(lvl) {
+        function obterNomeArmadura(lvl) {
             switch(lvl) {
                 case 1: return "Couro (15%)";
                 case 2: return "Algodão Acoch. (30%)";
@@ -694,6 +772,26 @@
                 case 4: return "Ferro Batido (70%)";
                 case 5: return "Aço Imperial (85%)";
                 default: return "Nenhuma";
+            }
+        }
+
+        function alternarUsoBarco() {
+            if(!barco.pilotando) {
+                // Tenta entrar no barco
+                if(dist(jogador.x, jogador.y, barco.x, barco.y) < barco.raioInteracao) {
+                    barco.pilotando = true;
+                    txtEstado.innerText = "Embarcado";
+                    txtEstado.style.color = "#ff9f43";
+                    dispararAlertaVisual("Você assumiu o leme do Barco! Navesgue pelo Norte.", "#3498db");
+                }
+            } else {
+                // Tenta desembarcar
+                barco.pilotando = false;
+                jogador.x = barco.x;
+                jogador.y = barco.y + 35;
+                txtEstado.innerText = "A Pé";
+                txtEstado.style.color = "#54a0ff";
+                dispararAlertaVisual("Você desembarcou do navio.", "#f1c40f");
             }
         }
 
@@ -707,7 +805,7 @@
             durMachadoTxt.innerText = Math.floor(jogador.machadoDurabilidade);
             
             txtMachado.innerText = "Lvl " + jogador.machadoNivel;
-            document.getElementById("txt-armadura-hud").innerText = obtenerNomeArmadura(jogador.armaduraNivel);
+            document.getElementById("txt-armadura-hud").innerText = obterNomeArmadura(jogador.armaduraNivel);
 
             if(jogador.temEspada) {
                 document.getElementById("status-espada").innerText = "Lvl " + jogador.espadaNivel;
@@ -723,7 +821,7 @@
 
         function tentarCortarPauBrasil() {
             let acertou = false;
-            if(jogador.machadoDurabilidade <= 0 || slotSelecionado !== 0) return false;
+            if(jogador.machadoDurabilidade <= 0 || slotSelecionado !== 0 || barco.pilotando) return false;
 
             arvores.forEach(a => {
                 if(a.viva && dist(jogador.x, jogador.y, a.x, a.y) < 60) {
@@ -747,6 +845,7 @@
         }
 
         function interagirFeitor() {
+            if(barco.pilotando) return false;
             if(dist(jogador.x, jogador.y, feitor.x, feitor.y) < 65) {
                 jogoPausado = true;
                 menuEscambo.style.display = "block";
@@ -770,7 +869,6 @@
             }
         }
 
-        // Sistema de 5 upgrades de machados
         function comprarMachado(lvl, custo) {
             if(jogador.inventario.madeira >= custo && jogador.machadoNivel === lvl - 1) {
                 jogador.inventario.madeira -= custo;
@@ -790,7 +888,6 @@
             }
         }
 
-        // Sistema de 5 upgrades de espadas
         function comprarEspada(lvl, custo) {
             if(jogador.inventario.madeira >= custo && jogador.espadaNivel === lvl - 1) {
                 jogador.inventario.madeira -= custo;
@@ -810,7 +907,6 @@
             }
         }
 
-        // Sistema de 5 upgrades de armaduras
         function comprarArmadura(lvl, custo) {
             if(jogador.inventario.madeira >= custo && jogador.armaduraNivel === lvl - 1) {
                 jogador.inventario.madeira -= custo;
@@ -845,10 +941,17 @@
         }
 
         function dispararFlecha() {
-            let angulo = Math.atan2(mouse.mundoY - jogador.y, mouse.mundoX - jogador.x);
+            let pontoOrigemX = jogador.x;
+            let pontoOrigemY = jogador.y;
+            if(barco.pilotando){
+                pontoOrigemX = barco.x;
+                pontoOrigemY = barco.y;
+            }
+
+            let angulo = Math.atan2(mouse.mundoY - pontoOrigemY, mouse.mundoX - pontoOrigemX);
             flechas.push({
-                x: jogador.x,
-                y: jogador.y,
+                x: pontoOrigemX,
+                y: pontoOrigemY,
                 vx: Math.cos(angulo) * 11,
                 vy: Math.sin(angulo) * 11,
                 ativa: true
@@ -856,6 +959,7 @@
         }
 
         function atacarDePerto() {
+            if(barco.pilotando) return;
             let danosEspada = [0, 30, 45, 65, 90, 150];
             let danoFinal = danosEspada[jogador.espadaNivel] || 25;
             inimigos.forEach(i => {
@@ -916,7 +1020,8 @@
                 vel: 1.6 + (nivelDificuldadeGuerra * 0.1),
                 dano: 8,
                 cooldownDano: 0,
-                isBoss: false
+                isBoss: false,
+                daIlhaInimiga: false
             });
         }
 
@@ -930,12 +1035,47 @@
                 vel: 1.1,
                 dano: 24,
                 cooldownDano: 0,
-                isBoss: true
+                isBoss: true,
+                daIlhaInimiga: false
             });
-            dispararAlertaVisual("O GENERAL DOS CONFINADOS DESEMBARCOU!", "#d32f2f");
+            dispararAlertaVisual("O GENERAL DOS CONFINADOS DESEMBARCOU NA PRAIA!", "#d32f2f");
         }
 
-        // SISTEMA DE INTERFACE ADM INTERNA (CORRIGIDO SEM PROMPT)
+        // DISPARADO QUANDO O JOGADOR ENTRA NA REGIAO DA ILHA INIMIGA
+        function dispararAtaqueDefensoresDaIlha() {
+            ilhaInimiga.guerreirosGerados = true;
+            dispararAlertaVisual("VOCÊ INVADIU A ILHA INIMIGA! OS DEFENSORES ESTÃO ATACANDO!", "#ff4757");
+            
+            // Defensores elites da ilha
+            for (let i = 0; i < 8; i++) {
+                inimigos.push({
+                    x: ilhaInimiga.x + Math.sin(i) * 120,
+                    y: ilhaInimiga.y + Math.cos(i) * 120,
+                    vida: 120,
+                    maxVida: 120,
+                    vel: 2.2,
+                    dano: 12,
+                    cooldownDano: 0,
+                    isBoss: false,
+                    daIlhaInimiga: true
+                });
+            }
+
+            // Rei Supremo da Ilha Inimiga (Derruba múltiplos saques)
+            inimigos.push({
+                x: ilhaInimiga.x,
+                y: ilhaInimiga.y - 30,
+                vida: 600,
+                maxVida: 600,
+                vel: 1.4,
+                dano: 30,
+                cooldownDano: 0,
+                isBoss: true,
+                daIlhaInimiga: true,
+                isReiInimigo: true
+            });
+        }
+
         function abrirPainelAdmAutenticar() {
             jogoPausado = true;
             authModal.style.display = "block";
@@ -976,32 +1116,122 @@
             }
         }
 
+        function renderizarMinimapa() {
+            // Desenha a base estrutural do radar de localização solicitado
+            mctx.fillStyle = "#1e3799"; // Água do mini-mapa
+            mctx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+
+            // Converte proporções reais do mapa para o canvas do radar (190x120)
+            let fx = (MAPA_LARGURA / minimapCanvas.width);
+            let fy = (MAPA_ALTURA / minimapCanvas.height);
+
+            // Desenha a praia/terra firma colonial no mini mapa
+            mctx.fillStyle = "#f6e58d";
+            mctx.fillRect(0, LINHA_DA_AGUA / fy, minimapCanvas.width, ALTURA_PRAIA / fy);
+            mctx.fillStyle = "#1e3312";
+            mctx.fillRect(0, (LINHA_DA_AGUA + ALTURA_PRAIA) / fy, minimapCanvas.width, (MAPA_ALTURA - (LINHA_DA_AGUA + ALTURA_PRAIA)) / fy);
+
+            // Desenha Círculo da Ilha Inimiga no radar
+            mctx.fillStyle = "#ff4757";
+            mctx.beginPath();
+            mctx.arc(ilhaInimiga.x / fx, ilhaInimiga.y / fy, ilhaInimiga.raio / fx, 0, Math.PI*2);
+            mctx.fill();
+
+            // Ponto da Feitoria amigável
+            mctx.fillStyle = "#a67b5b";
+            mctx.fillRect(feitor.x / fx, feitor.y / fy, 4, 4);
+
+            // Ponto Azul do Barco
+            mctx.fillStyle = "#54a0ff";
+            mctx.beginPath();
+            mctx.arc(barco.x / fx, barco.y / fy, 3, 0, Math.PI*2);
+            mctx.fill();
+
+            // Ponto Verde do Jogador Ativo
+            let px = barco.pilotando ? barco.x : jogador.x;
+            let py = barco.pilotando ? barco.y : jogador.y;
+            mctx.fillStyle = "#2ecc71";
+            mctx.beginPath();
+            mctx.arc(px / fx, py / fy, 4, 0, Math.PI*2);
+            mctx.fill();
+        }
+
         function atualizar() {
             if (jogoPausado) return;
 
             let dx = 0, dy = 0;
-            if (teclas['w']) dy -= jogador.vel;
-            if (teclas['s']) dy += jogador.vel;
-            if (teclas['a']) dx -= jogador.vel;
-            if (teclas['d']) dx += jogador.vel;
+            let velocidadeAtual = jogador.vel;
 
-            let proximoX = jogador.x + dx;
-            let proximoY = jogador.y + dy;
-
-            if (proximoY >= LINHA_DA_AGUA) {
-                jogador.x = Math.max(jogador.raio, Math.min(MAPA_LARGURA - jogador.raio, proximoX));
-                jogador.y = Math.max(LINHA_DA_AGUA, Math.min(MAPA_ALTURA - jogador.raio, proximoY));
+            // Se o guerreiro estiver controlando o barco
+            if (barco.pilotando) {
+                velocidadeAtual = barco.vel;
             }
 
-            camera.x = jogador.x - canvas.width / 2;
-            camera.y = jogador.y - canvas.height / 2;
+            if (teclas['w']) dy -= velocidadeAtual;
+            if (teclas['s']) dy += velocidadeAtual;
+            if (teclas['a']) dx -= velocidadeAtual;
+            if (teclas['d']) dx += velocidadeAtual;
+
+            if (barco.pilotando) {
+                // Barco navega exclusivamente no Mar (ou raso da praia)
+                barco.x = Math.max(40, Math.min(MAPA_LARGURA - 40, barco.x + dx));
+                barco.y = Math.max(40, Math.min(LINHA_DA_AGUA + 60, barco.y + dy));
+                
+                // Aliados entram automaticamente no barco com você
+                aliados.forEach(al => {
+                    al.x = barco.x + Math.random()*20 - 10;
+                    al.y = barco.y + Math.random()*20 - 10;
+                });
+            } else {
+                // Movimento do Jogador a Pé normal pelas matas e areias
+                let proximoX = jogador.x + dx;
+                let proximoY = jogador.y + dy;
+
+                // Bloqueia jogador de andar a pé por todo o fundo do oceano aberto
+                if (proximoY < LINHA_DA_AGUA) {
+                    // Só permite andar no mar se estiver pisando dentro da Ilha Inimiga!
+                    if(dist(proximoX, proximoY, ilhaInimiga.x, ilhaInimiga.y) < ilhaInimiga.raio) {
+                        jogador.x = proximoX;
+                        jogador.y = proximoY;
+                    }
+                } else {
+                    jogador.x = Math.max(jogador.raio, Math.min(MAPA_LARGURA - jogador.raio, proximoX));
+                    jogador.y = Math.max(LINHA_DA_AGUA, Math.min(MAPA_ALTURA - jogador.raio, proximoY));
+                }
+            }
+
+            // Centralização de câmera fluida baseada no estado de condução
+            let focoX = barco.pilotando ? barco.x : jogador.x;
+            let focoY = barco.pilotando ? barco.y : jogador.y;
+
+            camera.x = focoX - canvas.width / 2;
+            camera.y = focoY - canvas.height / 2;
             camera.x = Math.max(0, Math.min(MAPA_LARGURA - canvas.width, camera.x));
             camera.y = Math.max(0, Math.min(MAPA_ALTURA - canvas.height, camera.y));
 
             jogador.fome -= 0.015;
             jogador.sede -= 0.025;
 
-            // Flechas
+            // SISTEMA DE GATILHO DA GUERRA NA ILHA INIMIGA
+            let refX = barco.pilotando ? barco.x : jogador.x;
+            let refY = barco.pilotando ? barco.y : jogador.y;
+            if(!ilhaInimiga.guerreirosGerados && dist(refX, refY, ilhaInimiga.x, ilhaInimiga.y) < ilhaInimiga.raio) {
+                dispararAtaqueDefensoresDaIlha();
+            }
+
+            // Coleta de tesouros derrubados (Sistema de roubo de itens valiosos dos adversários)
+            for(let t = tesourosSqueados.length - 1; t >= 0; t--) {
+                let pAtuX = barco.pilotando ? barco.x : jogador.x;
+                let pAtuY = barco.pilotando ? barco.y : jogador.y;
+                if(dist(pAtuX, pAtuY, tesourosSqueados[t].x, tesourosSqueados[t].y) < 40) {
+                    tesourosSqueados.splice(t, 1);
+                    jogador.inventario.madeira += 50; // Converte ouro roubado em recurso imediatamente
+                    dispararAlertaVisual("VOCÊ ROUBOU UM BAÚ VALIOSO DOS ADVERSÁRIOS! (+50 Recursos/Madeiras)", "#f1c40f");
+                    atualizarUI();
+                }
+            }
+
+            // Processamento de Flechas disparadas
             for(let f = flechas.length-1; f >= 0; f--) {
                 let fl = flechas[f];
                 fl.x += fl.vx; fl.y += fl.vy;
@@ -1019,7 +1249,7 @@
                 }
             }
 
-            // BALANCEAMENTO DOS GUERREIROS (Dano super baixo para agir como suporte)
+            // Suporte tático dos Guerreiros Aliados Comprados
             for (let alIndex = aliados.length - 1; alIndex >= 0; alIndex--) {
                 let al = aliados[alIndex];
                 if(al.vida <= 0) {
@@ -1042,10 +1272,10 @@
                     
                     if(al.cooldownAtaque > 0) al.cooldownAtaque--;
                     if(menorDist < 35 && al.cooldownAtaque === 0) {
-                        maisProximo.vida -= 3; // Reduzido drasticamente para 3 de dano tático
-                        al.cooldownAtaque = 70; // Ataca mais devagar
+                        maisProximo.vida -= 4; 
+                        al.cooldownAtaque = 70; 
                     }
-                } else {
+                } else if (!barco.pilotando) {
                     let dPlayer = dist(al.x, al.y, jogador.x, jogador.y);
                     if(dPlayer > 70) {
                         let a = Math.atan2(jogador.y - al.y, jogador.x - al.x);
@@ -1055,16 +1285,30 @@
                 }
             }
 
-            // Loop dos Inimigos
+            // Comportamento dos Adversários (Invasores da praia ou Defensores da Ilha)
             for (let i = inimigos.length - 1; i >= 0; i--) {
                 let enemy = inimigos[i];
                 if(enemy.vida <= 0) {
                     let foiBoss = enemy.isBoss;
+                    let eraDaIlha = enemy.daIlhaInimiga;
+                    let eraRei = enemy.isReiInimigo;
+
                     inimigos.splice(i, 1);
                     
-                    if(foiBoss) {
+                    // Se derrotar defensores da ilha inimiga, derruba riquezas valiosas no chão
+                    if(eraDaIlha) {
+                        let quantidadeBaus = eraRei ? 5 : 1;
+                        for(let k=0; k<quantidadeBaus; k++) {
+                            tesourosSqueados.push({
+                                x: enemy.x + (Math.random()*40 - 20),
+                                y: enemy.y + (Math.random()*40 - 20)
+                            });
+                        }
+                        dispararAlertaVisual("Adversário da Ilha Derrotado! Baú de Tesouro Colonial solto!", "#f1c40f");
+                    }
+
+                    if(foiBoss && !eraDaIlha) {
                         nivelLoja++;
-                        // Libera progressivamente os tiers mais altos da loja conforme vence os bosses
                         if(nivelLoja >= 2) {
                             document.getElementById("item-machado-3").style.display = "flex";
                             document.getElementById("item-espada-2").style.display = "flex";
@@ -1087,7 +1331,7 @@
                         dispararAlertaVisual(`CHEFE BATIDO! Tecnologias nível ${nivelLoja} liberadas!`, "#f1c40f");
                     }
 
-                    if(emGuerra && inimigos.length === 0) {
+                    if(emGuerra && !eraDaIlha && inimigos.filter(en => !en.daIlhaInimiga).length === 0) {
                         jogador.inventario.madeira += 30;
                         dispararAlertaVisual("Vitória! Linha costeira defendida (+30 Madeiras).", "#2ecc71");
                         emGuerra = false;
@@ -1098,8 +1342,11 @@
                     continue;
                 }
 
+                // Definição de foco de ataque do inimigo
                 let alvoAlvo = jogador;
-                let menorDistAlvo = dist(enemy.x, enemy.y, jogador.x, jogador.y);
+                let pXComp = barco.pilotando ? barco.x : jogador.x;
+                let pYComp = barco.pilotando ? barco.y : jogador.y;
+                let menorDistAlvo = dist(enemy.x, enemy.y, pXComp, pYComp);
 
                 aliados.forEach(al => {
                     let dAl = dist(enemy.x, enemy.y, al.x, al.y);
@@ -1110,32 +1357,35 @@
                 });
 
                 let a = Math.atan2(alvoAlvo.y - enemy.y, alvoAlvo.x - enemy.x);
-                let proxEnemyY = enemy.y + Math.sin(a) * enemy.vel;
-                
                 enemy.x += Math.cos(a) * enemy.vel;
-                enemy.y = Math.max(LINHA_DA_AGUA, proxEnemyY);
+                enemy.y += Math.sin(a) * enemy.vel;
 
                 if(enemy.cooldownDano > 0) enemy.cooldownDano--;
-                if(menorDistAlvo < (enemy.isBoss ? 45 : 28) && enemy.cooldownDano === 0) {
+                if(menorDistAlvo < (enemy.isBoss ? 50 : 30) && enemy.cooldownDano === 0) {
                     if(alvoAlvo === jogador) {
                         let totalDano = enemy.dano;
-                        // REDUÇÃO DE DANO CALCULADA COM BASE NOS 5 NÍVEIS DE ARMADURA
                         let reducoes = [1.0, 0.85, 0.70, 0.50, 0.30, 0.15];
                         let multiplicador = reducoes[jogador.armaduraNivel] || 1.0;
                         totalDano *= multiplicador;
 
                         if(!jogador.invencivel) jogador.vida -= totalDano;
                     } else {
-                        alvoAlvo.vida -= enemy.dano * 1.1; // Aliados tomam dano normal dos inimigos
+                        alvoAlvo.vida -= enemy.dano * 1.1; 
                     }
                     enemy.cooldownDano = enemy.isBoss ? 70 : 55;
                     atualizarUI();
                 }
             }
 
+            // Exibição de caixas de contexto dinâmico inteligente
             let txtContexto = false;
-            arvores.forEach(a => { if(a.viva && dist(jogador.x, jogador.y, a.x, a.y) < 60) txtContexto = "Coletar Pau-Brasil [Espaço]"; });
-            if(dist(jogador.x, jogador.y, feitor.x, feitor.y) < 65) txtContexto = "Negociar na Feitoria [Espaço]";
+            if(!barco.pilotando) {
+                arvores.forEach(a => { if(a.viva && dist(jogador.x, Manhattan = jogador.y, a.x, a.y) < 60) txtContexto = "Coletar Pau-Brasil [Espaço]"; });
+                if(dist(jogador.x, jogador.y, feitor.x, feitor.y) < 65) txtContexto = "Negociar na Feitoria [Espaço]";
+                if(dist(jogador.x, jogador.y, barco.x, barco.y) < barco.raioInteracao) txtContexto = "Comandar o Barco [Tecla F]";
+            } else {
+                txtContexto = "Desembarcar do Barco [Tecla F]";
+            }
             
             if(txtContexto) {
                 dicaContexto.style.display = "block"; dicaContexto.innerText = txtContexto;
@@ -1143,17 +1393,27 @@
                 dicaContexto.style.display = "none";
             }
 
+            // Loop de recondicionamento caso seja derrotado pelos nativos adversários
             if(jogador.fome <= 0 || jogador.sede <= 0 || jogador.vida <= 0) {
-                dispararAlertaVisual("Inconsciente! Território recuado.", "#c0392b");
+                dispararAlertaVisual("Você desmaiou em batalha! Suas posses foram perdidas.", "#c0392b");
                 jogador.vida = 100; jogador.fome = 100; jogador.sede = 100;
                 jogador.inventario = { madeira: 0, agua: 0, comida: 0 };
                 jogador.machadoDurabilidade = 100;
-                jogador.x = 500; jogador.y = 700;
+                jogador.x = 1200; jogador.y = 1400;
+                
+                barco.pilotando = false;
+                barco.x = 1200; barco.y = LINHA_DA_AGUA - 60;
+
                 inimigos = []; aliados = []; flechas = [];
                 emGuerra = false; tempoParaGuerra = 300; nivelDificuldadeGuerra = 1;
+                txtEstado.innerText = "A Pé";
+                txtEstado.style.color = "#54a0ff";
                 selecionarSlot(0);
+                inicializarAmbiente();
                 atualizarUI();
             }
+
+            renderizarMinimapa();
         }
 
         function desenhar() {
@@ -1161,26 +1421,36 @@
             ctx.save();
             ctx.translate(-camera.x, -camera.y);
 
+            // Desenha o fundo estático pré-renderizado do mapa expandido
             ctx.drawImage(bgCanvas, 0, 0);
 
-            // Caravelas
+            // Caravelas cenográficas ancoradas no fundo do mar
             ctx.fillStyle = "#5c4033";
-            ctx.fillRect(300, 60, 110, 45);
-            ctx.fillRect(1200, 70, 110, 45);
-            ctx.fillRect(2000, 65, 110, 45);
+            ctx.fillRect(500, 120, 110, 45);
+            ctx.fillRect(1600, 140, 110, 45);
             ctx.fillStyle = "#f5f5f5";
-            ctx.fillRect(350, 15, 5, 45); ctx.fillRect(330, 20, 20, 25);
-            ctx.fillRect(1250, 25, 5, 45); ctx.fillRect(1230, 30, 20, 25);
+            ctx.fillRect(550, 75, 5, 45); ctx.fillRect(530, 80, 20, 25);
+            ctx.fillRect(1650, 95, 5, 45); ctx.fillRect(1630, 100, 20, 25);
 
-            // Cabana Feitoria
+            // Cabana da Feitoria Portuguesa
             ctx.fillStyle = "#5c4033"; ctx.fillRect(feitor.x - 40, feitor.y - 50, 80, 50);
             ctx.fillStyle = "#a67b5b"; ctx.beginPath(); ctx.moveTo(feitor.x - 50, feitor.y - 50); ctx.lineTo(feitor.x, feitor.y - 80); ctx.lineTo(feitor.x + 50, feitor.y - 50); ctx.fill();
 
-            // NPC Feitor
+            // NPC Feitor de Alianças
             ctx.fillStyle = "#2b3d52"; ctx.beginPath(); ctx.arc(feitor.x, feitor.y, feitor.raio, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = "#1c140e"; ctx.fillRect(feitor.x - 24, feitor.y - 6, 48, 5);
 
-            // Árvores com barra de vida
+            // Desenho dos Baús de Tesouro Colonial no chão da ilha
+            tesourosSqueados.forEach(t => {
+                ctx.fillStyle = "#ffd32a"; // Ouro brilhante
+                ctx.fillRect(t.x - 12, t.y - 8, 24, 16);
+                ctx.fillStyle = "#4a3728"; // Forro de madeira do baú
+                ctx.strokeRect(t.x - 12, t.y - 8, 24, 16);
+                ctx.fillStyle = "#fff";
+                ctx.fillRect(t.x - 2, t.y - 2, 4, 4); // Fechadura do tesouro
+            });
+
+            // Árvores de extração de Pau-Brasil
             arvores.forEach(a => {
                 if(!a.viva) {
                     ctx.fillStyle = '#4a2f13'; ctx.fillRect(a.x - 6, a.y - 4, 12, 12); return;
@@ -1199,7 +1469,19 @@
                 }
             });
 
-            // Aliados
+            // RENDERIZAÇÃO DO BARCO PILOTÁVEL NO MAR
+            ctx.fillStyle = "#784212"; // Madeira naval resistente
+            ctx.beginPath();
+            ctx.ellipse(barco.x, barco.y, barco.largura, barco.altura, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Detalhes internos do assoalho do navio
+            ctx.fillStyle = "#a0522d";
+            ctx.fillRect(barco.x - 35, barco.y - 10, 70, 20);
+            // Mastro principal da embarcação
+            ctx.fillStyle = "#f5f5f5";
+            ctx.fillRect(barco.x - 5, barco.y - 5, 10, 10);
+
+            // Desenhar Aliados Comprados
             aliados.forEach(al => {
                 ctx.fillStyle = "#bd6a3f"; ctx.beginPath(); ctx.arc(al.x, al.y, 14, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = "#2ecc71"; ctx.fillRect(al.x - 6, al.y - 4, 12, 3);
@@ -1208,59 +1490,63 @@
                 ctx.fillStyle = "#2ecc71"; ctx.fillRect(al.x - 12, al.y - 22, (al.vida / al.maxVida) * 24, 3);
             });
 
-            // Inimigos
+            // Desenhar Adversários (Invasores ou Defensores da Fortaleza Inimiga)
             inimigos.forEach(e => {
                 let tam = e.isBoss ? 28 : 15;
-                ctx.fillStyle = e.isBoss ? "#3c40c6" : "#57606f"; 
+                // Defensores da ilha vestem azul colonial real, invasores comuns usam cinza
+                ctx.fillStyle = e.daIlhaInimiga ? (e.isReiInimigo ? "#881111" : "#0055ff") : (e.isBoss ? "#3c40c6" : "#57606f"); 
                 ctx.beginPath(); ctx.arc(e.x, e.y, tam, 0, Math.PI*2); ctx.fill();
                 
-                ctx.fillStyle = e.isBoss ? "#ffd32a" : "#d1ccc0"; 
+                ctx.fillStyle = e.isReiInimigo ? "#f1c40f" : (e.isBoss ? "#ffd32a" : "#d1ccc0"); 
                 ctx.beginPath(); ctx.arc(e.x, e.y - (e.isBoss ? 8 : 4), e.isBoss ? 16 : 9, Math.PI, 0); ctx.fill();
                 
                 ctx.fillStyle = "black"; ctx.fillRect(e.x - tam, e.y - tam - 10, tam * 2, e.isBoss ? 7 : 4);
-                ctx.fillStyle = e.isBoss ? "#ef5350" : "red"; ctx.fillRect(e.x - tam, e.y - tam - 10, (e.vida / e.maxVida) * (tam * 2), e.isBoss ? 7 : 4);
+                ctx.fillStyle = "#ef5350"; ctx.fillRect(e.x - tam, e.y - tam - 10, (e.vida / e.maxVida) * (tam * 2), e.isBoss ? 7 : 4);
             });
 
-            // Flechas
+            // Flechas em voo pelo ar/mar
             ctx.fillStyle = "#f5f5f5";
             flechas.forEach(fl => { ctx.fillRect(fl.x, fl.y, 5, 5); });
 
-            // Cores baseadas nos 5 níveis de armadura do jogador
-            let coresArmaduras = ["#bd6a3f", "#8a5329", "#d291bc", "#cd7f32", "#747d8c", "#f1c40f"];
-            ctx.fillStyle = coresArmaduras[jogador.armaduraNivel] || "#bd6a3f";
+            // SÓ DESENHA JOGADOR CORRRENDO SE ELE NÃO ESTIVER PILOTANDO O NAVIO
+            if (!barco.pilotando) {
+                let coresArmaduras = ["#bd6a3f", "#8a5329", "#d291bc", "#cd7f32", "#747d8c", "#f1c40f"];
+                ctx.fillStyle = coresArmaduras[jogador.armaduraNivel] || "#bd6a3f";
 
-            ctx.beginPath(); ctx.arc(jogador.x, jogador.y, jogador.raio, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(jogador.x, jogador.y - 6, 11, Math.PI, 0); ctx.fill();
-            ctx.fillStyle = "#900c3f"; ctx.fillRect(jogador.x - 8, jogador.y, 16, 3);
+                ctx.beginPath(); ctx.arc(jogador.x, jogador.y, jogador.raio, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(jogador.x, jogador.y - 6, 11, Math.PI, 0); ctx.fill();
+                ctx.fillStyle = "#900c3f"; ctx.fillRect(jogador.x - 8, jogador.y, 16, 3);
 
-            // Cores das espadas
-            let coresEspadas = ["#cd7f32", "#d1ccc0", "#341f97", "#ffb142", "#74b9ff"];
-            if(slotSelecionado === 3 && jogador.temEspada) {
-                ctx.strokeStyle = coresEspadas[jogador.espadaNivel - 1] || "#fff"; 
-                ctx.lineWidth = 3.5;
-                ctx.beginPath(); ctx.moveTo(jogador.x + 8, jogador.y); ctx.lineTo(jogador.x + 26, jogador.y - 10); ctx.stroke();
-            } else if(slotSelecionado === 4 && jogador.temArco) {
-                ctx.strokeStyle = "#cca43b"; ctx.lineWidth = 2.5;
-                ctx.beginPath(); ctx.arc(jogador.x + 8, jogador.y, 11, -Math.PI/3, Math.PI/3); ctx.stroke();
+                // Armamento visual em mãos
+                let coresEspadas = ["#cd7f32", "#d1ccc0", "#341f97", "#ffb142", "#74b9ff"];
+                if(slotSelecionado === 3 && jogador.temEspada) {
+                    ctx.strokeStyle = coresEspadas[jogador.espadaNivel - 1] || "#fff"; 
+                    ctx.lineWidth = 3.5;
+                    ctx.beginPath(); ctx.moveTo(jogador.x + 8, jogador.y); ctx.lineTo(jogador.x + 26, jogador.y - 10); ctx.stroke();
+                } else if(slotSelecionado === 4 && jogador.temArco) {
+                    ctx.strokeStyle = "#cca43b"; ctx.lineWidth = 2.5;
+                    ctx.beginPath(); ctx.arc(jogador.x + 8, jogador.y, 11, -Math.PI/3, Math.PI/3); ctx.stroke();
+                }
             }
 
+            // Retícula de mira arqueira
             if(slotSelecionado === 4 && jogador.temArco) {
                 ctx.strokeStyle = "rgba(255, 159, 67, 0.9)";
                 ctx.lineWidth = 1.5;
-                ctx.beginPath(); ctx.arc(mouse.mundoX, mouse.mundoY, 6, 0, Math.PI*2); stroke();
+                ctx.beginPath(); ctx.arc(mouse.mundoX, mouse.mundoY, 6, 0, Math.PI*2); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(mouse.mundoX - 10, mouse.mundoY); ctx.lineTo(mouse.mundoX + 10, mouse.mundoY); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(mouse.mundoX, mouse.mundoY - 10); ctx.lineTo(mouse.mundoX, mouse.mundoY + 10); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(mouse.mundoX, mouse.mundoY - 10); ctx.lineTo(mouse.mundoX, mouse.mundoY + 10); stroke();
             }
 
             ctx.restore();
 
-            // Mensagens internas de Alerta (Sem interromper a tela cheia)
+            // Renderizador de Alertas Estilizados Internos (Evita quebrar Tela Cheia)
             for(let a = customAlerts.length - 1; a >= 0; a--) {
                 let alertObj = customAlerts[a];
-                ctx.fillStyle = "rgba(0,0,0,0.85)";
-                ctx.fillRect(canvas.width/2 - 250, 40 + (a * 45), 500, 35);
+                ctx.fillStyle = "rgba(0,0,0,0.9)";
+                ctx.fillRect(canvas.width/2 - 270, 40 + (a * 45), 540, 35);
                 ctx.strokeStyle = alertObj.cor; ctx.lineWidth = 1.5;
-                ctx.strokeRect(canvas.width/2 - 250, 40 + (a * 45), 500, 35);
+                ctx.strokeRect(canvas.width/2 - 270, 40 + (a * 45), 540, 35);
                 
                 ctx.fillStyle = "#fff"; ctx.font = "bold 12px Arial";
                 ctx.textAlign = "center";
