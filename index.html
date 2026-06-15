@@ -623,8 +623,8 @@
             if(e.key === "1") selecionarSlot(0);
             if(e.key === "2") { selecionarSlot(1); usarConsumivel('agua'); }
             if(e.key === "3") { selecionarSlot(2); usarConsumivel('comida'); }
-            if(e.key === "4" && jogador.temEspada) selecionarSlot(3);
-            if(e.key === "5" && jogador.temArco) selecionarSlot(4);
+            if(e.key === "4") { if(jogador.temEspada) selecionarSlot(3); }
+            if(e.key === "5") { if(jogador.temArco) selecionarSlot(4); }
             
             if(e.key === " ") {
                 if(document.activeElement.id === "adm-pass-input") return;
@@ -686,7 +686,7 @@
             }
         }
 
-        function obterNomeArmadura(lvl) {
+        function obtenerNomeArmadura(lvl) {
             switch(lvl) {
                 case 1: return "Couro (15%)";
                 case 2: return "Algodão Acoch. (30%)";
@@ -707,7 +707,7 @@
             durMachadoTxt.innerText = Math.floor(jogador.machadoDurabilidade);
             
             txtMachado.innerText = "Lvl " + jogador.machadoNivel;
-            document.getElementById("txt-armadura-hud").innerText = obterNomeArmadura(jogador.armaduraNivel);
+            document.getElementById("txt-armadura-hud").innerText = obtenerNomeArmadura(jogador.armaduraNivel);
 
             if(jogador.temEspada) {
                 document.getElementById("status-espada").innerText = "Lvl " + jogador.espadaNivel;
@@ -765,7 +765,7 @@
             if(jogador.inventario.madeira >= custo) {
                 jogador.inventario.madeira -= custo;
                 if(tipo === 'Agua') jogador.inventario.agua++;
-                if(tipo === 'Comida') skeleton = jogador.inventario.comida++;
+                if(tipo === 'Comida') jogador.inventario.comida++;
                 atualizarUI();
             }
         }
@@ -1247,7 +1247,7 @@
             if(slotSelecionado === 4 && jogador.temArco) {
                 ctx.strokeStyle = "rgba(255, 159, 67, 0.9)";
                 ctx.lineWidth = 1.5;
-                ctx.beginPath(); ctx.arc(mouse.mundoX, mouse.mundoY, 6, 0, Math.PI*2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(mouse.mundoX, mouse.mundoY, 6, 0, Math.PI*2); stroke();
                 ctx.beginPath(); ctx.moveTo(mouse.mundoX - 10, mouse.mundoY); ctx.lineTo(mouse.mundoX + 10, mouse.mundoY); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(mouse.mundoX, mouse.mundoY - 10); ctx.lineTo(mouse.mundoX, mouse.mundoY + 10); ctx.stroke();
             }
