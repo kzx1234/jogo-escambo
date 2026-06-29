@@ -2085,14 +2085,14 @@
 atualizarMochilaUI();
         }
 
-        // Inicialização automática do mapa ao iniciar
+       // Inicialização automática do mapa ao iniciar
         popularArvoresMundo();
         atualizarMochilaUI();
         
-        // Ativa o guerreiro padrão para pular a tela travada
+        // Ativa o guerreiro padrão automaticamente para carregar os gráficos
         selecionarIndigena('Ubirajara', '#e67e22', 'coleta');
 
-        // Renderiza e inicia todos os gráficos, barcos e física do mapa
+        // Loop principal que renderiza os barcos, mapa e gráficos na tela
         loopGeralDoMundo();
     </script>
 </body>
