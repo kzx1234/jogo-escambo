@@ -2082,6 +2082,27 @@
                 inimigos = [];
                 dispararAlertaVisual("Cheat Ativo: Todos os invasores eliminados da costa!", "#2ecc71");
             }
+            } else if (tipo === 'killall') {
+                inimigos = [];
+                dispararAlertaVisual("Cheat Ativo: Todos os invasores eliminados da costa!", "#2ecc71");
+            }
+            atualizarMochilaUI();
+        } // <--- ESTA CHAVE FECHA A FUNÇÃO ADMCHEAT. É LOGO ABAIXO DELA!
+        
+        // APAGUE TUDO O QUE ESTIVER ABAIXO DAQUELA CHAVE E COLE ESTE BLOCO ATÉ AO FIM:
+
+        // Inicialização automática do mapa ao iniciar
+        popularArvoresMundo();
+        atualizarMochilaUI();
+        
+        // Força a escolha do personagem por trás dos panos para os gráficos ligarem
+        selecionarIndigena('Ubirajara', '#e67e22', 'coleta');
+
+        // Motor gráfico principal que renderiza a água, ilhas e barcos
+        loopGeralDoMundo();
+    </script>
+</body>
+</html>
 atualizarMochilaUI();
         }
 
@@ -2089,10 +2110,10 @@ atualizarMochilaUI();
         popularArvoresMundo();
         atualizarMochilaUI();
         
-        // Ativa o guerreiro padrão automaticamente para carregar os gráficos
+       // Ativa o guerreiro padrão automaticamente para carregar os gráficos
         selecionarIndigena('Ubirajara', '#e67e22', 'coleta');
 
-        // Loop principal que renderiza os barcos, mapa e gráficos no ecrã
+        // Loop principal que renderiza os barcos, mapa e gráficos na tela
         loopGeralDoMundo();
     </script>
 </body>
