@@ -2082,12 +2082,16 @@
                 inimigos = [];
                 dispararAlertaVisual("Cheat Ativo: Todos os invasores eliminados da costa!", "#2ecc71");
             }
-            atualizarMochilaUI();
+atualizarMochilaUI();
         }
 
         // Inicialização automática do mapa ao iniciar
         popularArvoresMundo();
         atualizarMochilaUI();
+        
+        // MODIFICADO: Força o início com o guerreiro padrão para renderizar os gráficos
+        selecionarIndigena('Ubirajara', '#e67e22', 'coleta');
+
         loopGeralDoMundo();
     </script>
 </body>
