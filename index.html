@@ -867,7 +867,7 @@
         let jogadorNaIlhaInimiga = false;
         let tempoAvisoInimigo = 0;
         let inimigosAtivadosNaIlha = false;
-        let totalInimigosIniciaisIlha = 0;
+        totalInimigosIniciaisIlha = 0;
         let mensagemBauMostrada = false;
         let customAlerts = [];
 
@@ -2082,8 +2082,10 @@
                 inimigos = [];
                 dispararAlertaVisual("Cheat Ativo: Todos os invasores eliminados da costa!", "#2ecc71");
             }
-            } else if (tipo === 'killall') {
-              // Inicialização automática do mapa ao iniciar
+            atualizarMochilaUI();
+        }
+
+        // Inicialização automática do mapa ao iniciar
         popularArvoresMundo();
         atualizarMochilaUI();
         
