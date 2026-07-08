@@ -101,6 +101,7 @@
         #fill-fome { background: linear-gradient(90deg, #d35400, #e67e22); }
         #fill-sede { background: linear-gradient(90deg, #2980b9, #3498db); }
         #fill-vida { background: linear-gradient(90deg, #c0392b, #e74c3c); }
+        #fill-armadura { background: linear-gradient(90deg, #6b4c3b, #d4a373); }
 
         #minimap-header {
             display: flex;
@@ -734,6 +735,137 @@
             display: none;
             z-index: 10;
         }
+
+        /* BARRA DE MENSAGENS */
+        #mensagens-container {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            border: 2px solid #6b533c;
+            border-radius: 8px;
+            padding: 10px 15px;
+            max-width: 400px;
+            max-height: 100px;
+            overflow-y: auto;
+            z-index: 12;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        #mensagens-container .msg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #d4a373;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #4a3728;
+            padding-bottom: 3px;
+        }
+
+        #mensagens-container .msg-header button {
+            background: #4a3728;
+            color: #faedcd;
+            border: 1px solid #6b533c;
+            border-radius: 3px;
+            cursor: pointer;
+            padding: 0px 8px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        #mensagens-container .msg-header button:hover { background: #6b533c; }
+
+        #msg-content {
+            color: #faedcd;
+            font-size: 12px;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+
+        #msg-content .msg-item {
+            padding: 2px 0;
+            border-bottom: 1px solid #2d1e13;
+            font-size: 11px;
+        }
+
+        #msg-content .msg-item:last-child { border-bottom: none; }
+
+        /* ALERTA PIRATA */
+        #alerta-pirata {
+            display: none;
+            position: absolute;
+            top: 80px;
+            right: 260px;
+            background: rgba(200, 50, 50, 0.9);
+            border: 2px solid #ff0000;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: bold;
+            font-size: 13px;
+            z-index: 11;
+            animation: pisca 0.5s infinite alternate;
+        }
+
+        @keyframes pisca {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+
+        /* BOTÃO CHAMAR ALIADOS */
+        #btn-chamar-aliados {
+            position: absolute;
+            bottom: 90px;
+            right: 15px;
+            background: #3498db;
+            color: #fff;
+            border: 2px solid #2980b9;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+        #btn-chamar-aliados:hover { background: #2980b9; transform: scale(1.05); }
+        #btn-chamar-aliados:disabled { background: #444; border-color: #555; cursor: not-allowed; }
+
+        /* BAU DO TESOURO E PIRATA */
+        #bau-tesouro-menu, #bau-pirata-menu {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(25, 15, 10, 0.98);
+            border: 3px solid #f1c40f;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 28;
+            text-align: center;
+            min-width: 300px;
+        }
+        #bau-pirata-menu { border-color: #c0392b; }
+        #bau-tesouro-menu h3 { color: #f1c40f; }
+        #bau-pirata-menu h3 { color: #c0392b; }
+        .bau-conteudo { color: #faedcd; margin: 15px 0; }
+        .bau-conteudo p { margin: 5px 0; }
+        .bau-botao {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .bau-botao-pegar { background: #f1c40f; color: #000; }
+        .bau-botao-pegar:hover { background: #ffd700; }
+        .bau-botao-fechar { background: #555; color: #fff; margin-left: 10px; }
+        .bau-botao-fechar:hover { background: #666; }
     </style>
 </head>
 <body>
@@ -793,6 +925,18 @@
         <!-- INDICADOR DE CHAVE DO TESOURO -->
         <div id="chave-tesouro-indicator">🗝️ Chave do Tesouro</div>
 
+        <!-- ALERTA DE PIRATAS -->
+        <div id="alerta-pirata">🏴‍☠️ PIRATAS AVISTADOS!</div>
+
+        <!-- BARRA DE MENSAGENS -->
+        <div id="mensagens-container">
+            <div class="msg-header">
+                <span>📜 Mensagens do Jogo</span>
+                <button onclick="minimizarMensagens()">[-]</button>
+            </div>
+            <div id="msg-content"></div>
+        </div>
+
         <div id="timer-invasao-display">EMBOSCADA INIMIGA EM 5s</div>
 
         <div id="status-hud">
@@ -807,6 +951,10 @@
             <div class="bar-container">
                 <span>Sede:</span>
                 <div class="bar"><div id="fill-sede" class="fill"></div></div>
+            </div>
+            <div class="bar-container" id="armadura-bar-container" style="display:none;">
+                <span>Armadura:</span>
+                <div class="bar"><div id="fill-armadura" class="fill"></div></div>
             </div>
             <div style="color: #faedcd; margin-top: 6px; font-size:11px; line-height: 1.35;">
                 🪵 Madeira Livre: <span id="txt-madeira-livre" style="color:#2ecc71; font-weight:bold;">0</span><br>
@@ -907,24 +1055,24 @@
 
             <div class="loja-secao">Tipos de Armaduras</div>
             <div class="loja-item" id="item-armadura-1">
-                <div><font>Armadura de Couro (Lvl 1)</font><small>Proteção: 15% | Custo: 12 Mad.</small></div>
+                <div><font>Armadura de Couro (Lvl 1)</font><small>Proteção: 15% | Durab: 80 | Custo: 12 Mad.</small></div>
                 <button onclick="comprarArmadura(1, 12)">Adquirir</button>
             </div>
             <div class="loja-item" id="item-armadura-2" style="display:none;">
-                <div><font>Algodão Acochoado (Lvl 2)</font><small>Proteção: 30% | Custo: 20 Mad.</small></div>
-                <button onclick="comprarArmadura(2, 20)">Adquirir</button>
+                <div><font>Armadura de Ferro (Lvl 2)</font><small>Proteção: 30% | Durab: 100 | Custo: 25 Mad.</small></div>
+                <button onclick="comprarArmadura(2, 25)">Adquirir</button>
             </div>
             <div class="loja-item" id="item-armadura-3" style="display:none;">
-                <div><font>Couraça de Bronze (Lvl 3)</font><small>Proteção: 50% | Custo: 30 Mad.</small></div>
-                <button onclick="comprarArmadura(3, 30)">Adquirir</button>
+                <div><font>Armadura de Aço (Lvl 3)</font><small>Proteção: 50% | Durab: 120 | Custo: 40 Mad.</small></div>
+                <button onclick="comprarArmadura(3, 40)">Adquirir</button>
             </div>
             <div class="loja-item" id="item-armadura-4" style="display:none;">
-                <div><font>Ferro Batido (Lvl 4)</font><small>Proteção: 70% | Custo: 45 Mad.</small></div>
-                <button onclick="comprarArmadura(4, 45)">Adquirir</button>
+                <div><font>Armadura Titânio (Lvl 4)</font><small>Proteção: 70% | Durab: 150 | Custo: 60 Mad.</small></div>
+                <button onclick="comprarArmadura(4, 60)">Adquirir</button>
             </div>
             <div class="loja-item" id="item-armadura-5" style="display:none;">
-                <div><font>Placas de Aço Imperial (Lvl 5)</font><small>Proteção: 85% | Custo: 65 Mad.</small></div>
-                <button onclick="comprarArmadura(5, 65)">Adquirir</button>
+                <div><font>Armadura Imperial (Lvl 5)</font><small>Proteção: 85% | Durab: 200 | Custo: 85 Mad.</small></div>
+                <button onclick="comprarArmadura(5, 85)">Adquirir</button>
             </div>
 
             <div class="loja-secao">Diplomacia / Exército</div>
@@ -969,7 +1117,7 @@
             <button onclick="fecharFerreiro()" style="background: linear-gradient(#c0392b, #962d22); color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; width: 100%; margin-top: 15px; font-weight: bold;">Fechar</button>
         </div>
 
-        <!-- BAU DE ARMAZENAMENTO -->
+        <!-- BAU DE ARMAZENAMENTO (JOGADOR) -->
         <div id="bau-menu">
             <h3 style="color: #d4a373;">📦 Baú de Armazenamento</h3>
             <p style="color: #faedcd; font-size: 12px;">Clique para guardar ou pegar itens</p>
@@ -977,6 +1125,30 @@
                 <!-- Gerado dinamicamente -->
             </div>
             <button onclick="fecharBau()" style="background: #555; color: white; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; margin-top: 10px;">Fechar</button>
+        </div>
+
+        <!-- BAU DO TESOURO -->
+        <div id="bau-tesouro-menu">
+            <h3>💰 Baú do Tesouro</h3>
+            <div class="bau-conteudo" id="tesouro-conteudo">
+                <p>Madeira: <span id="tesouro-madeira">0</span></p>
+                <p>Água: <span id="tesouro-agua">0</span></p>
+                <p>Comida: <span id="tesouro-comida">0</span></p>
+            </div>
+            <button class="bau-botao bau-botao-pegar" onclick="pegarTesouro()">Pegar Tudo</button>
+            <button class="bau-botao bau-botao-fechar" onclick="fecharBauTesouro()">Fechar</button>
+        </div>
+
+        <!-- BAU DO PIRATA -->
+        <div id="bau-pirata-menu">
+            <h3>🏴‍☠️ Saque do Pirata</h3>
+            <div class="bau-conteudo" id="pirata-conteudo">
+                <p>Madeira: <span id="pirata-madeira">0</span></p>
+                <p>Água: <span id="pirata-agua">0</span></p>
+                <p>Comida: <span id="pirata-comida">0</span></p>
+            </div>
+            <button class="bau-botao" style="background:#c0392b; color:#fff;" onclick="pegarSaquePirata()">Pegar Tudo</button>
+            <button class="bau-botao bau-botao-fechar" onclick="fecharBauPirata()">Fechar</button>
         </div>
 
         <!-- MOCHILA -->
@@ -998,6 +1170,9 @@
                 <button onclick="sairDaCasa()">Sair da Cabana</button>
             </div>
         </div>
+
+        <!-- BOTÃO CHAMAR ALIADOS -->
+        <button id="btn-chamar-aliados" onclick="chamarAliados()">📯 Chamar Aliados</button>
 
         <div id="hotbar">
             <div class="slot active" id="slot-0" onclick="selecionarSlot(0)"><span class="tecla">1</span><span class="nome">Machado</span><span class="qtd">-</span></div>
@@ -1023,7 +1198,7 @@
             <button onclick="admCheat('guerra')">Forçar Guerra Imediata</button>
             <button onclick="admCheat('vida')">Imortalidade / Full HP</button>
             <button onclick="admCheat('tp')">Teleporte Ilha Inimiga</button>
-            <button onclick="admCheat('killall')" style="background:#c0392b;">Exterminar Invasores (Kill All)</button>
+            <button onclick="admCheat('killall')" style="background:#c0392b;">Exterminar Invasores</button>
             <button onclick="fecharPainelAdm()" style="background:#444;">Fechar</button>
         </div>
 
@@ -1031,7 +1206,7 @@
     </div>
 
     <script>
-        const canvas = document.getElementById("gameCanvas");
+      const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const wrapper = document.getElementById("game-wrapper");
         const minimapCanvas = document.getElementById("minimap-canvas");
@@ -1046,6 +1221,8 @@
         const fomeFill = document.getElementById("fill-fome");
         const sedeFill = document.getElementById("fill-sede");
         const vidaFill = document.getElementById("fill-vida");
+        const armaduraFill = document.getElementById("fill-armadura");
+        const armaduraBarContainer = document.getElementById("armadura-bar-container");
         const txtMachado = document.getElementById("txt-machado");
         const durMachadoTxt = document.getElementById("dur-machado");
         const dicaContexto = document.getElementById("dica-contexto");
@@ -1060,6 +1237,10 @@
         const minimapContainer = document.getElementById("minimap-container");
         const btnMinimizarMapa = document.getElementById("btn-minimizar-mapa");
         const chaveIndicator = document.getElementById("chave-tesouro-indicator");
+        const msgContainer = document.getElementById("mensagens-container");
+        const msgContent = document.getElementById("msg-content");
+        const alertaPirata = document.getElementById("alerta-pirata");
+        const btnChamarAliados = document.getElementById("btn-chamar-aliados");
 
         // Variáveis de Estado do Jogo
         let jogoPausado = false;
@@ -1082,6 +1263,13 @@
         let casaPosicao = { x: 800, y: 850 };
         let construcaoItens = { parede: 0, teto: 0, porta: 0, janela: 0 };
         let construcaoMax = { parede: 4, teto: 2, porta: 1, janela: 2 };
+        let mensagensMinimizadas = false;
+        let historicoMensagens = [];
+        let nivelIlha = 1;
+        let tesouroRecompensa = { madeira: 0, agua: 0, comida: 0 };
+        let saquePirata = { madeira: 0, agua: 0, comida: 0 };
+        let bauTesouroAberto = false;
+        let bauPirataAberto = false;
 
         // Controle de Temporizador de Ataque na Ilha Inimiga
         let jogadorNaIlhaInimiga = false;
@@ -1093,9 +1281,46 @@
         let bauTesouroUnico = null;
         let tesouroSaqueado = false;
 
+        // PIRATAS
+        let piratas = [];
+        let tempoSpawnPiratas = 0;
+        let alertaPirataTimer = 0;
+
         let customAlerts = [];
         function dispararAlertaVisual(msg, cor = "#2ecc71") {
             customAlerts.push({ texto: msg, timer: 180, cor: cor });
+            adicionarMensagem(msg, cor);
+        }
+
+        function adicionarMensagem(msg, cor = "#faedcd") {
+            historicoMensagens.push({ texto: msg, cor: cor, timer: 300 });
+            if(historicoMensagens.length > 20) historicoMensagens.shift();
+            if(!mensagensMinimizadas) atualizarMensagensUI();
+        }
+
+        function atualizarMensagensUI() {
+            msgContent.innerHTML = '';
+            let msgs = historicoMensagens.slice(-10);
+            msgs.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'msg-item';
+                div.style.color = m.cor;
+                div.textContent = m.texto;
+                msgContent.appendChild(div);
+            });
+            msgContent.scrollTop = msgContent.scrollHeight;
+        }
+
+        function minimizarMensagens() {
+            mensagensMinimizadas = !mensagensMinimizadas;
+            if(mensagensMinimizadas) {
+                msgContent.style.display = "none";
+                document.querySelector("#mensagens-container .msg-header button").textContent = "[+]";
+            } else {
+                msgContent.style.display = "block";
+                document.querySelector("#mensagens-container .msg-header button").textContent = "[-]";
+                atualizarMensagensUI();
+            }
         }
 
         // Jogador Base
@@ -1111,6 +1336,8 @@
             temArco: false,
             temMochila: false,
             armaduraNivel: 0,
+            armaduraDurabilidade: 0,
+            armaduraMaxDurabilidade: 0,
             invencivel: false,
             pilotando: false,
             bonusVelocidade: 1,
@@ -1120,10 +1347,10 @@
             bonusCura: 1
         };
 
-        // Entidade do Barco do Jogador - AGORA RENASCE NO MAR
+        // Entidade do Barco do Jogador - RENASCE NA ÁGUA
         const barcoJogador = {
             x: 750,
-            y: LINHA_DA_AGUA + 80,
+            y: LINHA_DA_AGUA + 60,
             larg: 160,
             alt: 70,
             vel: 0,
@@ -1155,7 +1382,7 @@
             { x: 3400, y: 100, larg: 135, alt: 52, velX: 0.6, dir: 1, sementeBalanço: Math.PI / 1.5 }
         ];
 
-        // Nós Poligonais da Ilha Inimiga AMPLIZADA GEOGRAFICAMENTE
+        // Nós Poligonais da Ilha Inimiga
         const nósIlhaInimiga = [
             { x: 4200, y: 450 },
             { x: 4600, y: 350 },
@@ -1194,6 +1421,36 @@
             itens: { madeira: 0, agua: 0, comida: 0 }
         };
 
+        function spawnarPirata() {
+            let px, py;
+            let tentativas = 0;
+            do {
+                px = 1200 + Math.random() * 2800;
+                py = 50 + Math.random() * 350;
+                tentativas++;
+            } while((estaNaIlhaPrincipal(px, py) || estaDentroDaIlhaInimiga(px, py)) && tentativas < 50);
+            
+            let muitoPerto = false;
+            for(let p of piratas) {
+                if(Math.hypot(p.x - px, p.y - py) < 200) muitoPerto = true;
+            }
+            if(!muitoPerto && !estaNaIlhaPrincipal(px, py) && !estaDentroDaIlhaInimiga(px, py)) {
+                piratas.push({
+                    x: px, y: py,
+                    vida: 60 + (nivelIlha * 5),
+                    maxVida: 60 + (nivelIlha * 5),
+                    vel: 1.5 + Math.random() * 0.5,
+                    dano: 15 + (nivelIlha * 2),
+                    cooldownDano: 0,
+                    angulo: Math.random() * Math.PI * 2,
+                    estado: 'patrulha',
+                    tempoMudanca: 0,
+                    raioColisao: 25,
+                    saqueado: false
+                });
+            }
+        }
+
         function inicializarAmbiente() {
             arvores = [];
             particulas = [];
@@ -1205,19 +1462,21 @@
             tesouroSaqueado = false;
             temChaveTesouro = false;
             bauTesouroUnico = null;
+            piratas = [];
+            bauTesouroAberto = false;
+            bauPirataAberto = false;
 
             for(let i=0; i<120; i++) {
                 detalhesPraia.push({ x: Math.random() * 1300, y: LINHA_DA_AGUA + Math.random() * 140, raio: Math.random() * 3 + 1, opacidade: Math.random() * 0.5 + 0.3 });
             }
 
-            // ÁRVORES - NENHUMA PERTO DA LOJA (FEITORIA) E FERREIRO
+            // ÁRVORES - NENHUMA PERTO DA LOJA
             for(let i=0; i<75; i++) {
                 let x, y, valido;
                 do {
                     x = Math.random() * 1100 + 50;
                     y = Math.random() * (MAPA_ALTURA - (LINHA_DA_AGUA + 240)) + (LINHA_DA_AGUA + 210);
                     valido = true;
-                    // Verifica se não está perto da feitoria
                     if(Math.hypot(x - feitor.x, y - feitor.y) < 100) valido = false;
                     if(Math.hypot(x - ferreiro.x, y - ferreiro.y) < 100) valido = false;
                 } while(!valido);
@@ -1231,7 +1490,7 @@
                 moitasFrutas.push({ x: Math.random() * 1100 + 60, y: Math.random() * (MAPA_ALTURA - (LINHA_DA_AGUA + 220)) + (LINHA_DA_AGUA + 190), temFruta: true, timerRegen: 0 });
             }
 
-            // Inimigos nativos da ilha
+            // Inimigos nativos da ilha com nível
             inimigos = [];
             for(let i=0; i<18; i++) {
                 let rx, ry;
@@ -1239,11 +1498,33 @@
                     rx = 4250 + Math.random() * 1100;
                     ry = 450 + Math.random() * 1600;
                 } while(!estaDentroDaIlhaInimiga(rx, ry));
-                inimigos.push({ x: rx, y: ry, vida: 80, maxVida: 80, vel: 2.2, dano: 10, cooldownDano: 0, isBoss: false, nativoIlha: true });
+                let vidaBase = 80 + (nivelIlha * 10);
+                let danoBase = 10 + (nivelIlha * 2);
+                inimigos.push({ 
+                    x: rx, y: ry, 
+                    vida: vidaBase, maxVida: vidaBase, 
+                    vel: 2.2 + (nivelIlha * 0.05), 
+                    dano: danoBase, 
+                    cooldownDano: 0, 
+                    isBoss: false, 
+                    nativoIlha: true,
+                    saqueado: false 
+                });
             }
             
-            // Chefe da ilha
-            inimigos.push({ x: 4850, y: 1200, vida: 400, maxVida: 400, vel: 1.5, dano: 28, cooldownDano: 0, isBoss: true, nativoIlha: true });
+            // Chefe da ilha com nível
+            let bossVida = 400 + (nivelIlha * 50);
+            let bossDano = 28 + (nivelIlha * 3);
+            inimigos.push({ 
+                x: 4850, y: 1200, 
+                vida: bossVida, maxVida: bossVida, 
+                vel: 1.5 + (nivelIlha * 0.03), 
+                dano: bossDano, 
+                cooldownDano: 0, 
+                isBoss: true, 
+                nativoIlha: true,
+                saqueado: false 
+            });
             
             totalInimigosIniciaisIlha = inimigos.filter(e => e.nativoIlha).length;
 
@@ -1254,6 +1535,11 @@
                 by = 600 + Math.random() * 1300;
             } while(!estaDentroDaIlhaInimiga(bx, by));
             bauTesouroUnico = { x: bx, y: by, aberto: false };
+
+            // PIRATAS INICIAIS
+            for(let i=0; i<3; i++) {
+                spawnarPirata();
+            }
         }
 
         const bgCanvas = document.createElement('canvas');
@@ -1262,11 +1548,9 @@
         const bgCtx = bgCanvas.getContext('2d');
 
         function renderizarCenarioEstatico() {
-            // Mar profundo
             bgCtx.fillStyle = '#0a2246';
             bgCtx.fillRect(0, 0, MAPA_LARGURA, MAPA_ALTURA);
 
-            // Continente/Ilha Principal - Praia e Grama
             bgCtx.fillStyle = '#eadea6';
             bgCtx.fillRect(0, LINHA_DA_AGUA, 1250, 160);
             bgCtx.fillStyle = '#16350f';
@@ -1274,7 +1558,6 @@
             bgCtx.fillStyle = '#22441b';
             bgCtx.fillRect(0, LINHA_DA_AGUA + 150, 1220, 15);
 
-            // Desenhar a Grande Ilha Inimiga Expandida (Areia externa)
             bgCtx.fillStyle = '#dfd295';
             bgCtx.beginPath();
             bgCtx.moveTo(nósIlhaInimiga[0].x - 35, nósIlhaInimiga[0].y - 35);
@@ -1284,7 +1567,6 @@
             bgCtx.closePath();
             bgCtx.fill();
 
-            // Interior da Ilha Inimiga (Terra)
             bgCtx.fillStyle = '#261c14';
             bgCtx.beginPath();
             bgCtx.moveTo(nósIlhaInimiga[0].x, nósIlhaInimiga[0].y);
@@ -1308,7 +1590,6 @@
 
         function selecionarPersonagem(tipo) {
             personagemSelecionado = tipo;
-            // Aplica bônus
             jogador.bonusVelocidade = 1;
             jogador.bonusDano = 1;
             jogador.bonusDefesa = 1;
@@ -1334,12 +1615,9 @@
             
             document.getElementById("personagem-select").style.display = "none";
             dispararAlertaVisual(`Você escolheu o guerreiro ${tipo}!`, "#f1c40f");
-            
-            // Atualiza a velocidade do jogador
             jogador.vel = 4.5 * jogador.bonusVelocidade;
         }
 
-        // Sistema de Teclado Seguro contra loops e conflitos no Painel ADM
         const teclas = {};
         window.addEventListener("keydown", (e) => {
             if (painelAdmAtivo || document.activeElement.tagName === 'INPUT') return;
@@ -1351,14 +1629,13 @@
             if(chave === 'e' || chave === 'm') {
                 if(!dentroDaCasa) alternarMochila();
             }
-            if(chave === 'c' && !dentroDaCasa) {
+            if(chave === 'r' && !dentroDaCasa) {
                 alternarConstrucao();
             }
             if(['1','2','3','4','5'].includes(e.key)) {
                 selecionarSlot(parseInt(e.key) - 1);
             }
             if(chave === 'f' && !dentroDaCasa) {
-                // Interagir com ferreiro
                 let distFerreiro = Math.hypot(jogador.x - ferreiro.x, jogador.y - ferreiro.y);
                 if(distFerreiro < ferreiro.raio + jogador.raio + 15) {
                     abrirFerreiro();
@@ -1418,6 +1695,7 @@
                 dispararAlertaVisual("Cheat Ativo: Teleportado para o Coração Inimigo!", "#9b59b6");
             } else if(tipo === 'killall') {
                 inimigos.forEach(inim => inim.vida = 0);
+                piratas.forEach(p => p.vida = 0);
                 dispararAlertaVisual("Cheat Ativo: Todos os invasores eliminados!", "#2ecc71");
             }
         }
@@ -1584,7 +1862,6 @@
         function sairDaCasa() {
             dentroDaCasa = false;
             document.getElementById("casa-interna").style.display = "none";
-            // Posiciona o jogador na frente da casa
             jogador.x = casaPosicao.x + 30;
             jogador.y = casaPosicao.y;
             dispararAlertaVisual("Saiu da cabana!", "#2ecc71");
@@ -1619,7 +1896,7 @@
             if(jogador.inventario.madeira >= custo && jogador.machadoNivel < 5) {
                 jogador.inventario.madeira -= custo;
                 jogador.machadoNivel++;
-                jogador.machadoDurabilidade = 100;
+                jogador.machadoDurabilidade = 100 + (jogador.machadoNivel * 10);
                 dispararAlertaVisual(`Machado melhorado para Nível ${jogador.machadoNivel}!`, "#f1c40f");
                 document.getElementById("ferreiro-nv-atual").innerText = jogador.machadoNivel;
                 let novoCusto = jogador.machadoNivel * 15;
@@ -1715,6 +1992,73 @@
             }
         }
 
+        // BAU DO TESOURO
+        function abrirBauTesouro(recompensa) {
+            tesouroRecompensa = recompensa;
+            document.getElementById("tesouro-madeira").innerText = recompensa.madeira;
+            document.getElementById("tesouro-agua").innerText = recompensa.agua;
+            document.getElementById("tesouro-comida").innerText = recompensa.comida;
+            document.getElementById("bau-tesouro-menu").style.display = "block";
+            bauTesouroAberto = true;
+        }
+
+        function fecharBauTesouro() {
+            document.getElementById("bau-tesouro-menu").style.display = "none";
+            bauTesouroAberto = false;
+        }
+
+        function pegarTesouro() {
+            jogador.inventario.madeira += tesouroRecompensa.madeira;
+            jogador.inventario.agua += tesouroRecompensa.agua;
+            jogador.inventario.comida += tesouroRecompensa.comida;
+            dispararAlertaVisual(`🎉 Tesouro pego! +${tesouroRecompensa.madeira} Madeiras, +${tesouroRecompensa.agua} Água, +${tesouroRecompensa.comida} Comida!`, "#f1c40f");
+            fecharBauTesouro();
+            atualizarHUD();
+        }
+
+        // BAU DO PIRATA
+        function abrirBauPirata(saque) {
+            saquePirata = saque;
+            document.getElementById("pirata-madeira").innerText = saque.madeira;
+            document.getElementById("pirata-agua").innerText = saque.agua;
+            document.getElementById("pirata-comida").innerText = saque.comida;
+            document.getElementById("bau-pirata-menu").style.display = "block";
+            bauPirataAberto = true;
+        }
+
+        function fecharBauPirata() {
+            document.getElementById("bau-pirata-menu").style.display = "none";
+            bauPirataAberto = false;
+        }
+
+        function pegarSaquePirata() {
+            jogador.inventario.madeira += saquePirata.madeira;
+            jogador.inventario.agua += saquePirata.agua;
+            jogador.inventario.comida += saquePirata.comida;
+            dispararAlertaVisual(`🏴‍☠️ Saque do pirata! +${saquePirata.madeira} Madeiras, +${saquePirata.agua} Água, +${saquePirata.comida} Comida!`, "#c0392b");
+            fecharBauPirata();
+            atualizarHUD();
+        }
+
+        // CHAMAR ALIADOS
+        function chamarAliados() {
+            if(aliados.length === 0) {
+                dispararAlertaVisual("Você não tem aliados para chamar!", "#e74c3c");
+                return;
+            }
+            aliados.forEach(al => {
+                al.alvo = null;
+                // Move o aliado em direção ao jogador
+                let ang = Math.atan2(jogador.y - al.y, jogador.x - al.x);
+                let dist = Math.hypot(jogador.x - al.x, jogador.y - al.y);
+                if(dist > 50) {
+                    al.x += Math.cos(ang) * 5;
+                    al.y += Math.sin(ang) * 5;
+                }
+            });
+            dispararAlertaVisual("📯 Aliados estão vindo até você!", "#3498db");
+        }
+
         function selecionarSlot(idx) {
             slotSelecionado = idx;
             const slots = document.querySelectorAll(".slot");
@@ -1731,6 +2075,9 @@
                 if(tipo === 'Comida') jogador.inventario.comida++;
                 dispararAlertaVisual(`Troca Concluída: +1 Provisão de ${tipo}!`);
                 atualizarHUD();
+                // Aumenta nível da loja
+                nivelLoja = Math.min(5, nivelLoja + 0.1);
+                atualizarNivelLoja();
             } else {
                 dispararAlertaVisual("Madeira insuficiente para escambo!", "#e74c3c");
             }
@@ -1740,12 +2087,14 @@
             if(jogador.inventario.madeira >= custo) {
                 jogador.inventario.madeira -= custo;
                 jogador.machadoNivel = nv;
-                jogador.machadoDurabilidade = 100;
+                jogador.machadoDurabilidade = 100 + (nv * 10);
                 document.getElementById(`item-machado-${nv}`).style.display = "none";
                 if(nv < 5) document.getElementById(`item-machado-${nv+1}`).style.display = "flex";
                 txtMachado.innerText = "Nível " + nv;
                 dispararAlertaVisual(`Ferramenta Atualizada: Machado Nível ${nv}!`);
                 atualizarHUD();
+                nivelLoja = Math.min(5, nivelLoja + 0.2);
+                atualizarNivelLoja();
             } else { dispararAlertaVisual("Madeiras insuficientes!", "#e74c3c"); }
         }
 
@@ -1759,6 +2108,8 @@
                 if(nv < 5) document.getElementById(`item-espada-${nv+1}`).style.display = "flex";
                 dispararAlertaVisual(`Armamento Adquirido: Lâmina Nível ${nv}!`);
                 atualizarHUD();
+                nivelLoja = Math.min(5, nivelLoja + 0.2);
+                atualizarNivelLoja();
             } else { dispararAlertaVisual("Madeiras insuficientes!", "#e74c3c"); }
         }
 
@@ -1770,6 +2121,8 @@
                 document.getElementById("btn-arco-loja").disabled = true;
                 dispararAlertaVisual("Adquirido: Arco Longo de Campanha!");
                 atualizarHUD();
+                nivelLoja = Math.min(5, nivelLoja + 0.1);
+                atualizarNivelLoja();
             } else { dispararAlertaVisual("Madeiras insuficientes!", "#e74c3c"); }
         }
 
@@ -1789,21 +2142,37 @@
             if(jogador.inventario.madeira >= custo) {
                 jogador.inventario.madeira -= custo;
                 jogador.armaduraNivel = nv;
-                let nomes = ["Nenhuma", "Couro Rústico", "Algodão Forrado", "Couraça Bronze", "Ferro Batido", "Aço Real"];
+                let durabilidades = [0, 80, 100, 120, 150, 200];
+                jogador.armaduraDurabilidade = durabilidades[nv];
+                jogador.armaduraMaxDurabilidade = durabilidades[nv];
+                let nomes = ["Nenhuma", "Couro Rústico", "Armadura de Ferro", "Armadura de Aço", "Armadura Titânio", "Armadura Imperial"];
                 document.getElementById("txt-armadura-hud").innerText = nomes[nv];
                 document.getElementById(`item-armadura-${nv}`).style.display = "none";
                 if(nv < 5) document.getElementById(`item-armadura-${nv+1}`).style.display = "flex";
-                dispararAlertaVisual(`Defesa Reforçada: ${nomes[nv]}!`);
+                armaduraBarContainer.style.display = "flex";
+                dispararAlertaVisual(`Defesa Reforçada: ${nomes[nv]}! Durabilidade: ${jogador.armaduraDurabilidade}`);
                 atualizarHUD();
+                nivelLoja = Math.min(5, nivelLoja + 0.3);
+                atualizarNivelLoja();
             } else { dispararAlertaVisual("Madeiras insuficientes!", "#e74c3c"); }
         }
 
         function recrutarAliado() {
             if(jogador.inventario.madeira >= 20) {
                 jogador.inventario.madeira -= 20;
-                aliados.push({ x: feitor.x + Math.random()*40 - 20, y: feitor.y + Math.random()*40 + 30, vida: 100, alvo: null, cooldownAtaque: 0 });
+                let novoAliado = { 
+                    x: feitor.x + Math.random()*40 - 20, 
+                    y: feitor.y + Math.random()*40 + 30, 
+                    vida: 100, 
+                    alvo: null, 
+                    cooldownAtaque: 0,
+                    anguloPatrulha: Math.random() * Math.PI * 2
+                };
+                aliados.push(novoAliado);
                 dispararAlertaVisual("Miliciano recrutado para a defesa costeira!");
                 atualizarHUD();
+                nivelLoja = Math.min(5, nivelLoja + 0.1);
+                atualizarNivelLoja();
             } else { dispararAlertaVisual("Recurso insuficiente para alistamento!", "#e74c3c"); }
         }
 
@@ -1812,10 +2181,39 @@
             btnAntecipar.style.display = "none";
         }
 
+        function atualizarNivelLoja() {
+            let nivelTexto = ["Básico", "Intermediário", "Avançado", "Experiente", "Mestre"];
+            let idx = Math.min(4, Math.floor(nivelLoja - 1));
+            document.getElementById("txt-loja-lvl").innerText = `${Math.floor(nivelLoja)} (${nivelTexto[idx]})`;
+            
+            // Libera itens conforme nível da loja
+            if(nivelLoja >= 2) {
+                document.getElementById("item-armadura-2").style.display = "flex";
+                document.getElementById("item-espada-2").style.display = "flex";
+            }
+            if(nivelLoja >= 3) {
+                document.getElementById("item-armadura-3").style.display = "flex";
+                document.getElementById("item-espada-3").style.display = "flex";
+            }
+            if(nivelLoja >= 4) {
+                document.getElementById("item-armadura-4").style.display = "flex";
+                document.getElementById("item-espada-4").style.display = "flex";
+            }
+            if(nivelLoja >= 5) {
+                document.getElementById("item-armadura-5").style.display = "flex";
+                document.getElementById("item-espada-5").style.display = "flex";
+            }
+        }
+
         function atualizarHUD() {
             fomeFill.style.width = jogador.fome + "%";
             sedeFill.style.width = jogador.sede + "%";
             vidaFill.style.width = jogador.vida + "%";
+            
+            if(jogador.armaduraNivel > 0) {
+                armaduraFill.style.width = (jogador.armaduraDurabilidade / jogador.armaduraMaxDurabilidade * 100) + "%";
+            }
+            
             document.getElementById("txt-madeira-livre").innerText = jogador.inventario.madeira;
             durMachadoTxt.innerText = jogador.machadoDurabilidade;
             document.getElementById("txt-aliados").innerText = aliados.length + " guerreiros";
@@ -1827,21 +2225,40 @@
             } else {
                 chaveIndicator.style.display = "none";
             }
+            
+            // Atualiza nível da ilha no HUD
+            document.getElementById("txt-nivel-ilha").innerText = nivelIlha;
         }
 
-        // LÓGICAS DE ATUALIZAÇÃO E COLISÕES FÍSICAS REAIS DO MAPA
         function atualizarMundo() {
             if (jogoPausado || painelAdmAtivo || dentroDaCasa) return;
 
             tempoDecorrido++;
             contadorOndasMar += 0.04;
 
+            // SPAWN DE PIRATAS
+            tempoSpawnPiratas++;
+            if(tempoSpawnPiratas > 600 && piratas.length < 8) {
+                spawnarPirata();
+                tempoSpawnPiratas = 0;
+                alertaPirata.style.display = "block";
+                alertaPirataTimer = 120;
+                dispararAlertaVisual("🏴‍☠️ Piratas foram avistados no mar!", "#ff4757");
+            }
+
+            if(alertaPirataTimer > 0) {
+                alertaPirataTimer--;
+                if(alertaPirataTimer <= 0) {
+                    alertaPirata.style.display = "none";
+                }
+            }
+
             // Gerenciar guerra e invasões temporizadas
             if(!emGuerra) {
                 tempoParaGuerra -= (1/60);
                 if(tempoParaGuerra <= 0) {
                     emGuerra = true;
-                    tempoParaGuerra = 0;
+                    tempoParaGuerra = 300; // RESETA O TEMPO APÓS A GUERRA
                     iniciarInvasaoCosta();
                 }
                 let m = Math.floor(tempoParaGuerra / 60);
@@ -1851,6 +2268,8 @@
                     nivelAmeacaTxt.innerText = "IMINENTE";
                     nivelAmeacaTxt.style.color = "#ff4757";
                     btnAntecipar.style.display = "block";
+                } else {
+                    btnAntecipar.style.display = "none";
                 }
             }
 
@@ -1886,7 +2305,7 @@
                 }
             }
 
-            // CONTROLE DE NAVEGAÇÃO DO BARCO E BARREIRAS CONTRA ILHAS
+            // CONTROLE DE NAVEGAÇÃO DO BARCO
             if(jogador.pilotando) {
                 if(teclas['w'] || teclas['arrowup']) barcoJogador.vel = Math.min(barcoJogador.maxVel, barcoJogador.vel + barcoJogador.aceleracao);
                 else if(teclas['s'] || teclas['arrowdown']) barcoJogador.vel = Math.max(-barcoJogador.maxVel/2, barcoJogador.vel - barcoJogador.aceleracao);
@@ -1933,7 +2352,7 @@
                     }
                 }
             } else {
-                // MOVIMENTAÇÃO A PÉ DO JOGADOR
+                // MOVIMENTAÇÃO A PÉ
                 let dx = 0; let dy = 0;
                 if(teclas['w'] || teclas['arrowup']) dy = -1;
                 if(teclas['s'] || teclas['arrowdown']) dy = 1;
@@ -1994,7 +2413,7 @@
                 }
             }
 
-            // GESTÃO DO ALERTA E TEMPORIZADOR DE ATAQUE NA ILHA INIMIGA
+            // GESTÃO DO ALERTA NA ILHA INIMIGA
             let atualmenteNaIlhaInimiga = estaDentroDaIlhaInimiga(jogador.x, jogador.y);
             if(atualmenteNaIlhaInimiga && !jogador.pilotando) {
                 if(!jogadorNaIlhaInimiga) {
@@ -2020,7 +2439,7 @@
                 displayTimerInvasao.style.display = "none";
             }
 
-            // Proximidade automática do Feitor para abrir menus comerciais
+            // Proximidade do Feitor
             let distFeitor = Math.hypot(jogador.x - feitor.x, jogador.y - feitor.y);
             if(distFeitor < feitor.raio + jogador.raio + 15 && !jogador.pilotando) {
                 dicaContexto.innerText = "Aperte E para Escambo";
@@ -2028,28 +2447,124 @@
                 if(teclas['e']) { abrirLoja(); teclas['e'] = false; }
             }
 
-            // Atualização dos Aliados Milicianos - AGORA ELES ANDAM
+            // ATUALIZA PIRATAS
+            for(let i = piratas.length - 1; i >= 0; i--) {
+                let p = piratas[i];
+                if(p.vida <= 0) {
+                    if(!p.saqueado) {
+                        p.saqueado = true;
+                        // Gera saque do pirata
+                        let saque = {
+                            madeira: 15 + Math.floor(Math.random() * 20),
+                            agua: 2 + Math.floor(Math.random() * 5),
+                            comida: 2 + Math.floor(Math.random() * 5)
+                        };
+                        abrirBauPirata(saque);
+                        dispararAlertaVisual("🏴‍☠️ Pirata derrotado! Saque disponível!", "#c0392b");
+                    }
+                    piratas.splice(i, 1);
+                    continue;
+                }
+
+                // Comportamento do pirata
+                let distJogador = Math.hypot(jogador.x - p.x, jogador.y - p.y);
+                
+                if(distJogador < 300) {
+                    p.estado = 'perseguir';
+                } else if(p.estado === 'perseguir' && distJogador > 400) {
+                    p.estado = 'patrulha';
+                }
+
+                if(p.estado === 'perseguir') {
+                    let ang = Math.atan2(jogador.y - p.y, jogador.x - p.x);
+                    let proxX = p.x + Math.cos(ang) * p.vel;
+                    let proxY = p.y + Math.sin(ang) * p.vel;
+                    if(!estaNaIlhaPrincipal(proxX, proxY) && !estaDentroDaIlhaInimiga(proxX, proxY)) {
+                        p.x = proxX;
+                        p.y = proxY;
+                    }
+                    
+                    if(distJogador < 35 && jogador.pilotando) {
+                        // Só pode atacar piratas com arco e flecha quando no barco
+                        if(slotSelecionado === 4 && jogador.temArco) {
+                            // Disparo automático
+                            let anguloTiro = Math.atan2(jogador.y - p.y, jogador.x - p.x);
+                            flechas.push({
+                                x: jogador.x, y: jogador.y,
+                                vx: Math.cos(anguloTiro) * 9,
+                                vy: Math.sin(anguloTiro) * 9,
+                                alcance: 75
+                            });
+                            dispararAlertaVisual("🏹 Flecha disparada contra o pirata!", "#f1c40f");
+                        }
+                    } else if(distJogador < 35 && !jogador.pilotando) {
+                        if(p.cooldownDano <= 0) {
+                            if(!jogador.invencivel) {
+                                let absorcao = 0;
+                                if(jogador.armaduraNivel === 1) absorcao = 0.15 * jogador.bonusDefesa;
+                                if(jogador.armaduraNivel === 2) absorcao = 0.30 * jogador.bonusDefesa;
+                                if(jogador.armaduraNivel === 3) absorcao = 0.50 * jogador.bonusDefesa;
+                                if(jogador.armaduraNivel === 4) absorcao = 0.70 * jogador.bonusDefesa;
+                                if(jogador.armaduraNivel === 5) absorcao = 0.85 * jogador.bonusDefesa;
+                                jogador.vida -= p.dano * (1 - Math.min(absorcao, 0.95));
+                                
+                                // Reduz durabilidade da armadura
+                                if(jogador.armaduraNivel > 0) {
+                                    jogador.armaduraDurabilidade -= 2;
+                                    if(jogador.armaduraDurabilidade <= 0) {
+                                        jogador.armaduraNivel = 0;
+                                        jogador.armaduraDurabilidade = 0;
+                                        document.getElementById("txt-armadura-hud").innerText = "Nenhuma";
+                                        armaduraBarContainer.style.display = "none";
+                                        dispararAlertaVisual("⚠️ Sua armadura quebrou!", "#e74c3c");
+                                    }
+                                }
+                            }
+                            p.cooldownDano = 40;
+                            criarEfeitoSangue(jogador.x, jogador.y);
+                            if(jogador.vida <= 0) reiniciarJogoCompleto();
+                        }
+                    }
+                } else {
+                    // Patrulha
+                    p.tempoMudanca--;
+                    if(p.tempoMudanca <= 0) {
+                        p.angulo += (Math.random() - 0.5) * 1.5;
+                        p.tempoMudanca = 60 + Math.floor(Math.random() * 120);
+                    }
+                    let proxX = p.x + Math.cos(p.angulo) * p.vel * 0.5;
+                    let proxY = p.y + Math.sin(p.angulo) * p.vel * 0.5;
+                    if(!estaNaIlhaPrincipal(proxX, proxY) && !estaDentroDaIlhaInimiga(proxX, proxY) && 
+                       proxX > 100 && proxX < 5400 && proxY > 50 && proxY < 450) {
+                        p.x = proxX;
+                        p.y = proxY;
+                    } else {
+                        p.angulo += Math.PI * 0.5;
+                    }
+                }
+
+                if(p.cooldownDano > 0) p.cooldownDano--;
+            }
+
+            // Atualização dos Aliados
             aliados.forEach(al => {
-                // Movimento em direção ao alvo ou patrulha
                 if(!al.alvo || al.alvo.vida <= 0) {
-                    let possiveis = inimigos.filter(i => i.vida > 0 && Math.hypot(i.x - al.x, i.y - al.y) < 450);
+                    let todosInimigos = [...inimigos, ...piratas];
+                    let possiveis = todosInimigos.filter(i => i.vida > 0 && Math.hypot(i.x - al.x, i.y - al.y) < 450);
                     if(possiveis.length > 0) {
                         al.alvo = possiveis[0];
                     } else {
-                        // Patrulha em volta da feitoria
                         let angFeit = Math.atan2(feitor.y - al.y, feitor.x - al.x);
                         let distFeit = Math.hypot(feitor.x - al.x, feitor.y - al.y);
                         if(distFeit > 100) {
                             al.x += Math.cos(angFeit) * 1.8;
                             al.y += Math.sin(angFeit) * 1.8;
                         } else {
-                            // Movimento aleatório de patrulha
                             if(Math.random() < 0.02) {
-                                al.anguloPatrulha = Math.random() * Math.PI * 2;
+                                al.anguloPatrulha = (al.anguloPatrulha || 0) + (Math.random() - 0.5) * 1.5;
                             }
                             al.x += Math.cos(al.anguloPatrulha || 0) * 0.5;
                             al.y += Math.sin(al.anguloPatrulha || 0) * 0.5;
-                            // Mantém dentro dos limites
                             al.x = Math.max(200, Math.min(1000, al.x));
                             al.y = Math.max(LINHA_DA_AGUA + 200, Math.min(MAPA_ALTURA - 100, al.y));
                         }
@@ -2071,8 +2586,9 @@
                 if(al.cooldownAtaque > 0) al.cooldownAtaque--;
             });
 
-            // PROCESSAMENTO INTELIGENTE DOS INIMIGOS ADVERSÁRIOS
-            inimigos.forEach((inim, indexInim) => {
+            // PROCESSAMENTO DOS INIMIGOS
+            let todosInimigos = [...inimigos, ...piratas];
+            todosInimigos.forEach((inim) => {
                 if(inim.vida <= 0) return;
 
                 if (inim.nativoIlha && !inimigosAtivadosNaIlha) {
@@ -2080,7 +2596,6 @@
                 }
 
                 let dJg = Math.hypot(jogador.x - inim.x, jogador.y - inim.y);
-                
                 let alvoX = jogador.x; let alvoY = jogador.y; let alvoEntidade = jogador;
                 let menorDist = dJg;
                 
@@ -2094,14 +2609,21 @@
                 if(menorDist < 600) {
                     let proxInimX = inim.x + Math.cos(anguloPerseguicao) * inim.vel;
                     let proxInimY = inim.y + Math.sin(anguloPerseguicao) * inim.vel;
-
-                    if (estaNaIlhaPrincipal(proxInimX, proxInimY) || estaDentroDaIlhaInimiga(proxInimX, proxInimY)) {
-                        inim.x = proxInimX;
-                        inim.y = proxInimY;
+                    if(!inim.nativoIlha) {
+                        if(!estaNaIlhaPrincipal(proxInimX, proxInimY) && !estaDentroDaIlhaInimiga(proxInimX, proxInimY)) {
+                            inim.x = proxInimX;
+                            inim.y = proxInimY;
+                        }
+                    } else {
+                        if (estaNaIlhaPrincipal(proxInimX, proxInimY) || estaDentroDaIlhaInimiga(proxInimX, proxInimY)) {
+                            inim.x = proxInimX;
+                            inim.y = proxInimY;
+                        }
                     }
                 }
 
-                if(menorDist < (inim.isBoss ? 35 : 24)) {
+                let raioColisao = inim.isBoss ? 35 : (inim.nativoIlha ? 24 : 25);
+                if(menorDist < raioColisao && !jogador.pilotando) {
                     if(inim.cooldownDano <= 0) {
                         if(alvoEntidade === jogador) {
                             if(!jogador.invencivel) {
@@ -2112,6 +2634,17 @@
                                 if(jogador.armaduraNivel === 4) absorcao = 0.70 * jogador.bonusDefesa;
                                 if(jogador.armaduraNivel === 5) absorcao = 0.85 * jogador.bonusDefesa;
                                 jogador.vida -= inim.dano * (1 - Math.min(absorcao, 0.95));
+                                
+                                if(jogador.armaduraNivel > 0) {
+                                    jogador.armaduraDurabilidade -= 3;
+                                    if(jogador.armaduraDurabilidade <= 0) {
+                                        jogador.armaduraNivel = 0;
+                                        jogador.armaduraDurabilidade = 0;
+                                        document.getElementById("txt-armadura-hud").innerText = "Nenhuma";
+                                        armaduraBarContainer.style.display = "none";
+                                        dispararAlertaVisual("⚠️ Sua armadura quebrou!", "#e74c3c");
+                                    }
+                                }
                             }
                             dispararAlertaVisual("Você sofreu ferimentos em combate!", "#ff4757");
                         } else {
@@ -2125,21 +2658,26 @@
                 if(inim.cooldownDano > 0) inim.cooldownDano--;
             });
 
-            // Limpeza de inimigos mortos - GERA CHAVE E SAQUE
+            // Limpeza de inimigos mortos - GERA CHAVE E AUMENTA NÍVEL
             let inimigosVivosAntes = inimigos.filter(e => e.nativoIlha && e.vida > 0).length;
             let inimigosMortos = inimigos.filter(i => i.vida <= 0 && i.nativoIlha && !i.saqueado);
+            
+            if(inimigosMortos.length > 0) {
+                // Aumenta o nível da ilha
+                nivelIlha++;
+                document.getElementById("txt-nivel-ilha").innerText = nivelIlha;
+                dispararAlertaVisual(`⚔️ Nível da Ilha aumentou para ${nivelIlha}! Inimigos mais fortes!`, "#ff4757");
+            }
             
             inimigosMortos.forEach(inim => {
                 if(!inim.saqueado) {
                     inim.saqueado = true;
-                    // Chance de dropar chave (apenas do chefe ou raramente)
                     if(inim.isBoss || Math.random() < 0.15) {
                         temChaveTesouro = true;
                         dispararAlertaVisual("🗝️ Você encontrou uma Chave do Tesouro!", "#f1c40f");
                         atualizarHUD();
                     }
-                    // Dropar saque no chão
-                    let qtdSaque = Math.floor(Math.random() * 5) + 3;
+                    let qtdSaque = Math.floor(Math.random() * 3) + 1;
                     saquesChao.push({ 
                         x: inim.x + Math.random() * 30 - 15, 
                         y: inim.y + Math.random() * 30 - 15, 
@@ -2152,10 +2690,9 @@
             
             inimigos = inimigos.filter(i => i.vida > 0);
 
-            // Coleta de saques do chão (com clique do mouse)
+            // Coleta de saques do chão
             saquesChao.forEach(saque => {
                 if(!saque.coletado && Math.hypot(jogador.x - saque.x, jogador.y - saque.y) < 50) {
-                    // Coleta automática ao passar perto
                     saque.coletado = true;
                     jogador.inventario.madeira += saque.qtd;
                     dispararAlertaVisual(`+${saque.qtd} Madeiras coletadas do saque!`, "#2ecc71");
@@ -2164,7 +2701,7 @@
             });
             saquesChao = saquesChao.filter(s => !s.coletado);
 
-            // Verifica se todos os inimigos da ilha foram mortos
+            // Verifica todos os inimigos da ilha foram mortos
             if (totalInimigosIniciaisIlha > 0 && inimigos.filter(e => e.nativoIlha).length === 0 && bauTesouroUnico && !bauTesouroUnico.aberto) {
                 if (temChaveTesouro) {
                     dispararAlertaVisual("🏴‍☠️ Use a chave para abrir o Baú do Tesouro!", "#f1c40f");
@@ -2176,14 +2713,20 @@
             // Interação com o Baú do Tesouro
             if(bauTesouroUnico && !bauTesouroUnico.aberto) {
                 let distBau = Math.hypot(jogador.x - bauTesouroUnico.x, jogador.y - bauTesouroUnico.y);
-                if(distBau < 40 && temChaveTesouro) {
-                    dicaContexto.innerText = "Clique para abrir o Baú do Tesouro!";
-                    dicaContexto.style.display = "block";
-                    // Abrir com clique do mouse
+                if(distBau < 50 && temChaveTesouro && !bauTesouroAberto) {
+                    bauTesouroUnico.aberto = true;
+                    temChaveTesouro = false;
+                    let recompensa = {
+                        madeira: 100 + Math.floor(Math.random() * 80) + (nivelIlha * 10),
+                        agua: 10 + Math.floor(Math.random() * 10) + (nivelIlha * 2),
+                        comida: 10 + Math.floor(Math.random() * 10) + (nivelIlha * 2)
+                    };
+                    abrirBauTesouro(recompensa);
+                    atualizarHUD();
                 }
             }
 
-            // Atualização de Flechas Disparadas
+            // Atualização de Flechas
             for(let f = flechas.length - 1; f >= 0; f--) {
                 let fl = flechas[f];
                 fl.x += fl.vx;
@@ -2191,7 +2734,7 @@
                 fl.alcance--;
 
                 let atingiu = false;
-                inimigos.forEach(inim => {
+                todosInimigos.forEach(inim => {
                     if(Math.hypot(fl.x - inim.x, fl.y - inim.y) < 22) {
                         inim.vida -= 35 * jogador.bonusDano;
                         atingiu = true;
@@ -2213,37 +2756,30 @@
 
         function iniciarInvasaoCosta() {
             dispararAlertaVisual("⚠️ EMBOSCADA NAVAL ENVIADA À NOSSA COSTA!", "#e74c3c");
+            let nivel = nivelIlha;
             for(let i=0; i<8; i++) {
-                inimigos.push({ x: 100 + Math.random()*900, y: LINHA_DA_AGUA + 50, vida: 90, maxVida: 90, vel: 2.0, dano: 12, cooldownDano: 0, isBoss: false, nativoIlha: false, saqueado: false });
+                let vidaBase = 90 + (nivel * 5);
+                let danoBase = 12 + (nivel * 2);
+                inimigos.push({ 
+                    x: 100 + Math.random()*900, 
+                    y: LINHA_DA_AGUA + 50, 
+                    vida: vidaBase, 
+                    maxVida: vidaBase, 
+                    vel: 2.0 + (nivel * 0.03), 
+                    dano: danoBase, 
+                    cooldownDano: 0, 
+                    isBoss: false, 
+                    nativoIlha: false, 
+                    saqueado: false 
+                });
             }
         }
 
-        // SISTEMA DE INTERAÇÃO COM O MOUSE
+        // INTERAÇÃO COM O MOUSE
         window.addEventListener("mousedown", (e) => {
             if (jogoPausado || painelAdmAtivo || jogador.pilotando || dentroDaCasa) return;
 
-            // Verifica se clicou no Baú do Tesouro
-            if(bauTesouroUnico && !bauTesouroUnico.aberto) {
-                let distBau = Math.hypot(jogador.x - bauTesouroUnico.x, jogador.y - bauTesouroUnico.y);
-                if(distBau < 50 && temChaveTesouro) {
-                    bauTesouroUnico.aberto = true;
-                    temChaveTesouro = false;
-                    // Recompensa do tesouro
-                    let recompensa = {
-                        madeira: 100 + Math.floor(Math.random() * 80),
-                        agua: 10 + Math.floor(Math.random() * 10),
-                        comida: 10 + Math.floor(Math.random() * 10)
-                    };
-                    jogador.inventario.madeira += recompensa.madeira;
-                    jogador.inventario.agua += recompensa.agua;
-                    jogador.inventario.comida += recompensa.comida;
-                    dispararAlertaVisual(`🎉 TESOURO ENCONTRADO! +${recompensa.madeira} Madeiras, +${recompensa.agua} Água, +${recompensa.comida} Comida!`, "#f1c40f");
-                    atualizarHUD();
-                    return;
-                }
-            }
-
-            // Machado ativo extraindo árvores
+            // Machado
             if(slotSelecionado === 0) {
                 arvores.forEach(arv => {
                     if(arv.viva && Math.hypot(jogador.x - arv.x, jogador.y - arv.y) < 70) {
@@ -2255,7 +2791,8 @@
                             
                             if(arv.vida <= 0) {
                                 arv.viva = false;
-                                let madeiraGanha = Math.floor(rendimento * 5);
+                                // Drop de 1 a 3 madeiras por árvore
+                                let madeiraGanha = Math.floor(1 + Math.random() * 3) * jogador.bonusColeta;
                                 jogador.inventario.madeira += madeiraGanha;
                                 dispararAlertaVisual(`Tronco cortado! +${madeiraGanha} Madeiras.`);
                                 atualizarHUD();
@@ -2266,7 +2803,6 @@
                     }
                 });
 
-                // Colheita de frutas
                 moitasFrutas.forEach(m => {
                     if(m.temFruta && Math.hypot(jogador.x - m.x, jogador.y - m.y) < 55) {
                         m.temFruta = false;
@@ -2279,9 +2815,10 @@
                 });
             }
 
-            // Espada em combate
-            if(slotSelecionado === 3 && jogador.temEspada) {
-                inimigos.forEach(inim => {
+            // Espada - Só funciona em terra, não no barco
+            if(slotSelecionado === 3 && jogador.temEspada && !jogador.pilotando) {
+                let todosInimigos = [...inimigos, ...piratas];
+                todosInimigos.forEach(inim => {
                     if(Math.hypot(jogador.x - inim.x, jogador.y - inim.y) < 75) {
                         let danoBase = (25 + (jogador.espadaNivel * 12)) * jogador.bonusDano;
                         inim.vida -= danoBase;
@@ -2291,7 +2828,7 @@
                 });
             }
 
-            // Disparo com Arco
+            // Arco - Funciona em terra e no barco
             if(slotSelecionado === 4 && jogador.temArco) {
                 let ang = Math.atan2(mouse.mundoY - jogador.y, mouse.mundoX - jogador.x);
                 flechas.push({
@@ -2299,10 +2836,10 @@
                     vx: Math.cos(ang) * 9, vy: Math.sin(ang) * 9,
                     alcance: 75
                 });
+                dispararAlertaVisual("🏹 Flecha disparada!", "#f1c40f");
             }
         });
 
-        // Captura do mouse
         window.addEventListener("mousemove", (e) => {
             const rect = canvas.getBoundingClientRect();
             mouse.x = e.clientX - rect.left;
@@ -2323,17 +2860,22 @@
         }
 
         function reiniciarJogoCompleto() {
-            alert("Sua jornada terminou nas selvas de Pernambuco Colonial! Iniciando nova expedição...");
+            alert("Sua jornada terminou! Iniciando nova expedição...");
             jogador.vida = 100; jogador.fome = 100; jogador.sede = 100;
             jogador.inventario = { madeira: 15, agua: 1, comida: 1, chave: 0 };
-            jogador.machadoNivel = 1; jogador.machadoDurabilidade = 100;
+            jogador.machadoNivel = 1; jogador.machadoDurabilidade = 110;
             jogador.temEspada = false; jogador.espadaNivel = 0; jogador.temArco = false;
             jogador.pilotando = false;
             jogador.invencivel = false;
-            barcoJogador.x = 750; barcoJogador.y = LINHA_DA_AGUA + 80; barcoJogador.vel = 0;
+            jogador.armaduraNivel = 0;
+            jogador.armaduraDurabilidade = 0;
+            armaduraBarContainer.style.display = "none";
+            barcoJogador.x = 750; barcoJogador.y = LINHA_DA_AGUA + 60;
+            barcoJogador.vel = 0;
             jogador.x = 500; jogador.y = 750;
             document.getElementById("status-espada").innerText = "Não";
             document.getElementById("status-arco").innerText = "Não";
+            document.getElementById("txt-armadura-hud").innerText = "Nenhuma";
             aliados = []; flechas = [];
             tempoParaGuerra = 300; emGuerra = false;
             temChaveTesouro = false;
@@ -2342,11 +2884,18 @@
             construcaoItens = { parede: 0, teto: 0, porta: 0, janela: 0 };
             dentroDaCasa = false;
             document.getElementById("casa-interna").style.display = "none";
+            nivelIlha = 1;
+            piratas = [];
+            bauTesouroAberto = false;
+            bauPirataAberto = false;
+            document.getElementById("bau-tesouro-menu").style.display = "none";
+            document.getElementById("bau-pirata-menu").style.display = "none";
             inicializarAmbiente();
             atualizarHUD();
+            atualizarNivelLoja();
         }
 
-        // MOTOR DE DESENHO GRÁFICO
+        // RENDERIZAÇÃO
         function renderizarJogo() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -2404,22 +2953,19 @@
             ctx.fillStyle = "#d4a373";
             ctx.font = "bold 10px Arial"; ctx.fillText("🔨 FERREIRO", ferreiro.x - 28, ferreiro.y + 5);
 
-            // CASA CONSTRUÍDA
+            // Casa
             if(casaConstruida) {
                 ctx.fillStyle = "#5c3d24";
                 ctx.fillRect(casaPosicao.x - 40, casaPosicao.y - 35, 80, 70);
                 ctx.fillStyle = "#4a2f1a";
                 ctx.fillRect(casaPosicao.x - 30, casaPosicao.y - 25, 60, 50);
-                // Porta
                 ctx.fillStyle = "#3d2412";
                 ctx.fillRect(casaPosicao.x - 8, casaPosicao.y + 10, 16, 25);
-                // Janelas
                 if(construcaoItens.janela >= 1) {
                     ctx.fillStyle = "#87CEEB";
                     ctx.fillRect(casaPosicao.x - 25, casaPosicao.y - 10, 12, 12);
                     ctx.fillRect(casaPosicao.x + 13, casaPosicao.y - 10, 12, 12);
                 }
-                // Teto
                 if(construcaoItens.teto >= 1) {
                     ctx.fillStyle = "#8B4513";
                     ctx.beginPath();
@@ -2502,13 +3048,31 @@
                 ctx.fillText("💰", bauTesouroUnico.x - 8, bauTesouroUnico.y + 6);
             }
 
-            // Saques no chão
+            // Saques
             saquesChao.forEach(s => {
                 ctx.fillStyle = "#8B6914";
                 ctx.fillRect(s.x - 5, s.y - 3, 10, 6);
                 ctx.fillStyle = "#f1c40f";
                 ctx.font = "8px Arial";
                 ctx.fillText("🪵", s.x - 4, s.y + 4);
+            });
+
+            // Piratas
+            piratas.forEach(p => {
+                ctx.fillStyle = "#2c1810";
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.raioColisao, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#000";
+                ctx.fillRect(p.x - 8, p.y - 16, 16, 4);
+                ctx.fillStyle = "#c0392b";
+                ctx.fillRect(p.x - 10, p.y - 20, 20, 6);
+                ctx.fillStyle = "#000";
+                ctx.beginPath(); ctx.arc(p.x + 6, p.y - 4, 4, 0, Math.PI*2); ctx.fill();
+                if(p.vida < p.maxVida) {
+                    ctx.fillStyle = "#000";
+                    ctx.fillRect(p.x - 20, p.y - 30, 40, 4);
+                    ctx.fillStyle = "#e74c3c";
+                    ctx.fillRect(p.x - 20, p.y - 30, (p.vida / p.maxVida) * 40, 4);
+                }
             });
 
             // Barco do Jogador
@@ -2545,7 +3109,7 @@
                 }
             });
 
-            // Jogador (SEM O CÍRCULO VERMELHO)
+            // Jogador
             if(!jogador.pilotando) {
                 ctx.fillStyle = "#27ae60";
                 ctx.beginPath(); ctx.arc(jogador.x, jogador.y, jogador.raio, 0, Math.PI*2); ctx.fill();
@@ -2562,7 +3126,7 @@
                 ctx.beginPath(); ctx.arc(p.x, p.y, p.raio, 0, Math.PI*2); ctx.fill();
             });
 
-            // Mira do mouse (SEM LINHA VERMELHA DO CORPO A CORPO)
+            // Mira do arco
             if(slotSelecionado === 4 && jogador.temArco && !jogador.pilotando) {
                 ctx.strokeStyle = "#ff4757"; ctx.lineWidth = 2;
                 ctx.beginPath(); ctx.arc(mouse.mundoX, mouse.mundoY, 8, 0, Math.PI*2); ctx.stroke();
@@ -2618,6 +3182,11 @@
             mctx.fillStyle = "#e67e22";
             mctx.fillRect(barcoJogador.x * fX - 3, barcoJogador.y * fY - 2, 6, 4);
 
+            piratas.forEach(p => {
+                mctx.fillStyle = "#c0392b";
+                mctx.fillRect(p.x * fX - 2, p.y * fY - 2, 4, 4);
+            });
+
             mctx.fillStyle = "#2ecc71";
             mctx.beginPath(); mctx.arc(jogador.x * fX, jogador.y * fY, 3, 0, Math.PI*2); mctx.fill();
 
@@ -2639,11 +3208,12 @@
         inicializarAmbiente();
         renderizarCenarioEstatico();
         
-        // Esconde a tela de seleção se já tiver personagem (para debug)
-        // Normalmente fica visível
         if(personagemSelecionado) {
             document.getElementById("personagem-select").style.display = "none";
         }
+        
+        // Inicializa o nível da loja
+        atualizarNivelLoja();
         
         loopJogo();
     </script>
