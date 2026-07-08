@@ -692,8 +692,8 @@
             padding: 30px;
             border-radius: 12px;
             border: 4px solid #6b533c;
-            min-width: 400px;
-            min-height: 350px;
+            min-width: 500px;
+            min-height: 400px;
             text-align: center;
             position: relative;
         }
@@ -922,6 +922,18 @@
         }
 
         #selecionar-local-casa button:hover { background: linear-gradient(#a36b40, #734727); }
+        
+        #jogador-casa {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #27ae60;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            transition: all 0.1s;
+            z-index: 5;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -1144,7 +1156,10 @@
         <div id="casa-interna">
             <div class="interior-casa">
                 <h3>🏠 Interior da Cabana</h3>
-                <p style="font-size:13px;color:#b5a48c;">Use as setas para se mover dentro da casa</p>
+                <p style="font-size:13px;color:#b5a48c;">Use WASD ou as setas para se mover dentro da casa</p>
+                
+                <!-- Jogador dentro da casa -->
+                <div id="jogador-casa" style="left:50%; top:50%; transform:translate(-50%,-50%);"></div>
                 
                 <div class="movimento-casa">
                     <button></button>
@@ -1213,7 +1228,7 @@
 
     <script>
         // =====================================================
-        // CÓDIGO JAVASCRIPT COMPLETO
+        // CÓDIGO JAVASCRIPT COMPLETO - CORRIGIDO
         // =====================================================
         
         const canvas = document.getElementById("gameCanvas");
@@ -1249,6 +1264,7 @@
         const msgContent = document.getElementById("msg-content");
         const alertaPirata = document.getElementById("alerta-pirata");
         const selecionarLocal = document.getElementById("selecionar-local-casa");
+        const jogadorCasa = document.getElementById("jogador-casa");
 
         // VARIÁVEIS
         let jogoPausado = false;
@@ -1277,7 +1293,7 @@
         let bauTesouroAberto = false;
         let bauPirataAberto = false;
         let mostrandoSelecaoLocal = false;
-        let posicaoCasa = { x: 0, y: 0 }; // Posição dentro da casa
+        let posicaoCasa = { x: 0, y: 0 };
 
         // CONTROLE ILHA INIMIGA
         let jogadorNaIlhaInimiga = false;
@@ -1293,11 +1309,9 @@
         let tempoSpawnPiratas = 0;
         let alertaPirataTimer = 0;
 
-        // ALERTAS - AGORA SÓ VÃO PARA AS MENSAGENS
         let customAlerts = [];
 
         function dispararAlertaVisual(msg, cor = "#2ecc71") {
-            // Não mostra mais alertas grandes no meio da tela
             adicionarMensagem(msg, cor);
         }
 
@@ -1353,12 +1367,10 @@
             bonusDano: 1,
             bonusDefesa: 1,
             bonusColeta: 1,
-            bonusCura: 1,
-            dentroCasaX: 0,
-            dentroCasaY: 0
+            bonusCura: 1
         };
 
-        // BARCO - SÓ ANDA NA AREIA
+        // BARCO - AGORA PODE ANDAR NA ÁGUA
         const barcoJogador = {
             x: 750,
             y: LINHA_DA_AGUA + 50,
@@ -1372,12 +1384,6 @@
             velRotacao: 0.04,
             raioColisao: 65
         };
-
-        // FUNÇÃO PARA VERIFICAR SE ESTÁ NA AREIA (PERTO DA PRAIA)
-        function estaNaAreia(x, y) {
-            // Verifica se está na faixa de areia (próximo à linha d'água)
-            return y >= LINHA_DA_AGUA - 20 && y <= LINHA_DA_AGUA + 160 && x < 1250;
-        }
 
         const feitor = { x: 450, y: 650, raio: 22 };
         const ferreiro = { x: 550, y: 700, raio: 22 };
@@ -1620,7 +1626,7 @@
         window.addEventListener("keydown", (e) => {
             if (painelAdmAtivo || document.activeElement.tagName === 'INPUT') return;
             
-            // Dentro da casa - controles especiais
+            // Dentro da casa - controles para mover o boneco
             if (dentroDaCasa) {
                 let chave = e.key.toLowerCase();
                 if (chave === 'w' || chave === 'arrowup') moverDentroCasa('cima');
@@ -1924,17 +1930,33 @@
         function moverDentroCasa(direcao) {
             if (!dentroDaCasa) return;
             
-            let passo = 30;
+            let passo = 20;
+            let limites = { x: 180, y: 130 };
+            
             switch(direcao) {
-                case 'cima': posicaoCasa.y -= passo; break;
-                case 'baixo': posicaoCasa.y += passo; break;
-                case 'esquerda': posicaoCasa.x -= passo; break;
-                case 'direita': posicaoCasa.x += passo; break;
+                case 'cima': posicaoCasa.y = Math.max(-limites.y, posicaoCasa.y - passo); break;
+                case 'baixo': posicaoCasa.y = Math.min(limites.y, posicaoCasa.y + passo); break;
+                case 'esquerda': posicaoCasa.x = Math.max(-limites.x, posicaoCasa.x - passo); break;
+                case 'direita': posicaoCasa.x = Math.min(limites.x, posicaoCasa.x + passo); break;
             }
             
-            // Limita dentro da casa
-            posicaoCasa.x = Math.max(-100, Math.min(100, posicaoCasa.x));
-            posicaoCasa.y = Math.max(-80, Math.min(80, posicaoCasa.y));
+            // Atualiza a posição do jogador dentro da casa
+            let elemento = document.getElementById("jogador-casa");
+            let container = elemento.parentElement;
+            let containerWidth = container.clientWidth;
+            let containerHeight = container.clientHeight;
+            
+            // Converte a posição relativa para pixels
+            let posX = containerWidth / 2 + posicaoCasa.x;
+            let posY = containerHeight / 2 + posicaoCasa.y;
+            
+            // Limita para não sair da tela
+            posX = Math.max(20, Math.min(containerWidth - 20, posX));
+            posY = Math.max(20, Math.min(containerHeight - 20, posY));
+            
+            elemento.style.left = posX + "px";
+            elemento.style.top = posY + "px";
+            elemento.style.transform = "translate(-50%, -50%)";
             
             document.getElementById("posicao-casa").innerText = 
                 `X: ${posicaoCasa.x} | Y: ${posicaoCasa.y}`;
@@ -1959,6 +1981,14 @@
                     document.getElementById("construcao-menu").style.display = "none";
                     adicionarMensagem("Entrou na cabana!", "#2ecc71");
                     document.getElementById("posicao-casa").innerText = "Centro";
+                    // Posiciona o jogador no centro
+                    setTimeout(() => {
+                        let elemento = document.getElementById("jogador-casa");
+                        let container = elemento.parentElement;
+                        elemento.style.left = (container.clientWidth / 2) + "px";
+                        elemento.style.top = (container.clientHeight / 2) + "px";
+                        elemento.style.transform = "translate(-50%, -50%)";
+                    }, 50);
                 } else {
                     adicionarMensagem("Aproxime-se da casa para entrar!", "#f1c40f");
                 }
@@ -2413,7 +2443,7 @@
                 }
             }
 
-            // BARCO - SÓ ANDA NA AREIA
+            // BARCO - REMOVI A RESTRIÇÃO DE AREA, AGORA PODE ANDAR EM TODO LUGAR
             if (jogador.pilotando) {
                 if (teclas['w'] || teclas['arrowup']) barcoJogador.vel = Math.min(barcoJogador.maxVel, barcoJogador.vel + barcoJogador.aceleracao);
                 else if (teclas['s'] || teclas['arrowdown']) barcoJogador.vel = Math.max(-barcoJogador.maxVel / 2, barcoJogador.vel - barcoJogador.aceleracao);
@@ -2428,9 +2458,9 @@
                 let proxBarcoX = barcoJogador.x + Math.cos(barcoJogador.angulo) * barcoJogador.vel;
                 let proxBarcoY = barcoJogador.y + Math.sin(barcoJogador.angulo) * barcoJogador.vel;
 
-                // BARCO SÓ ANDA NA AREIA (perto da praia)
-                if (!estaNaAreia(proxBarcoX, proxBarcoY) || proxBarcoX < 20 || proxBarcoX > MAPA_LARGURA - 20 || 
-                    proxBarcoY < 20 || proxBarcoY > MAPA_ALTURA - 20) {
+                // Barco pode andar em qualquer lugar (água, areia, etc)
+                // Só não pode passar dos limites do mapa
+                if (proxBarcoX < 20 || proxBarcoX > MAPA_LARGURA - 20 || proxBarcoY < 20 || proxBarcoY > MAPA_ALTURA - 20) {
                     barcoJogador.vel = -barcoJogador.vel * 0.4;
                 } else {
                     barcoJogador.x = proxBarcoX;
@@ -2493,7 +2523,7 @@
 
                 if (teclas['f']) {
                     let d = Math.hypot(jogador.x - barcoJogador.x, jogador.y - barcoJogador.y);
-                    if (d < 85 && estaNaAreia(jogador.x, jogador.y)) {
+                    if (d < 85) {
                         jogador.pilotando = true;
                         adicionarMensagem("Pilotando!", "#f1c40f");
                     }
@@ -3304,8 +3334,7 @@
 
             ctx.restore();
 
-            // ALERTAS - REMOVIDOS DA TELA (só mensagens)
-            // Os alertas grandes foram removidos, agora só as mensagens no canto
+            // ALERTAS - REMOVIDOS DA TELA
         }
 
         // MINIMAPA
