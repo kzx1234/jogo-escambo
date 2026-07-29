@@ -1020,6 +1020,25 @@
             text-align: center;
             font-weight: bold;
         }
+
+        /* RELÓGIO / DIA E NOITE */
+        #relogio {
+            position: absolute;
+            top: 15px;
+            right: 250px;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #6b533c;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #faedcd;
+            z-index: 10;
+            text-align: center;
+            min-width: 100px;
+        }
+        #relogio .hora { font-weight: bold; font-size: 14px; }
+        #relogio .periodo { font-size: 11px; color: #f1c40f; }
     </style>
 </head>
 <body>
@@ -1078,6 +1097,12 @@
 
         <div id="chave-tesouro-indicator">🗝️ Chave do Tesouro</div>
         <div id="alerta-pirata">🏴‍☠️ PIRATAS AVISTADOS!</div>
+
+        <!-- RELÓGIO -->
+        <div id="relogio">
+            <div class="hora" id="hora-atual">06:00</div>
+            <div class="periodo" id="periodo-dia">🌅 Amanhecer</div>
+        </div>
 
         <div id="mensagens-container">
             <div class="msg-header">
@@ -1240,6 +1265,11 @@
                 <p>Água: <span id="bau-casa-agua">0</span></p>
                 <p>Comida: <span id="bau-casa-comida">0</span></p>
             </div>
+            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:10px 0;">
+                <button class="bau-botao" style="background:#2ecc71;color:#000;" onclick="guardarNoBauCasa('madeira')">Guardar Madeira</button>
+                <button class="bau-botao" style="background:#3498db;color:#000;" onclick="guardarNoBauCasa('agua')">Guardar Água</button>
+                <button class="bau-botao" style="background:#e67e22;color:#000;" onclick="guardarNoBauCasa('comida')">Guardar Comida</button>
+            </div>
             <button class="bau-botao bau-botao-pegar" onclick="pegarBauCasa()">Pegar Tudo</button>
             <button class="bau-botao bau-botao-fechar" onclick="fecharBauCasa()">Fechar</button>
         </div>
@@ -1255,7 +1285,7 @@
         <div id="casa-interna">
             <div class="interior-casa">
                 <h3>🏠 Interior da Cabana</h3>
-                <p class="info-casa">Use WASD para se mover livremente pela casa</p>
+                <p class="info-casa">Use WASD para se mover | P para abrir o baú</p>
                 
                 <div class="jogador-casa-container">
                     <div id="jogador-casa"></div>
@@ -1272,7 +1302,7 @@
                 <button class="btn-acordar" id="btn-acordar" onclick="acordar()">🔆 Acordar</button>
                 
                 <div class="bau-casa" onclick="abrirBauCasa()">📦</div>
-                <p style="font-size:11px;color:#b5a48c;">Clique no baú para abrir</p>
+                <p style="font-size:11px;color:#b5a48c;">Clique no baú ou pressione P</p>
                 
                 <p style="font-size:12px;color:#faedcd;margin-top:8px;">Posição: <span id="posicao-casa">Centro</span></p>
                 
@@ -1323,6 +1353,7 @@
             <button onclick="admCheat('vida')">Imortalidade</button>
             <button onclick="admCheat('tp')">TP Ilha</button>
             <button onclick="admCheat('killall')" style="background:#c0392b;">Kill All</button>
+            <button onclick="admCheat('tempo')">Avançar Tempo</button>
             <button onclick="fecharPainelAdm()" style="background:#444;">Fechar</button>
         </div>
 
@@ -1373,6 +1404,8 @@
         const progressoSono = document.getElementById("progresso-sono");
         const barraSono = document.getElementById("barra-sono");
         const btnAcordar = document.getElementById("btn-acordar");
+        const horaAtualEl = document.getElementById("hora-atual");
+        const periodoDiaEl = document.getElementById("periodo-dia");
 
         // VARIÁVEIS
         let jogoPausado = false;
@@ -1406,7 +1439,11 @@
         let bauCasaAberto = false;
         let dormindo = false;
         let tempoSono = 0;
-        let tempoSonoMax = 420; // 7 segundos (60fps * 7)
+        let tempoSonoMax = 420; // 7 segundos
+
+        // SISTEMA DE DIA E NOITE
+        let tempoDia = 0; // 0 a 1440 (minutos do dia)
+        let velocidadeTempo = 0.5; // minutos por frame
 
         // CONTROLE ILHA INIMIGA
         let jogadorNaIlhaInimiga = false;
@@ -1483,7 +1520,7 @@
             bonusCura: 1
         };
 
-        // BARCO - SÓ ANDA NA AREIA E NÃO ENTRA NA ILHA INIMIGA
+        // BARCO - AGORA PODE NAVEGAR NO MAR
         const barcoJogador = {
             x: 750,
             y: LINHA_DA_AGUA + 50,
@@ -1497,14 +1534,6 @@
             velRotacao: 0.04,
             raioColisao: 65
         };
-
-        function podeNavegar(x, y) {
-            // Barco só pode andar na areia (perto da praia)
-            let naAreia = (y >= LINHA_DA_AGUA - 10 && y <= LINHA_DA_AGUA + 130 && x < 1250);
-            // Não pode entrar na ilha inimiga
-            let naIlhaInimiga = estaDentroDaIlhaInimiga(x, y);
-            return naAreia && !naIlhaInimiga;
-        }
 
         const feitor = { x: 450, y: 650, raio: 22 };
         const ferreiro = { x: 550, y: 700, raio: 22 };
@@ -1702,6 +1731,27 @@
             bgCtx.fill();
         }
 
+        // ATUALIZA RELÓGIO
+        function atualizarRelogio() {
+            let horas = Math.floor(tempoDia / 60);
+            let minutos = Math.floor(tempoDia % 60);
+            let horasStr = horas.toString().padStart(2, '0');
+            let minutosStr = minutos.toString().padStart(2, '0');
+            horaAtualEl.textContent = `${horasStr}:${minutosStr}`;
+            
+            let periodo = "";
+            let cor = "#f1c40f";
+            if (horas >= 5 && horas < 7) { periodo = "🌅 Amanhecer"; cor = "#f39c12"; }
+            else if (horas >= 7 && horas < 12) { periodo = "☀️ Manhã"; cor = "#f1c40f"; }
+            else if (horas >= 12 && horas < 17) { periodo = "🌤️ Tarde"; cor = "#e67e22"; }
+            else if (horas >= 17 && horas < 19) { periodo = "🌅 Entardecer"; cor = "#e74c3c"; }
+            else if (horas >= 19 && horas < 22) { periodo = "🌙 Noite"; cor = "#3498db"; }
+            else { periodo = "🌙 Madrugada"; cor = "#2c3e50"; }
+            
+            periodoDiaEl.textContent = periodo;
+            periodoDiaEl.style.color = cor;
+        }
+
         function alternarMinimapa() {
             minimapMinimizado = !minimapMinimizado;
             if (minimapMinimizado) {
@@ -1742,7 +1792,6 @@
             adicionarMensagem(`Você escolheu ${tipo}!`, "#f1c40f");
             jogador.vel = 4.5 * jogador.bonusVelocidade;
             
-            // Mostra dica da casa
             dicaCasa.style.display = "block";
             setTimeout(() => {
                 dicaCasa.style.display = "none";
@@ -1754,7 +1803,6 @@
         window.addEventListener("keydown", (e) => {
             if (painelAdmAtivo || document.activeElement.tagName === 'INPUT') return;
             
-            // Dentro da casa - controles para mover o boneco
             if (dentroDaCasa) {
                 let chave = e.key.toLowerCase();
                 if (chave === 'w' || chave === 'arrowup') moverDentroCasa('cima');
@@ -1764,6 +1812,10 @@
                 else if (chave === 'e' || chave === ' ') {
                     if (dormindo) acordar();
                     else dormirNaCama();
+                }
+                else if (chave === 'p') {
+                    abrirBauCasa();
+                    e.preventDefault();
                 }
                 return;
             }
@@ -1848,6 +1900,11 @@
                 inimigos.forEach(inim => inim.vida = 0);
                 piratas.forEach(p => p.vida = 0);
                 adicionarMensagem("Kill All!", "#2ecc71");
+            } else if (tipo === 'tempo') {
+                tempoDia += 120;
+                if (tempoDia >= 1440) tempoDia -= 1440;
+                adicionarMensagem("⏰ Tempo avançado!", "#f1c40f");
+                atualizarRelogio();
             }
         }
 
@@ -2072,7 +2129,6 @@
                 case 'direita': posicaoCasa.x = Math.min(limites.x, posicaoCasa.x + passo); break;
             }
             
-            // Atualiza a posição do jogador dentro da casa
             let container = document.querySelector('.interior-casa');
             let containerWidth = container.clientWidth;
             let containerHeight = container.clientHeight;
@@ -2113,7 +2169,6 @@
             btnAcordar.style.display = 'none';
             barraSono.style.width = '0%';
             
-            // Recupera vida, fome e sede
             jogador.vida = Math.min(100, jogador.vida + 30);
             jogador.fome = Math.min(100, jogador.fome + 20);
             jogador.sede = Math.min(100, jogador.sede + 20);
@@ -2132,7 +2187,6 @@
                     document.getElementById("construcao-menu").style.display = "none";
                     adicionarMensagem("Entrou na cabana!", "#2ecc71");
                     document.getElementById("posicao-casa").innerText = "Centro";
-                    // Posiciona o jogador no centro
                     setTimeout(() => {
                         let container = document.querySelector('.interior-casa');
                         jogadorCasa.style.left = (container.clientWidth / 2) + "px";
@@ -2161,7 +2215,7 @@
             adicionarMensagem("Saiu da cabana!", "#2ecc71");
         }
 
-        // BAU DA CASA
+        // BAU DA CASA - COM BOTÕES PARA GUARDAR
         function abrirBauCasa() {
             if (!dentroDaCasa) return;
             document.getElementById("bau-casa-menu").style.display = "block";
@@ -2176,12 +2230,30 @@
             bauCasaAberto = false;
         }
 
+        function guardarNoBauCasa(tipo) {
+            if (jogador.inventario[tipo] > 0) {
+                let qtd = prompt(`Quantos ${tipo}(s) guardar?`, "1");
+                qtd = parseInt(qtd) || 1;
+                if (qtd > 0 && jogador.inventario[tipo] >= qtd) {
+                    jogador.inventario[tipo] -= qtd;
+                    bauCasaItens[tipo] = (bauCasaItens[tipo] || 0) + qtd;
+                    adicionarMensagem(`📦 ${qtd} ${tipo}(s) guardado(s) no baú da casa!`, "#d4a373");
+                    document.getElementById(`bau-casa-${tipo}`).innerText = bauCasaItens[tipo];
+                    atualizarHUD();
+                } else {
+                    adicionarMensagem(`Você não tem ${qtd} ${tipo}(s)!`, "#e74c3c");
+                }
+            } else {
+                adicionarMensagem(`Você não tem ${tipo}!`, "#e74c3c");
+            }
+        }
+
         function pegarBauCasa() {
             if (bauCasaItens.madeira > 0 || bauCasaItens.agua > 0 || bauCasaItens.comida > 0) {
                 jogador.inventario.madeira += bauCasaItens.madeira;
                 jogador.inventario.agua += bauCasaItens.agua;
                 jogador.inventario.comida += bauCasaItens.comida;
-                adicionarMensagem(`📦 Você pegou do baú da casa!`, "#d4a373");
+                adicionarMensagem(`📦 Você pegou tudo do baú da casa!`, "#d4a373");
                 bauCasaItens = { madeira: 0, agua: 0, comida: 0 };
                 document.getElementById("bau-casa-madeira").innerText = "0";
                 document.getElementById("bau-casa-agua").innerText = "0";
@@ -2569,8 +2641,13 @@
                     acordar();
                     adicionarMensagem("😴 Você dormiu profundamente e recuperou todas as suas forças!", "#2ecc71");
                 }
-                return; // Pausa o jogo enquanto dorme
+                return;
             }
+
+            // ATUALIZA DIA E NOITE
+            tempoDia += velocidadeTempo;
+            if (tempoDia >= 1440) tempoDia -= 1440;
+            atualizarRelogio();
 
             tempoDecorrido++;
             contadorOndasMar += 0.04;
@@ -2644,7 +2721,7 @@
                 }
             }
 
-            // BARCO - SÓ ANDA NA AREIA E NÃO ENTRA NA ILHA INIMIGA
+            // BARCO - AGORA PODE NAVEGAR NO MAR
             if (jogador.pilotando) {
                 if (teclas['w'] || teclas['arrowup']) barcoJogador.vel = Math.min(barcoJogador.maxVel, barcoJogador.vel + barcoJogador.aceleracao);
                 else if (teclas['s'] || teclas['arrowdown']) barcoJogador.vel = Math.max(-barcoJogador.maxVel / 2, barcoJogador.vel - barcoJogador.aceleracao);
@@ -2659,8 +2736,9 @@
                 let proxBarcoX = barcoJogador.x + Math.cos(barcoJogador.angulo) * barcoJogador.vel;
                 let proxBarcoY = barcoJogador.y + Math.sin(barcoJogador.angulo) * barcoJogador.vel;
 
-                // Verifica se pode navegar (areia e não ilha inimiga)
-                if (!podeNavegar(proxBarcoX, proxBarcoY)) {
+                // Barco pode navegar em todo o mapa, mas não pode entrar na ilha inimiga
+                if (estaDentroDaIlhaInimiga(proxBarcoX, proxBarcoY) || proxBarcoX < 20 || proxBarcoX > MAPA_LARGURA - 20 || 
+                    proxBarcoY < 20 || proxBarcoY > MAPA_ALTURA - 20) {
                     barcoJogador.vel = -barcoJogador.vel * 0.4;
                 } else {
                     barcoJogador.x = proxBarcoX;
@@ -2723,11 +2801,9 @@
 
                 if (teclas['f']) {
                     let d = Math.hypot(jogador.x - barcoJogador.x, jogador.y - barcoJogador.y);
-                    if (d < 85 && podeNavegar(jogador.x, jogador.y)) {
+                    if (d < 85) {
                         jogador.pilotando = true;
                         adicionarMensagem("Pilotando!", "#f1c40f");
-                    } else if (d < 85) {
-                        adicionarMensagem("Você só pode pilotar o barco na praia!", "#f1c40f");
                     }
                     teclas['f'] = false;
                 }
@@ -2766,7 +2842,6 @@
                 if (teclas['e']) { abrirLoja(); teclas['e'] = false; }
             }
 
-            // Mostra dica da casa se estiver perto de onde pode construir
             if (casaPosicao && Math.hypot(jogador.x - casaPosicao.x, jogador.y - casaPosicao.y) < 150 && !dentroDaCasa) {
                 dicaCasa.style.display = "block";
             } else if (!dentroDaCasa) {
@@ -2848,7 +2923,6 @@
                     p.angulo += Math.PI * 0.5;
                 }
 
-                // Piratas atiram flechas
                 if (distJogador < 400 && distJogador > 50) {
                     p.tempoTiro--;
                     if (p.tempoTiro <= 0) {
@@ -3211,10 +3285,12 @@
             progressoSono.style.display = 'none';
             btnAcordar.style.display = 'none';
             barraSono.style.width = '0%';
+            tempoDia = 360; // 6:00 da manhã
             
             inicializarAmbiente();
             atualizarHUD();
             atualizarNivelLoja();
+            atualizarRelogio();
             
             adicionarMensagem("🔄 Jogo reiniciado! Escolha seu personagem.", "#f1c40f");
             dicaCasa.style.display = "block";
@@ -3223,7 +3299,7 @@
             }, 5000);
         }
 
-        // RENDERIZAÇÃO
+        // RENDERIZAÇÃO - COM EFEITO DE DIA E NOITE
         function renderizarJogo() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -3235,8 +3311,23 @@
 
             ctx.drawImage(bgCanvas, 0, 0);
 
+            // EFEITO DE DIA E NOITE
+            let horas = tempoDia / 60;
+            let intensidadeNoite = 0;
+            
+            if (horas < 5 || horas > 19) {
+                intensidadeNoite = 0.7;
+            } else if (horas < 7) {
+                intensidadeNoite = 0.7 - (horas - 5) / 2 * 0.7;
+            } else if (horas > 17) {
+                intensidadeNoite = (horas - 17) / 2 * 0.7;
+            }
+            
+            ctx.fillStyle = `rgba(0, 0, 20, ${intensidadeNoite})`;
+            ctx.fillRect(0, 0, MAPA_LARGURA, MAPA_ALTURA);
+
             // ONDAS
-            ctx.strokeStyle = "rgba(255,255,255,0.08)";
+            ctx.strokeStyle = `rgba(255,255,255,${0.08 - intensidadeNoite * 0.05})`;
             ctx.lineWidth = 2;
             for (let y = 60; y < LINHA_DA_AGUA; y += 70) {
                 ctx.beginPath();
@@ -3249,7 +3340,8 @@
             }
 
             detalhesPraia.forEach(d => {
-                ctx.fillStyle = `rgba(230, 215, 160, ${d.opacidade})`;
+                let opacidade = d.opacidade * (1 - intensidadeNoite * 0.5);
+                ctx.fillStyle = `rgba(230, 215, 160, ${opacidade})`;
                 ctx.beginPath();
                 ctx.arc(d.x, d.y, d.raio, 0, Math.PI * 2);
                 ctx.fill();
@@ -3313,7 +3405,8 @@
                 }
                 
                 if (construcaoItens.janela >= 1) {
-                    ctx.fillStyle = "#87CEEB";
+                    let janelaCor = intensidadeNoite > 0.3 ? "#f1c40f" : "#87CEEB";
+                    ctx.fillStyle = janelaCor;
                     ctx.fillRect(casaPosicao.x - 25, casaPosicao.y - 10, 12, 12);
                     ctx.fillRect(casaPosicao.x + 13, casaPosicao.y - 10, 12, 12);
                 }
@@ -3621,6 +3714,8 @@
         renderizarCenarioEstatico();
 
         document.getElementById("personagem-select").style.display = "flex";
+        tempoDia = 360; // 6:00 da manhã
+        atualizarRelogio();
 
         atualizarNivelLoja();
         loopJogo();
