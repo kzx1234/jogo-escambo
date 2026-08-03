@@ -106,6 +106,37 @@
         #fill-vida { background: linear-gradient(90deg, #c0392b, #e74c3c); }
         #fill-armadura { background: linear-gradient(90deg, #6b4c3b, #d4a373); }
 
+        /* ALERTA DE GUERRA NO HUD */
+        #alerta-guerra-hud {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(140, 35, 24, 0.85);
+            border: 1px solid #ff4757;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 10px;
+            color: #fff;
+            font-weight: bold;
+            margin-top: 3px;
+            width: 180px;
+            transition: all 0.3s;
+        }
+        #alerta-guerra-hud .tempo-guerra-hud {
+            color: #ff4757;
+            font-size: 12px;
+        }
+        #alerta-guerra-hud .status-guerra-hud {
+            color: #f1c40f;
+        }
+        #alerta-guerra-hud.ativo {
+            animation: piscaGuerra 0.8s infinite alternate;
+        }
+        @keyframes piscaGuerra {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+
         #minimap-header {
             display: flex;
             justify-content: space-between;
@@ -392,18 +423,7 @@
         #adm-panel button:hover { background: #4a779a; }
 
         #alerta-guerra {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(140, 35, 24, 0.95);
-            border: 2px solid #ff4757;
-            padding: 10px;
-            border-radius: 6px;
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            width: 210px;
-            z-index: 10;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            display: none;
         }
 
         #btn-antecipar {
@@ -455,23 +475,7 @@
         }
 
         #timer-invasao-display {
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: 'Georgia', serif;
-            font-size: 28px;
-            color: #ff4757;
-            font-weight: bold;
-            text-shadow: 3px 3px 6px #000;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 10px 30px;
-            border-radius: 10px;
-            border: 3px solid #ff4757;
             display: none;
-            z-index: 100;
-            text-align: center;
-            box-shadow: 0 0 20px #ff4757;
         }
 
         #personagem-select {
@@ -1237,6 +1241,14 @@
                 <span>Armadura:</span>
                 <div class="bar"><div id="fill-armadura" class="fill"></div></div>
             </div>
+            
+            <!-- ALERTA DE GUERRA NO HUD -->
+            <div id="alerta-guerra-hud">
+                <span>⚔️</span>
+                <span>Invasão: <span class="tempo-guerra-hud" id="tempo-guerra-hud">05:00</span></span>
+                <span class="status-guerra-hud" id="status-guerra-hud">● Baixa</span>
+            </div>
+
             <div class="hud-info">
                 🪵 Madeira: <span id="txt-madeira-livre">0</span><br>
                 Machado: <span id="txt-machado">Nível 1</span> (<span id="dur-machado">100</span>%)<br>
@@ -1252,13 +1264,6 @@
             <div id="minimap-container">
                 <canvas id="minimap-canvas" width="190" height="110"></canvas>
             </div>
-        </div>
-
-        <div id="alerta-guerra">
-            <b style="font-size:13px; color:#fff;">⚔️ Tensionamento</b><br>
-            Tempo: <span id="tempo-guerra">05:00</span><br>
-            Ameaça: <span id="nivel-ameaca" style="color:#f1c40f; font-weight:bold;">Baixa</span>
-            <button id="btn-antecipar" onclick="anteciparGuerra()">Iniciar Guerra!</button>
         </div>
 
         <div id="dica-contexto">Aperte ESPAÇO</div>
@@ -1499,8 +1504,6 @@
         const mochilaMenu = document.getElementById("mochila-menu");
         const admPanel = document.getElementById("adm-panel");
         const authModal = document.getElementById("adm-auth-modal");
-        const tempoGuerraTxt = document.getElementById("tempo-guerra");
-        const nivelAmeacaTxt = document.getElementById("nivel-ameaca");
         const btnAntecipar = document.getElementById("btn-antecipar");
         const displayTimerInvasao = document.getElementById("timer-invasao-display");
         const minimapContainer = document.getElementById("minimap-container");
@@ -1518,6 +1521,9 @@
         const periodoDiaEl = document.getElementById("periodo-dia");
         const instBody = document.getElementById("inst-body");
         const indicadorBarco = document.getElementById("indicador-barco");
+        const alertaGuerraHud = document.getElementById("alerta-guerra-hud");
+        const tempoGuerraHud = document.getElementById("tempo-guerra-hud");
+        const statusGuerraHud = document.getElementById("status-guerra-hud");
 
         // VARIÁVEIS
         let jogoPausado = false;
@@ -1646,7 +1652,7 @@
             bonusCura: 1
         };
 
-        // ===================== BARCO =====================
+        // ===================== BARCO - RENASCE AO LADO DA ILHA =====================
         const barcoJogador = {
             x: 750,
             y: LINHA_DA_AGUA + 60,
@@ -1660,6 +1666,9 @@
             velRotacao: 0.04,
             raioColisao: 65
         };
+
+        // POSIÇÃO INICIAL DO BARCO (AO LADO DA ILHA, NA ÁGUA)
+        const POSICAO_BARCO_PADRAO = { x: 750, y: LINHA_DA_AGUA + 60 };
 
         // ===================== FUNÇÕES AUXILIARES =====================
         function estaDentroDaIlhaInimiga(x, y) {
@@ -1681,6 +1690,17 @@
 
         function estaNaIlhaPrincipal(x, y) {
             return x < 1200 && y >= LINHA_DA_AGUA + 20;
+        }
+
+        // VERIFICA SE O BARCO PODE NAVEGAR (NÃO ENTRA NA ILHA PRINCIPAL)
+        function podeNavegar(x, y) {
+            // Não pode entrar na ilha principal (terra firme)
+            if (estaNaIlhaPrincipal(x, y)) return false;
+            // Não pode entrar na ilha inimiga
+            if (estaDentroDaIlhaInimiga(x, y)) return false;
+            // Não pode sair dos limites do mapa
+            if (x < 20 || x > MAPA_LARGURA - 20 || y < 20 || y > MAPA_ALTURA - 20) return false;
+            return true;
         }
 
         const feitor = { x: 450, y: 650, raio: 22 };
@@ -1921,6 +1941,39 @@
             setTimeout(() => dicaCasa.style.display = "none", 5000);
         }
 
+        // ===================== ATUALIZAR ALERTA DE GUERRA =====================
+        function atualizarAlertaGuerra() {
+            if (emGuerra) {
+                alertaGuerraHud.classList.add('ativo');
+                tempoGuerraHud.textContent = "⚔️ ATIVO!";
+                statusGuerraHud.textContent = "● GUERRA!";
+                statusGuerraHud.style.color = "#ff4757";
+                return;
+            }
+            
+            let m = Math.floor(tempoParaGuerra / 60);
+            let s = Math.floor(tempoParaGuerra % 60);
+            tempoGuerraHud.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            
+            if (tempoParaGuerra < 60) {
+                alertaGuerraHud.classList.add('ativo');
+                statusGuerraHud.textContent = "● IMINENTE!";
+                statusGuerraHud.style.color = "#ff4757";
+            } else if (tempoParaGuerra < 120) {
+                alertaGuerraHud.classList.add('ativo');
+                statusGuerraHud.textContent = "● ALTA";
+                statusGuerraHud.style.color = "#e67e22";
+            } else if (tempoParaGuerra < 180) {
+                alertaGuerraHud.classList.remove('ativo');
+                statusGuerraHud.textContent = "● Média";
+                statusGuerraHud.style.color = "#f1c40f";
+            } else {
+                alertaGuerraHud.classList.remove('ativo');
+                statusGuerraHud.textContent = "● Baixa";
+                statusGuerraHud.style.color = "#2ecc71";
+            }
+        }
+
         // ===================== SISTEMA DE SALVAMENTO =====================
         function salvarJogo() {
             try {
@@ -2005,6 +2058,14 @@
                 document.getElementById("personagem-select").style.display = "none";
                 if (personagemSelecionado) jogador.vel = 4.5 * jogador.bonusVelocidade;
                 
+                // Reset do barco para posição padrão se estiver em local inválido
+                if (!podeNavegar(barcoJogador.x, barcoJogador.y)) {
+                    barcoJogador.x = POSICAO_BARCO_PADRAO.x;
+                    barcoJogador.y = POSICAO_BARCO_PADRAO.y;
+                    barcoJogador.vel = 0;
+                    barcoJogador.angulo = 0;
+                }
+                
                 atualizarHUD();
                 atualizarRelogio();
                 atualizarNivelLoja();
@@ -2068,6 +2129,7 @@
                     // TENTAR ENTRAR NO BARCO
                     if (distBarco < 85) {
                         jogador.pilotando = true;
+                        // Sincroniza a posição do jogador com o barco
                         jogador.x = barcoJogador.x;
                         jogador.y = barcoJogador.y;
                         adicionarMensagem("🚢 Você entrou no barco! Use WASD para navegar.", "#f1c40f");
@@ -2078,10 +2140,18 @@
                         setTimeout(() => { indicadorBarco.style.display = "none"; }, 3000);
                     }
                 } else {
-                    // SAIR DO BARCO
+                    // SAIR DO BARCO - POSICIONA AO LADO DO BARCO
                     jogador.pilotando = false;
-                    jogador.x = barcoJogador.x - Math.cos(barcoJogador.angulo) * 50;
-                    jogador.y = barcoJogador.y - Math.sin(barcoJogador.angulo) * 50;
+                    // Posiciona o jogador ao lado do barco (na direção oposta da proa)
+                    let anguloSaida = barcoJogador.angulo + Math.PI / 2;
+                    jogador.x = barcoJogador.x + Math.cos(anguloSaida) * 60;
+                    jogador.y = barcoJogador.y + Math.sin(anguloSaida) * 60;
+                    // Garante que o jogador fique em terra firme ou na praia
+                    if (!estaNaIlhaPrincipal(jogador.x, jogador.y) && !estaDentroDaIlhaInimiga(jogador.x, jogador.y)) {
+                        // Se estiver na água, coloca na borda
+                        jogador.x = barcoJogador.x - Math.cos(barcoJogador.angulo) * 50;
+                        jogador.y = barcoJogador.y - Math.sin(barcoJogador.angulo) * 50;
+                    }
                     adicionarMensagem("🚢 Você desembarcou!", "#2ecc71");
                 }
             }
@@ -2806,6 +2876,9 @@
             document.getElementById("qtd-comida").innerText = jogador.inventario.comida;
 
             chaveIndicator.style.display = temChaveTesouro ? "block" : "none";
+            
+            // Atualiza alerta de guerra
+            atualizarAlertaGuerra();
         }
 
         // ===================== LOOP PRINCIPAL =====================
@@ -2829,7 +2902,8 @@
             tempoDecorrido++;
             contadorOndasMar += 0.04;
 
-            // SPAWN PIRATAS            tempoSpawnPiratas++;
+            // SPAWN PIRATAS
+            tempoSpawnPiratas++;
             if (tempoSpawnPiratas > 800 && piratas.length < 6) {
                 spawnarPirata();
                 tempoSpawnPiratas = 0;
@@ -2851,16 +2925,7 @@
                     tempoParaGuerra = 300;
                     iniciarInvasaoCosta();
                 }
-                let m = Math.floor(tempoParaGuerra / 60);
-                let s = Math.floor(tempoParaGuerra % 60);
-                tempoGuerraTxt.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                if (tempoParaGuerra < 60) {
-                    nivelAmeacaTxt.innerText = "IMINENTE";
-                    nivelAmeacaTxt.style.color = "#ff4757";
-                    btnAntecipar.style.display = "block";
-                } else {
-                    btnAntecipar.style.display = "none";
-                }
+                atualizarAlertaGuerra();
             }
 
             // SOBREVIVÊNCIA
@@ -2908,13 +2973,12 @@
                 if (teclas['a'] || teclas['arrowleft']) barcoJogador.angulo -= barcoJogador.velRotacao;
                 if (teclas['d'] || teclas['arrowright']) barcoJogador.angulo += barcoJogador.velRotacao;
 
-                // MOVER O BARCO
+                // MOVER O BARCO - COM BARREIRA
                 let proxX = barcoJogador.x + Math.cos(barcoJogador.angulo) * barcoJogador.vel;
                 let proxY = barcoJogador.y + Math.sin(barcoJogador.angulo) * barcoJogador.vel;
 
-                // BARREIRA: NÃO ENTRA NA ILHA INIMIGA
-                if (estaDentroDaIlhaInimiga(proxX, proxY) || proxX < 20 || proxX > MAPA_LARGURA - 20 || 
-                    proxY < 20 || proxY > MAPA_ALTURA - 20) {
+                // VERIFICA SE PODE NAVEGAR (NÃO ENTRA NA ILHA)
+                if (!podeNavegar(proxX, proxY)) {
                     barcoJogador.vel = -barcoJogador.vel * 0.4;
                 } else {
                     barcoJogador.x = proxX;
@@ -3410,8 +3474,9 @@
             armaduraBarContainer.style.display = "none";
             temChaveCasa = false;
             modoVoo = false;
-            barcoJogador.x = 750;
-            barcoJogador.y = LINHA_DA_AGUA + 60;
+            // RESETA O BARCO PARA A POSIÇÃO PADRÃO
+            barcoJogador.x = POSICAO_BARCO_PADRAO.x;
+            barcoJogador.y = POSICAO_BARCO_PADRAO.y;
             barcoJogador.vel = 0;
             barcoJogador.angulo = 0;
             jogador.x = 500;
