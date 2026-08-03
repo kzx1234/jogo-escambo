@@ -1103,6 +1103,24 @@
         #instrucoes .inst-body { font-size: 10px; line-height: 1.5; }
         #instrucoes .inst-body .tecla { color: #f1c40f; font-weight: bold; background: #2d1e13; padding: 1px 6px; border-radius: 3px; border: 1px solid #6b533c; }
         #instrucoes .inst-body .destaque { color: #2ecc71; }
+
+        #btn-salvar {
+            position: absolute;
+            bottom: 15px;
+            left: 80px;
+            background: rgba(46, 204, 113, 0.85);
+            border: 2px solid #2ecc71;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+        #btn-salvar:hover { background: rgba(46, 204, 113, 1); transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -1177,6 +1195,7 @@
                 <div><span class="tecla">Clique</span> Coletar / Atacar / Disparar</div>
                 <div style="margin-top:4px;color:#f1c40f;">🏠 Casa: <span class="destaque">Construa com R</span></div>
                 <div style="color:#b5a48c;">🔑 Chave da casa na loja (E)</div>
+                <div style="color:#2ecc71;">💾 Botão SALVAR no canto inferior</div>
             </div>
         </div>
 
@@ -1414,6 +1433,9 @@
         <!-- BOTÃO CHAMAR ALIADOS -->
         <button id="btn-chamar-aliados" onclick="chamarAliados()">📯 Chamar</button>
 
+        <!-- BOTÃO SALVAR -->
+        <button id="btn-salvar" onclick="salvarJogo()">💾 Salvar</button>
+
         <!-- HOTBAR -->
         <div id="hotbar">
             <div class="slot active" id="slot-0" onclick="selecionarSlot(0)"><span class="tecla">1</span><span class="nome">Machado</span><span class="qtd">-</span></div>
@@ -1450,7 +1472,7 @@
 
     <script>
         // =====================================================
-        // CÓDIGO JAVASCRIPT COMPLETO - CORRIGIDO
+        // CÓDIGO JAVASCRIPT COMPLETO
         // =====================================================
         
         const canvas = document.getElementById("gameCanvas");
@@ -1637,12 +1659,6 @@
             velRotacao: 0.04,
             raioColisao: 65
         };
-
-        function podeNavegar(x, y) {
-            if (estaDentroDaIlhaInimiga(x, y)) return false;
-            if (x < 1250 && y > LINHA_DA_AGUA + 20 && y < MAPA_ALTURA - 100) return false;
-            return true;
-        }
 
         const feitor = { x: 450, y: 650, raio: 22 };
         const ferreiro = { x: 550, y: 700, raio: 22 };
@@ -1906,7 +1922,143 @@
             }, 5000);
         }
 
-        // TECLADO
+        // ===================== SISTEMA DE SALVAMENTO =====================
+        function salvarJogo() {
+            try {
+                const saveData = {
+                    jogador: {
+                        x: jogador.x,
+                        y: jogador.y,
+                        vida: jogador.vida,
+                        fome: jogador.fome,
+                        sede: jogador.sede,
+                        inventario: jogador.inventario,
+                        machadoNivel: jogador.machadoNivel,
+                        machadoDurabilidade: jogador.machadoDurabilidade,
+                        temEspada: jogador.temEspada,
+                        espadaNivel: jogador.espadaNivel,
+                        temArco: jogador.temArco,
+                        temMochila: jogador.temMochila,
+                        armaduraNivel: jogador.armaduraNivel,
+                        armaduraDurabilidade: jogador.armaduraDurabilidade,
+                        armaduraMaxDurabilidade: jogador.armaduraMaxDurabilidade,
+                        bonusVelocidade: jogador.bonusVelocidade,
+                        bonusDano: jogador.bonusDano,
+                        bonusDefesa: jogador.bonusDefesa,
+                        bonusColeta: jogador.bonusColeta,
+                        bonusCura: jogador.bonusCura,
+                        pilotando: jogador.pilotando,
+                        invencivel: jogador.invencivel
+                    },
+                    barco: {
+                        x: barcoJogador.x,
+                        y: barcoJogador.y,
+                        angulo: barcoJogador.angulo,
+                        vel: barcoJogador.vel
+                    },
+                    estado: {
+                        tempoDecorrido: tempoDecorrido,
+                        tempoParaGuerra: tempoParaGuerra,
+                        emGuerra: emGuerra,
+                        nivelLoja: nivelLoja,
+                        nivelIlha: nivelIlha,
+                        tempoDia: tempoDia,
+                        personagemSelecionado: personagemSelecionado,
+                        temChaveTesouro: temChaveTesouro,
+                        temChaveCasa: temChaveCasa,
+                        casaConstruida: casaConstruida,
+                        casaPosicao: casaPosicao,
+                        construcaoItens: construcaoItens,
+                        bauComprado: bauComprado,
+                        bauCasaItens: bauCasaItens,
+                        bauArmazenamento: bauArmazenamento,
+                        aliados: aliados.map(al => ({ x: al.x, y: al.y, vida: al.vida })),
+                        piratas: piratas.map(p => ({ x: p.x, y: p.y, vida: p.vida, maxVida: p.maxVida }))
+                    }
+                };
+                
+                localStorage.setItem('pernambuco_save', JSON.stringify(saveData));
+                adicionarMensagem("💾 Jogo salvo com sucesso!", "#2ecc71");
+            } catch (e) {
+                adicionarMensagem("❌ Erro ao salvar o jogo!", "#e74c3c");
+                console.error(e);
+            }
+        }
+
+        function carregarJogo() {
+            try {
+                const saveData = localStorage.getItem('pernambuco_save');
+                if (!saveData) {
+                    adicionarMensagem("ℹ️ Nenhum save encontrado.", "#f1c40f");
+                    return false;
+                }
+                
+                const data = JSON.parse(saveData);
+                
+                // Carregar jogador
+                if (data.jogador) {
+                    Object.assign(jogador, data.jogador);
+                }
+                
+                // Carregar barco
+                if (data.barco) {
+                    Object.assign(barcoJogador, data.barco);
+                }
+                
+                // Carregar estado
+                if (data.estado) {
+                    tempoDecorrido = data.estado.tempoDecorrido || 0;
+                    tempoParaGuerra = data.estado.tempoParaGuerra || 300;
+                    emGuerra = data.estado.emGuerra || false;
+                    nivelLoja = data.estado.nivelLoja || 1;
+                    nivelIlha = data.estado.nivelIlha || 1;
+                    tempoDia = data.estado.tempoDia || 360;
+                    personagemSelecionado = data.estado.personagemSelecionado || null;
+                    temChaveTesouro = data.estado.temChaveTesouro || false;
+                    temChaveCasa = data.estado.temChaveCasa || false;
+                    casaConstruida = data.estado.casaConstruida || false;
+                    casaPosicao = data.estado.casaPosicao || null;
+                    if (data.estado.construcaoItens) Object.assign(construcaoItens, data.estado.construcaoItens);
+                    bauComprado = data.estado.bauComprado || false;
+                    if (data.estado.bauCasaItens) Object.assign(bauCasaItens, data.estado.bauCasaItens);
+                    if (data.estado.bauArmazenamento) Object.assign(bauArmazenamento, data.estado.bauArmazenamento);
+                    
+                    if (data.estado.aliados) {
+                        aliados = data.estado.aliados.map(al => ({ 
+                            ...al, 
+                            alvo: null, 
+                            cooldownAtaque: 0,
+                            anguloPatrulha: Math.random() * Math.PI * 2 
+                        }));
+                    }
+                }
+                
+                document.getElementById("item-chave-casa").style.display = temChaveCasa ? "none" : "flex";
+                document.getElementById("personagem-select").style.display = "none";
+                
+                if (personagemSelecionado) {
+                    jogador.vel = 4.5 * jogador.bonusVelocidade;
+                }
+                
+                atualizarHUD();
+                atualizarRelogio();
+                atualizarNivelLoja();
+                
+                adicionarMensagem("📂 Jogo carregado com sucesso!", "#2ecc71");
+                return true;
+            } catch (e) {
+                adicionarMensagem("❌ Erro ao carregar o jogo!", "#e74c3c");
+                console.error(e);
+                return false;
+            }
+        }
+
+        // Carregar automaticamente ao iniciar
+        window.addEventListener('load', () => {
+            carregarJogo();
+        });
+
+        // ===================== TECLADO =====================
         const teclas = {};
         window.addEventListener("keydown", (e) => {
             if (painelAdmAtivo || document.activeElement.tagName === 'INPUT') return;
@@ -1946,19 +2098,26 @@
                 selecionarSlot(parseInt(e.key) - 1);
             }
             
-            // F para pilotar o barco
+            // F para pilotar o barco (sem restrições)
             if (chave === 'f' && !dentroDaCasa) {
                 let distFerreiro = Math.hypot(jogador.x - ferreiro.x, jogador.y - ferreiro.y);
                 if (distFerreiro < ferreiro.raio + jogador.raio + 15) {
                     abrirFerreiro();
                 } else {
-                    // Tentar pilotar o barco
+                    // Tentar pilotar o barco - sem restrições de local
                     let distBarco = Math.hypot(jogador.x - barcoJogador.x, jogador.y - barcoJogador.y);
-                    if (distBarco < 85 && podeNavegar(jogador.x, jogador.y)) {
-                        jogador.pilotando = true;
-                        adicionarMensagem("Pilotando o barco!", "#f1c40f");
-                    } else if (distBarco < 85) {
-                        adicionarMensagem("Você só pode pilotar o barco na praia!", "#f1c40f");
+                    if (distBarco < 85) {
+                        if (!jogador.pilotando) {
+                            jogador.pilotando = true;
+                            adicionarMensagem("⛵ Pilotando o barco! (F para desembarcar)", "#f1c40f");
+                        } else {
+                            jogador.pilotando = false;
+                            jogador.x = barcoJogador.x - Math.cos(barcoJogador.angulo) * 50;
+                            jogador.y = barcoJogador.y - Math.sin(barcoJogador.angulo) * 50;
+                            adicionarMensagem("Desembarcou!", "#2ecc71");
+                        }
+                    } else {
+                        adicionarMensagem("Aproxime-se do barco para pilotar!", "#f1c40f");
                     }
                 }
             }
@@ -1969,7 +2128,7 @@
             teclas[chave] = false;
         });
 
-        // ADM
+        // ===================== ADM =====================
         function abrirPainelAdmAutenticar() {
             painelAdmAtivo = true;
             authModal.style.display = "block";
@@ -2057,7 +2216,7 @@
             }, 100);
         });
 
-        // MOCHILA
+        // ===================== MOCHILA =====================
         function alternarMochila() {
             if (menuEscambo.style.display === "block") return;
             if (dentroDaCasa) return;
@@ -2107,7 +2266,7 @@
             atualizarHUD();
         }
 
-        // LOJA
+        // ===================== LOJA =====================
         function abrirLoja() {
             mochilaAberta = false;
             mochilaMenu.style.display = "none";
@@ -2116,7 +2275,6 @@
 
         function fecharLoja() { menuEscambo.style.display = "none"; }
 
-        // COMPRAR CHAVE DA CASA
         function comprarChaveCasa() {
             if (jogador.inventario.madeira >= 15) {
                 if (jogador.inventario.chaveCasa >= 1) {
@@ -2134,7 +2292,7 @@
             }
         }
 
-        // CONSTRUÇÃO
+        // ===================== CONSTRUÇÃO =====================
         function alternarConstrucao() {
             if (menuEscambo.style.display === "block") return;
             if (dentroDaCasa) return;
@@ -2270,7 +2428,7 @@
             atualizarConstrucaoUI();
         }
 
-        // MOVIMENTO DENTRO DA CASA - ANDA NORMAL
+        // ===================== CASA INTERNA =====================
         function moverDentroCasa(direcao) {
             if (!dentroDaCasa || dormindo) return;
             
@@ -2366,7 +2524,7 @@
             adicionarMensagem("Saiu da cabana!", "#2ecc71");
         }
 
-        // BAU DA CASA
+        // ===================== BAU DA CASA =====================
         function abrirBauCasa() {
             if (!dentroDaCasa) {
                 adicionarMensagem("Você precisa estar dentro da casa para abrir o baú!", "#f1c40f");
@@ -2419,7 +2577,7 @@
             }
         }
 
-        // FERREIRO
+        // ===================== FERREIRO =====================
         function abrirFerreiro() {
             if (dentroDaCasa) return;
             document.getElementById("ferreiro-menu").style.display = "block";
@@ -2461,7 +2619,7 @@
             }
         }
 
-        // BAU
+        // ===================== BAU =====================
         function comprarBau() {
             if (jogador.inventario.madeira >= 30) {
                 jogador.inventario.madeira -= 30;
@@ -2544,7 +2702,7 @@
             }
         }
 
-        // BAU TESOURO
+        // ===================== BAU TESOURO E PIRATA =====================
         function abrirBauTesouro(recompensa) {
             tesouroRecompensa = recompensa;
             document.getElementById("tesouro-madeira").innerText = recompensa.madeira;
@@ -2568,7 +2726,6 @@
             atualizarHUD();
         }
 
-        // BAU PIRATA
         function abrirBauPirata(saque) {
             saquePirata = saque;
             document.getElementById("pirata-madeira").innerText = saque.madeira;
@@ -2592,7 +2749,7 @@
             atualizarHUD();
         }
 
-        // CHAMAR ALIADOS
+        // ===================== CHAMAR ALIADOS =====================
         function chamarAliados() {
             if (aliados.length === 0) {
                 adicionarMensagem("Sem aliados!", "#e74c3c");
@@ -2610,7 +2767,7 @@
             adicionarMensagem("📯 Aliados vindo!", "#3498db");
         }
 
-        // SLOT
+        // ===================== SLOT =====================
         function selecionarSlot(idx) {
             slotSelecionado = idx;
             const slots = document.querySelectorAll(".slot");
@@ -2620,7 +2777,7 @@
             });
         }
 
-        // COMPRAS
+        // ===================== COMPRAS =====================
         function comprarItem(tipo, custo) {
             if (jogador.inventario.madeira >= custo) {
                 jogador.inventario.madeira -= custo;
@@ -2781,7 +2938,7 @@
             }
         }
 
-        // ========== LOOP PRINCIPAL ==========
+        // ===================== LOOP PRINCIPAL =====================
         function atualizarMundo() {
             if (jogoPausado || painelAdmAtivo) return;
 
@@ -2869,7 +3026,7 @@
                 }
             }
 
-            // BARCO - COM PILOTO
+            // BARCO - PILOTANDO
             if (jogador.pilotando) {
                 if (teclas['w'] || teclas['arrowup']) barcoJogador.vel = Math.min(barcoJogador.maxVel, barcoJogador.vel + barcoJogador.aceleracao);
                 else if (teclas['s'] || teclas['arrowdown']) barcoJogador.vel = Math.max(-barcoJogador.maxVel / 2, barcoJogador.vel - barcoJogador.aceleracao);
@@ -2884,9 +3041,9 @@
                 let proxBarcoX = barcoJogador.x + Math.cos(barcoJogador.angulo) * barcoJogador.vel;
                 let proxBarcoY = barcoJogador.y + Math.sin(barcoJogador.angulo) * barcoJogador.vel;
 
-                // Pode navegar na areia e mar, mas não entra na ilha
-                if (estaDentroDaIlhaInimiga(proxBarcoX, proxBarcoY) || (proxBarcoX < 1250 && proxBarcoY > LINHA_DA_AGUA + 20 && proxBarcoY < MAPA_ALTURA - 100) ||
-                    proxBarcoX < 20 || proxBarcoX > MAPA_LARGURA - 20 || proxBarcoY < 20 || proxBarcoY > MAPA_ALTURA - 20) {
+                // Barco só não entra na ilha inimiga
+                if (estaDentroDaIlhaInimiga(proxBarcoX, proxBarcoY) || proxBarcoX < 20 || proxBarcoX > MAPA_LARGURA - 20 || 
+                    proxBarcoY < 20 || proxBarcoY > MAPA_ALTURA - 20) {
                     barcoJogador.vel = -barcoJogador.vel * 0.4;
                 } else {
                     barcoJogador.x = proxBarcoX;
@@ -2905,7 +3062,7 @@
                     teclas['f'] = false;
                 }
             } else {
-                // MOVIMENTO A PÉ - COM MODO VOO
+                // MOVIMENTO A PÉ
                 let dx = 0, dy = 0;
                 if (teclas['w'] || teclas['arrowup']) dy = -1;
                 if (teclas['s'] || teclas['arrowdown']) dy = 1;
@@ -2919,7 +3076,6 @@
                     let proxY = jogador.y + (dy / comp) * velAtual;
 
                     if (modoVoo) {
-                        // Modo voo - pode andar em qualquer lugar
                         jogador.x = Math.max(jogador.raio, Math.min(MAPA_LARGURA - jogador.raio, proxX));
                         jogador.y = Math.max(jogador.raio, Math.min(MAPA_ALTURA - jogador.raio, proxY));
                     } else {
@@ -2955,6 +3111,7 @@
                 }
             }
 
+            // ILHA INIMIGA
             let atualmenteNaIlhaInimiga = estaDentroDaIlhaInimiga(jogador.x, jogador.y);
             if (atualmenteNaIlhaInimiga && !jogador.pilotando) {
                 if (!jogadorNaIlhaInimiga) {
@@ -2992,6 +3149,7 @@
                 dicaCasa.style.display = "none";
             }
 
+            // ALIADOS
             aliados.forEach(al => {
                 if (!al.alvo || al.alvo.vida <= 0) {
                     let todosInimigos = [...inimigos];
@@ -3031,6 +3189,7 @@
                 if (al.cooldownAtaque > 0) al.cooldownAtaque--;
             });
 
+            // PIRATAS
             for (let i = piratas.length - 1; i >= 0; i--) {
                 let p = piratas[i];
                 if (p.vida <= 0) {
@@ -3275,6 +3434,7 @@
             }
         }
 
+        // ===================== MOUSE =====================
         window.addEventListener("mousedown", (e) => {
             if (jogoPausado || painelAdmAtivo || jogador.pilotando || dentroDaCasa) return;
 
@@ -3436,7 +3596,7 @@
             }, 5000);
         }
 
-        // RENDERIZAÇÃO
+        // ===================== RENDERIZAÇÃO =====================
         function renderizarJogo() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -3767,7 +3927,7 @@
             ctx.restore();
         }
 
-        // MINIMAPA
+        // ===================== MINIMAPA =====================
         function renderizarMinimapa() {
             if (minimapMinimizado) return;
             mctx.clearRect(0, 0, minimapCanvas.width, minimapCanvas.height);
@@ -3817,7 +3977,7 @@
             }
         }
 
-        // LOOP
+        // ===================== LOOP =====================
         function loopJogo() {
             atualizarMundo();
             renderizarJogo();
@@ -3825,7 +3985,7 @@
             requestAnimationFrame(loopJogo);
         }
 
-        // INICIALIZAÇÃO
+        // ===================== INICIALIZAÇÃO =====================
         inicializarAmbiente();
         renderizarCenarioEstatico();
 
