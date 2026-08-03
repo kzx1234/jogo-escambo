@@ -1441,6 +1441,7 @@
             <button onclick="admCheat('tp')">TP Ilha</button>
             <button onclick="admCheat('killall')" style="background:#c0392b;">Kill All</button>
             <button onclick="admCheat('tempo')">Avançar Tempo</button>
+            <button onclick="admCheat('fly')" style="background:#9b59b6;">🕊️ Modo Voo</button>
             <button onclick="fecharPainelAdm()" style="background:#444;">Fechar</button>
         </div>
 
@@ -1449,7 +1450,7 @@
 
     <script>
         // =====================================================
-        // CÓDIGO JAVASCRIPT COMPLETO
+        // CÓDIGO JAVASCRIPT COMPLETO - CORRIGIDO
         // =====================================================
         
         const canvas = document.getElementById("gameCanvas");
@@ -1530,10 +1531,11 @@
         let tempoSono = 0;
         let tempoSonoMax = 420;
         let instrucoesMinimizadas = false;
+        let modoVoo = false;
 
         // SISTEMA DE DIA E NOITE - MAIS LENTO
         let tempoDia = 360;
-        let velocidadeTempo = 0.15; // MAIS LENTO
+        let velocidadeTempo = 0.15;
 
         // CONTROLE ILHA INIMIGA
         let jogadorNaIlhaInimiga = false;
@@ -1621,7 +1623,7 @@
             bonusCura: 1
         };
 
-        // BARCO - SÓ NA AREIA E MAR (NÃO ENTRA NA ILHA)
+        // BARCO
         const barcoJogador = {
             x: 750,
             y: LINHA_DA_AGUA + 60,
@@ -1636,13 +1638,9 @@
             raioColisao: 65
         };
 
-        // VERIFICA SE ESTÁ NA AREIA OU MAR (NÃO NA ILHA)
         function podeNavegar(x, y) {
-            // Não pode entrar na ilha inimiga
             if (estaDentroDaIlhaInimiga(x, y)) return false;
-            // Não pode entrar na ilha principal (terra firme)
             if (x < 1250 && y > LINHA_DA_AGUA + 20 && y < MAPA_ALTURA - 100) return false;
-            // Pode navegar na areia e no mar
             return true;
         }
 
@@ -1842,7 +1840,6 @@
             bgCtx.fill();
         }
 
-        // ATUALIZA RELÓGIO
         function atualizarRelogio() {
             let horas = Math.floor(tempoDia / 60);
             let minutos = Math.floor(tempoDia % 60);
@@ -1942,16 +1939,27 @@
                     alternarConstrucao();
                     dicaCasa.style.display = "none";
                 } else {
-                    adicionarMensagem("🔑 Você precisa comprar a chave da casa na loja primeiro! (E)", "#f1c40f");
+                    adicionarMensagem("🔑 Compre a chave da casa na loja! (E)", "#f1c40f");
                 }
             }
             if (['1', '2', '3', '4', '5'].includes(e.key)) {
                 selecionarSlot(parseInt(e.key) - 1);
             }
+            
+            // F para pilotar o barco
             if (chave === 'f' && !dentroDaCasa) {
                 let distFerreiro = Math.hypot(jogador.x - ferreiro.x, jogador.y - ferreiro.y);
                 if (distFerreiro < ferreiro.raio + jogador.raio + 15) {
                     abrirFerreiro();
+                } else {
+                    // Tentar pilotar o barco
+                    let distBarco = Math.hypot(jogador.x - barcoJogador.x, jogador.y - barcoJogador.y);
+                    if (distBarco < 85 && podeNavegar(jogador.x, jogador.y)) {
+                        jogador.pilotando = true;
+                        adicionarMensagem("Pilotando o barco!", "#f1c40f");
+                    } else if (distBarco < 85) {
+                        adicionarMensagem("Você só pode pilotar o barco na praia!", "#f1c40f");
+                    }
                 }
             }
         });
@@ -2020,6 +2028,15 @@
                 if (tempoDia >= 1440) tempoDia -= 1440;
                 adicionarMensagem("⏰ Tempo avançado!", "#f1c40f");
                 atualizarRelogio();
+            } else if (tipo === 'fly') {
+                modoVoo = !modoVoo;
+                jogador.invencivel = modoVoo;
+                adicionarMensagem(`🕊️ Modo Voo: ${modoVoo ? 'ATIVADO' : 'DESATIVADO'}`, "#9b59b6");
+                if (modoVoo) {
+                    jogador.vel = 12;
+                } else {
+                    jogador.vel = 4.5 * jogador.bonusVelocidade;
+                }
             }
         }
 
@@ -2110,7 +2127,7 @@
                 jogador.inventario.chaveCasa = 1;
                 temChaveCasa = true;
                 document.getElementById("item-chave-casa").style.display = "none";
-                adicionarMensagem("🔑 Chave da casa comprada! Agora pressione R para construir!", "#f1c40f");
+                adicionarMensagem("🔑 Chave da casa comprada! Pressione R para construir!", "#f1c40f");
                 atualizarHUD();
             } else {
                 adicionarMensagem("Madeira insuficiente!", "#e74c3c");
@@ -2253,16 +2270,15 @@
             atualizarConstrucaoUI();
         }
 
-        // MOVIMENTO DENTRO DA CASA - ANDA NORMAL COMO NO MAPA
+        // MOVIMENTO DENTRO DA CASA - ANDA NORMAL
         function moverDentroCasa(direcao) {
             if (!dentroDaCasa || dormindo) return;
             
-            let passo = 3;
+            let passo = 4;
             let container = document.getElementById('jogador-casa-container');
             let containerWidth = container.clientWidth;
             let containerHeight = container.clientHeight;
             
-            // Calcula a posição atual em pixels
             let posX = parseFloat(jogadorCasa.style.left) || containerWidth / 2;
             let posY = parseFloat(jogadorCasa.style.top) || containerHeight / 2;
             
@@ -2277,7 +2293,6 @@
             jogadorCasa.style.top = posY + "px";
             jogadorCasa.style.transform = "translate(-50%, -50%)";
             
-            // Atualiza posição relativa para exibição
             let relX = Math.round(posX - containerWidth / 2);
             let relY = Math.round(posY - containerHeight / 2);
             document.getElementById("posicao-casa").innerText = `X: ${relX} | Y: ${relY}`;
@@ -2322,7 +2337,6 @@
                     document.getElementById("casa-interna").style.display = "flex";
                     document.getElementById("construcao-menu").style.display = "none";
                     adicionarMensagem("Entrou na cabana!", "#2ecc71");
-                    // Posiciona o jogador no centro
                     setTimeout(() => {
                         let container = document.getElementById('jogador-casa-container');
                         jogadorCasa.style.left = (container.clientWidth / 2) + "px";
@@ -2354,7 +2368,10 @@
 
         // BAU DA CASA
         function abrirBauCasa() {
-            if (!dentroDaCasa) return;
+            if (!dentroDaCasa) {
+                adicionarMensagem("Você precisa estar dentro da casa para abrir o baú!", "#f1c40f");
+                return;
+            }
             document.getElementById("bau-casa-menu").style.display = "block";
             document.getElementById("bau-casa-madeira").innerText = bauCasaItens.madeira;
             document.getElementById("bau-casa-agua").innerText = bauCasaItens.agua;
@@ -2852,7 +2869,7 @@
                 }
             }
 
-            // BARCO - SÓ NA AREIA E MAR
+            // BARCO - COM PILOTO
             if (jogador.pilotando) {
                 if (teclas['w'] || teclas['arrowup']) barcoJogador.vel = Math.min(barcoJogador.maxVel, barcoJogador.vel + barcoJogador.aceleracao);
                 else if (teclas['s'] || teclas['arrowdown']) barcoJogador.vel = Math.max(-barcoJogador.maxVel / 2, barcoJogador.vel - barcoJogador.aceleracao);
@@ -2867,8 +2884,9 @@
                 let proxBarcoX = barcoJogador.x + Math.cos(barcoJogador.angulo) * barcoJogador.vel;
                 let proxBarcoY = barcoJogador.y + Math.sin(barcoJogador.angulo) * barcoJogador.vel;
 
-                if (!podeNavegar(proxBarcoX, proxBarcoY) || proxBarcoX < 20 || proxBarcoX > MAPA_LARGURA - 20 || 
-                    proxBarcoY < 20 || proxBarcoY > MAPA_ALTURA - 20) {
+                // Pode navegar na areia e mar, mas não entra na ilha
+                if (estaDentroDaIlhaInimiga(proxBarcoX, proxBarcoY) || (proxBarcoX < 1250 && proxBarcoY > LINHA_DA_AGUA + 20 && proxBarcoY < MAPA_ALTURA - 100) ||
+                    proxBarcoX < 20 || proxBarcoX > MAPA_LARGURA - 20 || proxBarcoY < 20 || proxBarcoY > MAPA_ALTURA - 20) {
                     barcoJogador.vel = -barcoJogador.vel * 0.4;
                 } else {
                     barcoJogador.x = proxBarcoX;
@@ -2878,6 +2896,7 @@
                 jogador.x = barcoJogador.x;
                 jogador.y = barcoJogador.y;
 
+                // Desembarcar com F
                 if (teclas['f']) {
                     jogador.pilotando = false;
                     jogador.x = barcoJogador.x - Math.cos(barcoJogador.angulo) * 50;
@@ -2886,6 +2905,7 @@
                     teclas['f'] = false;
                 }
             } else {
+                // MOVIMENTO A PÉ - COM MODO VOO
                 let dx = 0, dy = 0;
                 if (teclas['w'] || teclas['arrowup']) dy = -1;
                 if (teclas['s'] || teclas['arrowdown']) dy = 1;
@@ -2894,20 +2914,27 @@
 
                 if (dx !== 0 || dy !== 0) {
                     let comp = Math.sqrt(dx * dx + dy * dy);
-                    let proxX = jogador.x + (dx / comp) * jogador.vel * jogador.bonusVelocidade;
-                    let proxY = jogador.y + (dy / comp) * jogador.vel * jogador.bonusVelocidade;
+                    let velAtual = modoVoo ? 12 : (jogador.vel * jogador.bonusVelocidade);
+                    let proxX = jogador.x + (dx / comp) * velAtual;
+                    let proxY = jogador.y + (dy / comp) * velAtual;
 
-                    let naTerraPrincipal = estaNaIlhaPrincipal(proxX, proxY);
-                    let naTerraInimiga = estaDentroDaIlhaInimiga(proxX, proxY);
-
-                    if (naTerraPrincipal || naTerraInimiga) {
+                    if (modoVoo) {
+                        // Modo voo - pode andar em qualquer lugar
                         jogador.x = Math.max(jogador.raio, Math.min(MAPA_LARGURA - jogador.raio, proxX));
                         jogador.y = Math.max(jogador.raio, Math.min(MAPA_ALTURA - jogador.raio, proxY));
                     } else {
-                        let distBarco = Math.hypot(jogador.x - barcoJogador.x, jogador.y - barcoJogador.y);
-                        if (distBarco < 100) {
-                            dicaContexto.innerText = "F para Pilotar";
-                            dicaContexto.style.display = "block";
+                        let naTerraPrincipal = estaNaIlhaPrincipal(proxX, proxY);
+                        let naTerraInimiga = estaDentroDaIlhaInimiga(proxX, proxY);
+
+                        if (naTerraPrincipal || naTerraInimiga) {
+                            jogador.x = Math.max(jogador.raio, Math.min(MAPA_LARGURA - jogador.raio, proxX));
+                            jogador.y = Math.max(jogador.raio, Math.min(MAPA_ALTURA - jogador.raio, proxY));
+                        } else {
+                            let distBarco = Math.hypot(jogador.x - barcoJogador.x, jogador.y - barcoJogador.y);
+                            if (distBarco < 100) {
+                                dicaContexto.innerText = "F para Pilotar";
+                                dicaContexto.style.display = "block";
+                            }
                         }
                     }
                 } else {
@@ -2925,15 +2952,6 @@
                     dicaContexto.innerText = "B - Baú";
                     dicaContexto.style.display = "block";
                     if (teclas['b']) { abrirBau(); teclas['b'] = false; }
-                }
-
-                if (teclas['f']) {
-                    let d = Math.hypot(jogador.x - barcoJogador.x, jogador.y - barcoJogador.y);
-                    if (d < 85 && podeNavegar(jogador.x, jogador.y)) {
-                        jogador.pilotando = true;
-                        adicionarMensagem("Pilotando!", "#f1c40f");
-                    }
-                    teclas['f'] = false;
                 }
             }
 
@@ -3361,6 +3379,7 @@
             jogador.bonusCura = 1;
             armaduraBarContainer.style.display = "none";
             temChaveCasa = false;
+            modoVoo = false;
             
             barcoJogador.x = 750;
             barcoJogador.y = LINHA_DA_AGUA + 60;
@@ -3417,7 +3436,7 @@
             }, 5000);
         }
 
-        // RENDERIZAÇÃO - COM EFEITO DE DIA E NOITE
+        // RENDERIZAÇÃO
         function renderizarJogo() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
