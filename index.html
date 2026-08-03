@@ -678,23 +678,22 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(180deg, #1a0e08 0%, #2d1e13 100%);
+            background: #2d1e13;
             z-index: 50;
             border: 6px solid #6b533c;
             border-radius: 4px;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
         }
 
         #casa-interna .interior-casa {
-            background: linear-gradient(135deg, #3d2a1c, #2d1e13);
+            background: #3d2a1c;
             padding: 30px;
             border-radius: 16px;
             border: 4px solid #8B6914;
-            min-width: 520px;
-            min-height: 400px;
+            min-width: 600px;
+            min-height: 450px;
             text-align: center;
             position: relative;
             box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 30px rgba(139, 105, 20, 0.3);
@@ -703,34 +702,37 @@
         #casa-interna h3 { 
             color: #d4a373; 
             margin-top: 0; 
-            font-size: 26px;
+            font-size: 24px;
             text-shadow: 2px 2px 4px #000;
             border-bottom: 2px solid #6b533c;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         #casa-interna .info-casa {
             color: #b5a48c;
             font-size: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             font-style: italic;
         }
 
         #casa-interna .cama {
             background: #5c3d24;
-            width: 120px;
-            height: 50px;
+            width: 100px;
+            height: 40px;
             border-radius: 10px;
-            margin: 12px auto;
+            margin: 10px auto;
             border: 3px solid #4a2f1a;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #faedcd;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: inset 0 -5px 0 #3d2412;
+            position: absolute;
+            top: 120px;
+            left: 50px;
         }
         #casa-interna .cama:hover { background: #6b4c3b; transform: scale(1.03); }
         #casa-interna .cama.dormindo {
@@ -741,19 +743,22 @@
 
         #casa-interna .bau-casa {
             background: #6b4c3b;
-            width: 80px;
-            height: 50px;
+            width: 70px;
+            height: 45px;
             border-radius: 8px;
-            margin: 12px auto;
+            margin: 0;
             border: 3px solid #4a2f1a;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #f1c40f;
-            font-size: 28px;
+            font-size: 24px;
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: inset 0 -5px 0 #3d2412;
+            position: absolute;
+            bottom: 80px;
+            right: 60px;
         }
         #casa-interna .bau-casa:hover { background: #7a5a48; transform: scale(1.03); }
 
@@ -768,6 +773,9 @@
             margin-top: 15px;
             font-size: 14px;
             transition: all 0.3s;
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
         }
         #casa-interna .btn-sair-casa:hover { background: linear-gradient(#a36b40, #734727); transform: scale(1.03); }
 
@@ -775,26 +783,31 @@
             background: #2980b9;
             color: #fff;
             border: none;
-            padding: 8px 20px;
+            padding: 6px 16px;
             cursor: pointer;
             border-radius: 6px;
             font-weight: bold;
-            font-size: 13px;
-            margin-top: 8px;
+            font-size: 12px;
+            margin-top: 5px;
             display: none;
             transition: all 0.3s;
+            position: absolute;
+            top: 170px;
+            left: 50px;
         }
         #casa-interna .btn-acordar:hover { background: #3498db; transform: scale(1.03); }
 
         #casa-interna .progresso-sono {
-            width: 100%;
+            width: 100px;
             height: 6px;
             background: #1a0e08;
             border-radius: 3px;
-            margin: 8px auto;
+            margin: 0;
             overflow: hidden;
-            max-width: 200px;
             display: none;
+            position: absolute;
+            top: 165px;
+            left: 50px;
         }
         #casa-interna .progresso-sono .barra-sono {
             height: 100%;
@@ -804,17 +817,26 @@
             transition: width 0.1s;
         }
 
+        #casa-interna .posicao-casa-texto {
+            font-size: 12px;
+            color: #faedcd;
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
         #casa-interna .jogador-casa-container {
             position: relative;
             width: 100%;
-            height: 60px;
-            margin: 10px 0;
+            height: 100%;
+            min-height: 350px;
         }
 
         #jogador-casa {
             position: absolute;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             background: #27ae60;
             border-radius: 50%;
             border: 2px solid #fff;
@@ -1039,6 +1061,48 @@
         }
         #relogio .hora { font-weight: bold; font-size: 14px; }
         #relogio .periodo { font-size: 11px; color: #f1c40f; }
+
+        /* INSTRUÇÕES */
+        #instrucoes {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.85);
+            border: 2px solid #d4a373;
+            border-radius: 8px;
+            padding: 12px 16px;
+            max-width: 280px;
+            z-index: 15;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            color: #faedcd;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+        #instrucoes .inst-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #d4a373;
+            font-weight: bold;
+            font-size: 12px;
+            border-bottom: 1px solid #4a3728;
+            padding-bottom: 5px;
+            margin-bottom: 6px;
+        }
+        #instrucoes .inst-header button {
+            background: #4a3728;
+            color: #faedcd;
+            border: 1px solid #6b533c;
+            border-radius: 3px;
+            cursor: pointer;
+            padding: 0px 6px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+        #instrucoes .inst-header button:hover { background: #6b533c; }
+        #instrucoes .inst-body { font-size: 10px; line-height: 1.5; }
+        #instrucoes .inst-body .tecla { color: #f1c40f; font-weight: bold; background: #2d1e13; padding: 1px 6px; border-radius: 3px; border: 1px solid #6b533c; }
+        #instrucoes .inst-body .destaque { color: #2ecc71; }
     </style>
 </head>
 <body>
@@ -1092,6 +1156,27 @@
                     <div class="nome-personagem">Pataxó</div>
                     <div class="bonus">+15% Todos Atributos</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- INSTRUÇÕES -->
+        <div id="instrucoes">
+            <div class="inst-header">
+                <span>📖 Instruções</span>
+                <button onclick="minimizarInstrucoes()">[-]</button>
+            </div>
+            <div class="inst-body" id="inst-body">
+                <div><span class="tecla">W A S D</span> Movimentar</div>
+                <div><span class="tecla">1-5</span> Selecionar ferramenta</div>
+                <div><span class="tecla">Espaço</span> Usar item (água/comida)</div>
+                <div><span class="tecla">E</span> Abrir mochila / Escambo</div>
+                <div><span class="tecla">R</span> Construir casa</div>
+                <div><span class="tecla">P</span> Abrir baú da casa</div>
+                <div><span class="tecla">F</span> Pilotar barco / Ferreiro</div>
+                <div><span class="tecla">B</span> Abrir baú de armazenamento</div>
+                <div><span class="tecla">Clique</span> Coletar / Atacar / Disparar</div>
+                <div style="margin-top:4px;color:#f1c40f;">🏠 Casa: <span class="destaque">Construa com R</span></div>
+                <div style="color:#b5a48c;">🔑 Chave da casa na loja (E)</div>
             </div>
         </div>
 
@@ -1167,6 +1252,9 @@
             <div class="loja-secao">Armazenamento</div>
             <div class="loja-item"><div><font>Mochila de Couro</font><small>Custo: 6 Madeiras</small></div><button id="btn-mochila-loja" onclick="comprarMochila()">Comprar</button></div>
             <div class="loja-item"><div><font>Baú de Armazenamento</font><small>Custo: 30 Madeiras</small></div><button id="btn-bau-loja" onclick="comprarBau()">Comprar</button></div>
+
+            <div class="loja-secao">Casa</div>
+            <div class="loja-item" id="item-chave-casa"><div><font>🔑 Chave da Casa</font><small>Custo: 15 Madeiras</small></div><button onclick="comprarChaveCasa()">Comprar</button></div>
 
             <div class="loja-secao">Espadas</div>
             <div class="loja-item" id="item-espada-1"><div><font>Espada Bronze (Lvl 1)</font><small>Custo: 12 Madeiras</small></div><button onclick="comprarEspada(1, 12)">Comprar</button></div>
@@ -1285,9 +1373,9 @@
         <div id="casa-interna">
             <div class="interior-casa">
                 <h3>🏠 Interior da Cabana</h3>
-                <p class="info-casa">Use WASD para se mover | P para abrir o baú</p>
+                <p class="info-casa">Use WASD para se mover livremente pela casa</p>
                 
-                <div class="jogador-casa-container">
+                <div class="jogador-casa-container" id="jogador-casa-container">
                     <div id="jogador-casa"></div>
                 </div>
                 
@@ -1302,9 +1390,8 @@
                 <button class="btn-acordar" id="btn-acordar" onclick="acordar()">🔆 Acordar</button>
                 
                 <div class="bau-casa" onclick="abrirBauCasa()">📦</div>
-                <p style="font-size:11px;color:#b5a48c;">Clique no baú ou pressione P</p>
                 
-                <p style="font-size:12px;color:#faedcd;margin-top:8px;">Posição: <span id="posicao-casa">Centro</span></p>
+                <p class="posicao-casa-texto">Posição: <span id="posicao-casa">Centro</span></p>
                 
                 <button class="btn-sair-casa" onclick="sairDaCasa()">🚪 Sair da Cabana</button>
             </div>
@@ -1406,6 +1493,7 @@
         const btnAcordar = document.getElementById("btn-acordar");
         const horaAtualEl = document.getElementById("hora-atual");
         const periodoDiaEl = document.getElementById("periodo-dia");
+        const instBody = document.getElementById("inst-body");
 
         // VARIÁVEIS
         let jogoPausado = false;
@@ -1424,6 +1512,7 @@
         let dentroDaCasa = false;
         let casaConstruida = false;
         let casaPosicao = null;
+        let temChaveCasa = false;
         let construcaoItens = { parede: 0, teto: 0, porta: 0, janela: 0 };
         let construcaoMax = { parede: 4, teto: 2, porta: 1, janela: 2 };
         let mensagensMinimizadas = false;
@@ -1439,11 +1528,12 @@
         let bauCasaAberto = false;
         let dormindo = false;
         let tempoSono = 0;
-        let tempoSonoMax = 420; // 7 segundos
+        let tempoSonoMax = 420;
+        let instrucoesMinimizadas = false;
 
-        // SISTEMA DE DIA E NOITE
-        let tempoDia = 0; // 0 a 1440 (minutos do dia)
-        let velocidadeTempo = 0.5; // minutos por frame
+        // SISTEMA DE DIA E NOITE - MAIS LENTO
+        let tempoDia = 360;
+        let velocidadeTempo = 0.15; // MAIS LENTO
 
         // CONTROLE ILHA INIMIGA
         let jogadorNaIlhaInimiga = false;
@@ -1496,12 +1586,23 @@
             }
         }
 
+        function minimizarInstrucoes() {
+            instrucoesMinimizadas = !instrucoesMinimizadas;
+            if (instrucoesMinimizadas) {
+                instBody.style.display = "none";
+                document.querySelector("#instrucoes .inst-header button").textContent = "[+]";
+            } else {
+                instBody.style.display = "block";
+                document.querySelector("#instrucoes .inst-header button").textContent = "[-]";
+            }
+        }
+
         // JOGADOR
         const jogador = {
             x: 500, y: 750,
             vel: 4.5, raio: 17,
             vida: 100, fome: 100, sede: 100,
-            inventario: { madeira: 15, agua: 1, comida: 1, chave: 0 },
+            inventario: { madeira: 15, agua: 1, comida: 1, chave: 0, chaveCasa: 0 },
             machadoNivel: 1,
             machadoDurabilidade: 110,
             temEspada: false,
@@ -1520,10 +1621,10 @@
             bonusCura: 1
         };
 
-        // BARCO - AGORA PODE NAVEGAR NO MAR
+        // BARCO - SÓ NA AREIA E MAR (NÃO ENTRA NA ILHA)
         const barcoJogador = {
             x: 750,
-            y: LINHA_DA_AGUA + 50,
+            y: LINHA_DA_AGUA + 60,
             larg: 160,
             alt: 70,
             vel: 0,
@@ -1534,6 +1635,16 @@
             velRotacao: 0.04,
             raioColisao: 65
         };
+
+        // VERIFICA SE ESTÁ NA AREIA OU MAR (NÃO NA ILHA)
+        function podeNavegar(x, y) {
+            // Não pode entrar na ilha inimiga
+            if (estaDentroDaIlhaInimiga(x, y)) return false;
+            // Não pode entrar na ilha principal (terra firme)
+            if (x < 1250 && y > LINHA_DA_AGUA + 20 && y < MAPA_ALTURA - 100) return false;
+            // Pode navegar na areia e no mar
+            return true;
+        }
 
         const feitor = { x: 450, y: 650, raio: 22 };
         const ferreiro = { x: 550, y: 700, raio: 22 };
@@ -1827,8 +1938,12 @@
                 if (!dentroDaCasa) alternarMochila();
             }
             if (chave === 'r' && !dentroDaCasa) {
-                alternarConstrucao();
-                dicaCasa.style.display = "none";
+                if (temChaveCasa || casaConstruida) {
+                    alternarConstrucao();
+                    dicaCasa.style.display = "none";
+                } else {
+                    adicionarMensagem("🔑 Você precisa comprar a chave da casa na loja primeiro! (E)", "#f1c40f");
+                }
             }
             if (['1', '2', '3', '4', '5'].includes(e.key)) {
                 selecionarSlot(parseInt(e.key) - 1);
@@ -1901,7 +2016,7 @@
                 piratas.forEach(p => p.vida = 0);
                 adicionarMensagem("Kill All!", "#2ecc71");
             } else if (tipo === 'tempo') {
-                tempoDia += 120;
+                tempoDia += 60;
                 if (tempoDia >= 1440) tempoDia -= 1440;
                 adicionarMensagem("⏰ Tempo avançado!", "#f1c40f");
                 atualizarRelogio();
@@ -1941,7 +2056,8 @@
             const itens = [
                 { nome: 'Madeira', chave: 'madeira', icone: '🪵' },
                 { nome: 'Água', chave: 'agua', icone: '💧' },
-                { nome: 'Comida', chave: 'comida', icone: '🍖' }
+                { nome: 'Comida', chave: 'comida', icone: '🍖' },
+                { nome: 'Chave Casa', chave: 'chaveCasa', icone: '🔑' }
             ];
 
             itens.forEach(item => {
@@ -1983,10 +2099,32 @@
 
         function fecharLoja() { menuEscambo.style.display = "none"; }
 
+        // COMPRAR CHAVE DA CASA
+        function comprarChaveCasa() {
+            if (jogador.inventario.madeira >= 15) {
+                if (jogador.inventario.chaveCasa >= 1) {
+                    adicionarMensagem("Você já tem a chave da casa!", "#f1c40f");
+                    return;
+                }
+                jogador.inventario.madeira -= 15;
+                jogador.inventario.chaveCasa = 1;
+                temChaveCasa = true;
+                document.getElementById("item-chave-casa").style.display = "none";
+                adicionarMensagem("🔑 Chave da casa comprada! Agora pressione R para construir!", "#f1c40f");
+                atualizarHUD();
+            } else {
+                adicionarMensagem("Madeira insuficiente!", "#e74c3c");
+            }
+        }
+
         // CONSTRUÇÃO
         function alternarConstrucao() {
             if (menuEscambo.style.display === "block") return;
             if (dentroDaCasa) return;
+            if (!temChaveCasa && !casaConstruida) {
+                adicionarMensagem("🔑 Compre a chave da casa na loja primeiro!", "#f1c40f");
+                return;
+            }
             const menu = document.getElementById("construcao-menu");
             if (menu.style.display === "block") {
                 menu.style.display = "none";
@@ -2115,36 +2253,34 @@
             atualizarConstrucaoUI();
         }
 
-        // MOVIMENTO DENTRO DA CASA
+        // MOVIMENTO DENTRO DA CASA - ANDA NORMAL COMO NO MAPA
         function moverDentroCasa(direcao) {
             if (!dentroDaCasa || dormindo) return;
             
-            let passo = 15;
-            let limites = { x: 180, y: 120 };
-            
-            switch(direcao) {
-                case 'cima': posicaoCasa.y = Math.max(-limites.y, posicaoCasa.y - passo); break;
-                case 'baixo': posicaoCasa.y = Math.min(limites.y, posicaoCasa.y + passo); break;
-                case 'esquerda': posicaoCasa.x = Math.max(-limites.x, posicaoCasa.x - passo); break;
-                case 'direita': posicaoCasa.x = Math.min(limites.x, posicaoCasa.x + passo); break;
-            }
-            
-            let container = document.querySelector('.interior-casa');
+            let passo = 3;
+            let container = document.getElementById('jogador-casa-container');
             let containerWidth = container.clientWidth;
             let containerHeight = container.clientHeight;
             
-            let posX = containerWidth / 2 + posicaoCasa.x;
-            let posY = containerHeight / 2 + posicaoCasa.y;
+            // Calcula a posição atual em pixels
+            let posX = parseFloat(jogadorCasa.style.left) || containerWidth / 2;
+            let posY = parseFloat(jogadorCasa.style.top) || containerHeight / 2;
             
-            posX = Math.max(20, Math.min(containerWidth - 20, posX));
-            posY = Math.max(20, Math.min(containerHeight - 20, posY));
+            switch(direcao) {
+                case 'cima': posY = Math.max(20, posY - passo); break;
+                case 'baixo': posY = Math.min(containerHeight - 20, posY + passo); break;
+                case 'esquerda': posX = Math.max(20, posX - passo); break;
+                case 'direita': posX = Math.min(containerWidth - 20, posX + passo); break;
+            }
             
             jogadorCasa.style.left = posX + "px";
             jogadorCasa.style.top = posY + "px";
             jogadorCasa.style.transform = "translate(-50%, -50%)";
             
-            document.getElementById("posicao-casa").innerText = 
-                `X: ${posicaoCasa.x} | Y: ${posicaoCasa.y}`;
+            // Atualiza posição relativa para exibição
+            let relX = Math.round(posX - containerWidth / 2);
+            let relY = Math.round(posY - containerHeight / 2);
+            document.getElementById("posicao-casa").innerText = `X: ${relX} | Y: ${relY}`;
         }
 
         function dormirNaCama() {
@@ -2186,12 +2322,13 @@
                     document.getElementById("casa-interna").style.display = "flex";
                     document.getElementById("construcao-menu").style.display = "none";
                     adicionarMensagem("Entrou na cabana!", "#2ecc71");
-                    document.getElementById("posicao-casa").innerText = "Centro";
+                    // Posiciona o jogador no centro
                     setTimeout(() => {
-                        let container = document.querySelector('.interior-casa');
+                        let container = document.getElementById('jogador-casa-container');
                         jogadorCasa.style.left = (container.clientWidth / 2) + "px";
                         jogadorCasa.style.top = (container.clientHeight / 2) + "px";
                         jogadorCasa.style.transform = "translate(-50%, -50%)";
+                        document.getElementById("posicao-casa").innerText = "X: 0 | Y: 0";
                         camaElement.classList.remove('dormindo');
                         camaElement.innerHTML = '🛏️ Dormir';
                         progressoSono.style.display = 'none';
@@ -2215,7 +2352,7 @@
             adicionarMensagem("Saiu da cabana!", "#2ecc71");
         }
 
-        // BAU DA CASA - COM BOTÕES PARA GUARDAR
+        // BAU DA CASA
         function abrirBauCasa() {
             if (!dentroDaCasa) return;
             document.getElementById("bau-casa-menu").style.display = "block";
@@ -2631,7 +2768,6 @@
         function atualizarMundo() {
             if (jogoPausado || painelAdmAtivo) return;
 
-            // Atualiza o sono dentro da casa
             if (dentroDaCasa && dormindo) {
                 tempoSono++;
                 let progresso = (tempoSono / tempoSonoMax) * 100;
@@ -2644,7 +2780,6 @@
                 return;
             }
 
-            // ATUALIZA DIA E NOITE
             tempoDia += velocidadeTempo;
             if (tempoDia >= 1440) tempoDia -= 1440;
             atualizarRelogio();
@@ -2652,7 +2787,6 @@
             tempoDecorrido++;
             contadorOndasMar += 0.04;
 
-            // SPAWN PIRATAS
             tempoSpawnPiratas++;
             if (tempoSpawnPiratas > 800 && piratas.length < 6) {
                 spawnarPirata();
@@ -2669,7 +2803,6 @@
                 }
             }
 
-            // GUERRA
             if (!emGuerra) {
                 tempoParaGuerra -= (1 / 60);
                 if (tempoParaGuerra <= 0) {
@@ -2689,7 +2822,6 @@
                 }
             }
 
-            // SOBREVIVÊNCIA
             if (tempoDecorrido % 160 === 0) {
                 if (!jogador.invencivel) {
                     jogador.fome = Math.max(0, jogador.fome - 1);
@@ -2703,7 +2835,6 @@
                 }
             }
 
-            // USAR ITENS
             if (teclas[' '] || teclas['spacebar']) {
                 if (slotSelecionado === 1 && jogador.inventario.agua > 0) {
                     jogador.inventario.agua--;
@@ -2721,7 +2852,7 @@
                 }
             }
 
-            // BARCO - AGORA PODE NAVEGAR NO MAR
+            // BARCO - SÓ NA AREIA E MAR
             if (jogador.pilotando) {
                 if (teclas['w'] || teclas['arrowup']) barcoJogador.vel = Math.min(barcoJogador.maxVel, barcoJogador.vel + barcoJogador.aceleracao);
                 else if (teclas['s'] || teclas['arrowdown']) barcoJogador.vel = Math.max(-barcoJogador.maxVel / 2, barcoJogador.vel - barcoJogador.aceleracao);
@@ -2736,8 +2867,7 @@
                 let proxBarcoX = barcoJogador.x + Math.cos(barcoJogador.angulo) * barcoJogador.vel;
                 let proxBarcoY = barcoJogador.y + Math.sin(barcoJogador.angulo) * barcoJogador.vel;
 
-                // Barco pode navegar em todo o mapa, mas não pode entrar na ilha inimiga
-                if (estaDentroDaIlhaInimiga(proxBarcoX, proxBarcoY) || proxBarcoX < 20 || proxBarcoX > MAPA_LARGURA - 20 || 
+                if (!podeNavegar(proxBarcoX, proxBarcoY) || proxBarcoX < 20 || proxBarcoX > MAPA_LARGURA - 20 || 
                     proxBarcoY < 20 || proxBarcoY > MAPA_ALTURA - 20) {
                     barcoJogador.vel = -barcoJogador.vel * 0.4;
                 } else {
@@ -2756,7 +2886,6 @@
                     teclas['f'] = false;
                 }
             } else {
-                // MOVIMENTO A PÉ
                 let dx = 0, dy = 0;
                 if (teclas['w'] || teclas['arrowup']) dy = -1;
                 if (teclas['s'] || teclas['arrowdown']) dy = 1;
@@ -2785,7 +2914,6 @@
                     dicaContexto.style.display = "none";
                 }
 
-                // INTERAÇÕES
                 let distFerreiro = Math.hypot(jogador.x - ferreiro.x, jogador.y - ferreiro.y);
                 if (distFerreiro < ferreiro.raio + jogador.raio + 15) {
                     dicaContexto.innerText = "F - Ferreiro";
@@ -2801,7 +2929,7 @@
 
                 if (teclas['f']) {
                     let d = Math.hypot(jogador.x - barcoJogador.x, jogador.y - barcoJogador.y);
-                    if (d < 85) {
+                    if (d < 85 && podeNavegar(jogador.x, jogador.y)) {
                         jogador.pilotando = true;
                         adicionarMensagem("Pilotando!", "#f1c40f");
                     }
@@ -2809,7 +2937,6 @@
                 }
             }
 
-            // ILHA INIMIGA
             let atualmenteNaIlhaInimiga = estaDentroDaIlhaInimiga(jogador.x, jogador.y);
             if (atualmenteNaIlhaInimiga && !jogador.pilotando) {
                 if (!jogadorNaIlhaInimiga) {
@@ -2834,7 +2961,6 @@
                 displayTimerInvasao.style.display = "none";
             }
 
-            // FEITOR
             let distFeitor = Math.hypot(jogador.x - feitor.x, jogador.y - feitor.y);
             if (distFeitor < feitor.raio + jogador.raio + 15 && !jogador.pilotando) {
                 dicaContexto.innerText = "E - Escambo";
@@ -2848,7 +2974,6 @@
                 dicaCasa.style.display = "none";
             }
 
-            // ALIADOS
             aliados.forEach(al => {
                 if (!al.alvo || al.alvo.vida <= 0) {
                     let todosInimigos = [...inimigos];
@@ -2888,7 +3013,6 @@
                 if (al.cooldownAtaque > 0) al.cooldownAtaque--;
             });
 
-            // PIRATAS
             for (let i = piratas.length - 1; i >= 0; i--) {
                 let p = piratas[i];
                 if (p.vida <= 0) {
@@ -2939,7 +3063,6 @@
                 }
             }
 
-            // FLECHAS DOS PIRATAS
             for (let f = flechasPiratas.length - 1; f >= 0; f--) {
                 let fl = flechasPiratas[f];
                 fl.x += fl.vx;
@@ -2966,7 +3089,6 @@
                 if (fl.alcance <= 0) flechasPiratas.splice(f, 1);
             }
 
-            // INIMIGOS
             let todosInimigos = [...inimigos];
             todosInimigos.forEach((inim) => {
                 if (inim.vida <= 0) return;
@@ -3026,7 +3148,6 @@
                 if (inim.cooldownDano > 0) inim.cooldownDano--;
             });
 
-            // INIMIGOS MORTOS
             let inimigosMortos = inimigos.filter(i => i.vida <= 0 && i.nativoIlha && !i.saqueado);
             if (inimigosMortos.length > 0) {
                 nivelIlha++;
@@ -3052,7 +3173,6 @@
             });
             inimigos = inimigos.filter(i => i.vida > 0);
 
-            // SAQUES
             saquesChao.forEach(saque => {
                 if (!saque.coletado && Math.hypot(jogador.x - saque.x, jogador.y - saque.y) < 50) {
                     saque.coletado = true;
@@ -3063,7 +3183,6 @@
             });
             saquesChao = saquesChao.filter(s => !s.coletado);
 
-            // BAU TESOURO
             if (totalInimigosIniciaisIlha > 0 && inimigos.filter(e => e.nativoIlha).length === 0 && bauTesouroUnico && !bauTesouroUnico.aberto) {
                 if (temChaveTesouro) {
                     adicionarMensagem("🔑 Abra o Baú do Tesouro!", "#f1c40f");
@@ -3087,7 +3206,6 @@
                 }
             }
 
-            // FLECHAS DO JOGADOR
             for (let f = flechas.length - 1; f >= 0; f--) {
                 let fl = flechas[f];
                 fl.x += fl.vx;
@@ -3111,7 +3229,6 @@
                 if (atingiu || fl.alcance <= 0) flechas.splice(f, 1);
             }
 
-            // PARTÍCULAS
             particulas.forEach(p => { p.x += p.vx; p.y += p.vy; p.vida--; });
             particulas = particulas.filter(p => p.vida > 0);
 
@@ -3140,7 +3257,6 @@
             }
         }
 
-        // MOUSE
         window.addEventListener("mousedown", (e) => {
             if (jogoPausado || painelAdmAtivo || jogador.pilotando || dentroDaCasa) return;
 
@@ -3228,7 +3344,7 @@
             jogador.vida = 100;
             jogador.fome = 100;
             jogador.sede = 100;
-            jogador.inventario = { madeira: 15, agua: 1, comida: 1, chave: 0 };
+            jogador.inventario = { madeira: 15, agua: 1, comida: 1, chave: 0, chaveCasa: 0 };
             jogador.machadoNivel = 1;
             jogador.machadoDurabilidade = 110;
             jogador.temEspada = false;
@@ -3244,9 +3360,10 @@
             jogador.bonusColeta = 1;
             jogador.bonusCura = 1;
             armaduraBarContainer.style.display = "none";
+            temChaveCasa = false;
             
             barcoJogador.x = 750;
-            barcoJogador.y = LINHA_DA_AGUA + 50;
+            barcoJogador.y = LINHA_DA_AGUA + 60;
             barcoJogador.vel = 0;
             barcoJogador.angulo = 0;
             
@@ -3258,6 +3375,7 @@
             document.getElementById("txt-armadura-hud").innerText = "Nenhuma";
             document.getElementById("txt-mochila").innerText = "Não Possui (E)";
             document.getElementById("txt-mochila").style.color = "#fff";
+            document.getElementById("item-chave-casa").style.display = "flex";
             
             aliados = [];
             flechas = [];
@@ -3285,7 +3403,7 @@
             progressoSono.style.display = 'none';
             btnAcordar.style.display = 'none';
             barraSono.style.width = '0%';
-            tempoDia = 360; // 6:00 da manhã
+            tempoDia = 360;
             
             inicializarAmbiente();
             atualizarHUD();
@@ -3311,7 +3429,6 @@
 
             ctx.drawImage(bgCanvas, 0, 0);
 
-            // EFEITO DE DIA E NOITE
             let horas = tempoDia / 60;
             let intensidadeNoite = 0;
             
@@ -3326,7 +3443,6 @@
             ctx.fillStyle = `rgba(0, 0, 20, ${intensidadeNoite})`;
             ctx.fillRect(0, 0, MAPA_LARGURA, MAPA_ALTURA);
 
-            // ONDAS
             ctx.strokeStyle = `rgba(255,255,255,${0.08 - intensidadeNoite * 0.05})`;
             ctx.lineWidth = 2;
             for (let y = 60; y < LINHA_DA_AGUA; y += 70) {
@@ -3372,7 +3488,6 @@
                 ctx.restore();
             });
 
-            // FEITORIA
             ctx.fillStyle = "#5c4033";
             ctx.fillRect(feitor.x - 35, feitor.y - 35, 70, 70);
             ctx.fillStyle = "#8b5a2b";
@@ -3385,14 +3500,12 @@
             ctx.font = "bold 10px Arial";
             ctx.fillText("ESCAMBO", feitor.x - 24, feitor.y + 5);
 
-            // FERREIRO
             ctx.fillStyle = "#6b4c3b";
             ctx.fillRect(ferreiro.x - 30, ferreiro.y - 30, 60, 60);
             ctx.fillStyle = "#d4a373";
             ctx.font = "bold 10px Arial";
             ctx.fillText("🔨 FERREIRO", ferreiro.x - 28, ferreiro.y + 5);
 
-            // CASA
             if (casaConstruida && casaPosicao) {
                 ctx.fillStyle = "#5c3d24";
                 ctx.fillRect(casaPosicao.x - 40, casaPosicao.y - 35, 80, 70);
@@ -3432,7 +3545,6 @@
                 ctx.fillText("CASA", casaPosicao.x - 14, casaPosicao.y + 55);
             }
 
-            // BAÚ JOGADOR
             if (bauComprado && casaPosicao) {
                 ctx.fillStyle = "#6b4c3b";
                 ctx.fillRect(casaPosicao.x - 15, casaPosicao.y + 65, 30, 20);
@@ -3443,7 +3555,6 @@
                 ctx.fillText("BAÚ", casaPosicao.x - 12, casaPosicao.y + 82);
             }
 
-            // MOITAS
             moitasFrutas.forEach(m => {
                 ctx.fillStyle = "#1e5631";
                 ctx.beginPath();
@@ -3458,7 +3569,6 @@
                 }
             });
 
-            // ÁRVORES
             arvores.forEach(arv => {
                 if (!arv.viva) {
                     ctx.fillStyle = "#4a2f13";
@@ -3507,7 +3617,6 @@
                 ctx.restore();
             });
 
-            // BAU TESOURO
             if (bauTesouroUnico && !bauTesouroUnico.aberto) {
                 ctx.fillStyle = "#d4a373";
                 ctx.fillRect(bauTesouroUnico.x - 18, bauTesouroUnico.y - 12, 36, 24);
@@ -3520,7 +3629,6 @@
                 ctx.fillText("💰", bauTesouroUnico.x - 8, bauTesouroUnico.y + 6);
             }
 
-            // SAQUES
             saquesChao.forEach(s => {
                 ctx.fillStyle = "#8B6914";
                 ctx.fillRect(s.x - 5, s.y - 3, 10, 6);
@@ -3529,7 +3637,6 @@
                 ctx.fillText("🪵", s.x - 4, s.y + 4);
             });
 
-            // PIRATAS
             piratas.forEach(p => {
                 ctx.fillStyle = "#2c1810";
                 ctx.beginPath();
@@ -3560,11 +3667,9 @@
                 }
             });
 
-            // FLECHAS DOS PIRATAS
             ctx.fillStyle = "#ff0000";
             flechasPiratas.forEach(f => { ctx.fillRect(f.x - 2, f.y - 2, 6, 6); });
 
-            // BARCO DO JOGADOR
             ctx.save();
             ctx.translate(barcoJogador.x, barcoJogador.y);
             ctx.rotate(barcoJogador.angulo);
@@ -3582,7 +3687,6 @@
             ctx.fillRect(-35, -2, 15, 4);
             ctx.restore();
 
-            // ALIADOS
             aliados.forEach(al => {
                 ctx.fillStyle = "#3498db";
                 ctx.beginPath();
@@ -3592,7 +3696,6 @@
                 ctx.fillRect(al.x - 8, al.y - 16, 16, 4);
             });
 
-            // INIMIGOS
             inimigos.forEach(inim => {
                 ctx.fillStyle = inim.isBoss ? "#7f8c8d" : "#c0392b";
                 ctx.beginPath();
@@ -3606,7 +3709,6 @@
                 }
             });
 
-            // JOGADOR
             if (!jogador.pilotando) {
                 ctx.fillStyle = "#27ae60";
                 ctx.beginPath();
@@ -3617,11 +3719,9 @@
                 ctx.stroke();
             }
 
-            // FLECHAS DO JOGADOR
             ctx.fillStyle = "#f1c40f";
             flechas.forEach(f => { ctx.fillRect(f.x, f.y, 6, 6); });
 
-            // PARTÍCULAS
             particulas.forEach(p => {
                 ctx.fillStyle = p.cor;
                 ctx.beginPath();
@@ -3629,7 +3729,6 @@
                 ctx.fill();
             });
 
-            // MIRA ARCO
             if (slotSelecionado === 4 && jogador.temArco && !jogador.pilotando) {
                 ctx.strokeStyle = "#ff4757";
                 ctx.lineWidth = 2;
@@ -3647,8 +3746,6 @@
             }
 
             ctx.restore();
-
-            // ALERTAS - REMOVIDOS DA TELA
         }
 
         // MINIMAPA
@@ -3714,7 +3811,7 @@
         renderizarCenarioEstatico();
 
         document.getElementById("personagem-select").style.display = "flex";
-        tempoDia = 360; // 6:00 da manhã
+        tempoDia = 360;
         atualizarRelogio();
 
         atualizarNivelLoja();
