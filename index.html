@@ -1652,10 +1652,10 @@
             bonusCura: 1
         };
 
-        // ===================== BARCO - POSIÇÃO CORRIGIDA NO MAR =====================
+        // ===================== BARCO - POSIÇÃO CORRIGIDA NO MAR (MAIS PARA CIMA) =====================
         const barcoJogador = {
-            x: 950,  // Posição mais afastada da praia
-            y: LINHA_DA_AGUA + 40,  // Na água, ligeiramente abaixo da linha d'água
+            x: 950,
+            y: LINHA_DA_AGUA - 45,  // MAIS PARA CIMA - BEM NO MAR
             larg: 160,
             alt: 70,
             vel: 0,
@@ -1667,8 +1667,8 @@
             raioColisao: 65
         };
 
-        // POSIÇÃO INICIAL DO BARCO (NO MAR, LONGE DA PRAIA)
-        const POSICAO_BARCO_PADRAO = { x: 950, y: LINHA_DA_AGUA + 40 };
+        // POSIÇÃO INICIAL DO BARCO (NO MAR, BEM MAIS PARA CIMA)
+        const POSICAO_BARCO_PADRAO = { x: 950, y: LINHA_DA_AGUA - 45 };
 
         // ===================== FUNÇÕES AUXILIARES =====================
         function estaDentroDaIlhaInimiga(x, y) {
@@ -1694,7 +1694,7 @@
 
         // ÁREA DE TRANSIÇÃO PARA O BARCO (PRAIA)
         function estaNaPraia(x, y) {
-            return x > 700 && x < 1300 && y > LINHA_DA_AGUA - 30 && y < LINHA_DA_AGUA + 60;
+            return x > 700 && x < 1200 && y > LINHA_DA_AGUA - 20 && y < LINHA_DA_AGUA + 50;
         }
 
         // VERIFICA SE O BARCO PODE NAVEGAR (NÃO ENTRA NA ILHA PRINCIPAL)
@@ -1705,6 +1705,8 @@
             if (estaDentroDaIlhaInimiga(x, y)) return false;
             // Não pode sair dos limites do mapa
             if (x < 20 || x > MAPA_LARGURA - 20 || y < 20 || y > MAPA_ALTURA - 20) return false;
+            // Não pode encalhar na praia (barco não pode ficar na areia)
+            if (estaNaPraia(x, y)) return false;
             return true;
         }
 
@@ -2161,7 +2163,7 @@
                     jogador.pilotando = false;
                     // Posiciona o jogador na praia (área de transição)
                     jogador.x = 850;
-                    jogador.y = LINHA_DA_AGUA + 30;
+                    jogador.y = LINHA_DA_AGUA + 25;
                     adicionarMensagem("🚢 Você desembarcou!", "#2ecc71");
                 }
             }
@@ -3781,7 +3783,7 @@
             ctx.fillStyle = "#ff0000";
             flechasPiratas.forEach(f => { ctx.fillRect(f.x - 2, f.y - 2, 6, 6); });
 
-            // BARCO
+            // BARCO - AGORA NO MAR (MAIS PARA CIMA)
             ctx.save();
             ctx.translate(barcoJogador.x, barcoJogador.y);
             ctx.rotate(barcoJogador.angulo);
@@ -3917,6 +3919,7 @@
                 mctx.fillRect(casaPosicao.x * fX - 3, casaPosicao.y * fY - 3, 6, 6);
             }
 
+            // BARCO NO MINIMAPA
             mctx.fillStyle = "#e67e22";
             mctx.fillRect(barcoJogador.x * fX - 3, barcoJogador.y * fY - 2, 6, 4);
 
