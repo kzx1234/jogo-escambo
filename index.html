@@ -1652,10 +1652,10 @@
             bonusCura: 1
         };
 
-        // ===================== BARCO - RENASCE AO LADO DA ILHA =====================
+        // ===================== BARCO - POSIÇÃO CORRIGIDA NO MAR =====================
         const barcoJogador = {
-            x: 750,
-            y: LINHA_DA_AGUA + 60,
+            x: 950,  // Posição mais afastada da praia
+            y: LINHA_DA_AGUA + 40,  // Na água, ligeiramente abaixo da linha d'água
             larg: 160,
             alt: 70,
             vel: 0,
@@ -1667,8 +1667,8 @@
             raioColisao: 65
         };
 
-        // POSIÇÃO INICIAL DO BARCO (AO LADO DA ILHA, NA ÁGUA)
-        const POSICAO_BARCO_PADRAO = { x: 750, y: LINHA_DA_AGUA + 60 };
+        // POSIÇÃO INICIAL DO BARCO (NO MAR, LONGE DA PRAIA)
+        const POSICAO_BARCO_PADRAO = { x: 950, y: LINHA_DA_AGUA + 40 };
 
         // ===================== FUNÇÕES AUXILIARES =====================
         function estaDentroDaIlhaInimiga(x, y) {
@@ -1689,7 +1689,12 @@
         }
 
         function estaNaIlhaPrincipal(x, y) {
-            return x < 1200 && y >= LINHA_DA_AGUA + 20;
+            return x < 1300 && y >= LINHA_DA_AGUA + 20;
+        }
+
+        // ÁREA DE TRANSIÇÃO PARA O BARCO (PRAIA)
+        function estaNaPraia(x, y) {
+            return x > 700 && x < 1300 && y > LINHA_DA_AGUA - 30 && y < LINHA_DA_AGUA + 60;
         }
 
         // VERIFICA SE O BARCO PODE NAVEGAR (NÃO ENTRA NA ILHA PRINCIPAL)
@@ -1701,6 +1706,18 @@
             // Não pode sair dos limites do mapa
             if (x < 20 || x > MAPA_LARGURA - 20 || y < 20 || y > MAPA_ALTURA - 20) return false;
             return true;
+        }
+
+        // VERIFICA SE O JOGADOR PODE ANDAR NO LOCAL
+        function podeAndar(x, y) {
+            // Pode andar na ilha principal
+            if (estaNaIlhaPrincipal(x, y)) return true;
+            // Pode andar na ilha inimiga
+            if (estaDentroDaIlhaInimiga(x, y)) return true;
+            // Pode andar na praia (área de transição)
+            if (estaNaPraia(x, y)) return true;
+            // Não pode andar na água (a menos que esteja no barco)
+            return false;
         }
 
         const feitor = { x: 450, y: 650, raio: 22 };
@@ -2126,8 +2143,8 @@
                 let distBarco = Math.hypot(jogador.x - barcoJogador.x, jogador.y - barcoJogador.y);
                 
                 if (!jogador.pilotando) {
-                    // TENTAR ENTRAR NO BARCO
-                    if (distBarco < 85) {
+                    // TENTAR ENTRAR NO BARCO - DISTÂNCIA MAIOR PARA FACILITAR
+                    if (distBarco < 120) {
                         jogador.pilotando = true;
                         // Sincroniza a posição do jogador com o barco
                         jogador.x = barcoJogador.x;
@@ -2140,18 +2157,11 @@
                         setTimeout(() => { indicadorBarco.style.display = "none"; }, 3000);
                     }
                 } else {
-                    // SAIR DO BARCO - POSICIONA AO LADO DO BARCO
+                    // SAIR DO BARCO - POSICIONA NA PRAIA
                     jogador.pilotando = false;
-                    // Posiciona o jogador ao lado do barco (na direção oposta da proa)
-                    let anguloSaida = barcoJogador.angulo + Math.PI / 2;
-                    jogador.x = barcoJogador.x + Math.cos(anguloSaida) * 60;
-                    jogador.y = barcoJogador.y + Math.sin(anguloSaida) * 60;
-                    // Garante que o jogador fique em terra firme ou na praia
-                    if (!estaNaIlhaPrincipal(jogador.x, jogador.y) && !estaDentroDaIlhaInimiga(jogador.x, jogador.y)) {
-                        // Se estiver na água, coloca na borda
-                        jogador.x = barcoJogador.x - Math.cos(barcoJogador.angulo) * 50;
-                        jogador.y = barcoJogador.y - Math.sin(barcoJogador.angulo) * 50;
-                    }
+                    // Posiciona o jogador na praia (área de transição)
+                    jogador.x = 850;
+                    jogador.y = LINHA_DA_AGUA + 30;
                     adicionarMensagem("🚢 Você desembarcou!", "#2ecc71");
                 }
             }
@@ -3012,18 +3022,16 @@
                         jogador.x = Math.max(jogador.raio, Math.min(MAPA_LARGURA - jogador.raio, proxX));
                         jogador.y = Math.max(jogador.raio, Math.min(MAPA_ALTURA - jogador.raio, proxY));
                     } else {
-                        let naTerraPrincipal = estaNaIlhaPrincipal(proxX, proxY);
-                        let naTerraInimiga = estaDentroDaIlhaInimiga(proxX, proxY);
-
-                        if (naTerraPrincipal || naTerraInimiga) {
+                        // VERIFICA SE PODE ANDAR (inclui praia como área permitida)
+                        if (podeAndar(proxX, proxY) || estaNaPraia(proxX, proxY)) {
                             jogador.x = Math.max(jogador.raio, Math.min(MAPA_LARGURA - jogador.raio, proxX));
                             jogador.y = Math.max(jogador.raio, Math.min(MAPA_ALTURA - jogador.raio, proxY));
-                        } else {
-                            let distBarco = Math.hypot(jogador.x - barcoJogador.x, jogador.y - barcoJogador.y);
-                            if (distBarco < 100) {
-                                dicaContexto.innerText = "F para Pilotar o Barco";
-                                dicaContexto.style.display = "block";
-                            }
+                        }
+                        // Mostra dica do barco se estiver na praia perto do barco
+                        let distBarco = Math.hypot(jogador.x - barcoJogador.x, jogador.y - barcoJogador.y);
+                        if (estaNaPraia(jogador.x, jogador.y) && distBarco < 200) {
+                            dicaContexto.innerText = "F para entrar no Barco";
+                            dicaContexto.style.display = "block";
                         }
                     }
                 }
@@ -3474,7 +3482,7 @@
             armaduraBarContainer.style.display = "none";
             temChaveCasa = false;
             modoVoo = false;
-            // RESETA O BARCO PARA A POSIÇÃO PADRÃO
+            // RESETA O BARCO PARA A POSIÇÃO PADRÃO (NO MAR)
             barcoJogador.x = POSICAO_BARCO_PADRAO.x;
             barcoJogador.y = POSICAO_BARCO_PADRAO.y;
             barcoJogador.vel = 0;
@@ -3886,7 +3894,7 @@
             mctx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
 
             mctx.fillStyle = "#1e5631";
-            mctx.fillRect(0, LINHA_DA_AGUA * fY, 1200 * fX, (MAPA_ALTURA - LINHA_DA_AGUA) * fY);
+            mctx.fillRect(0, LINHA_DA_AGUA * fY, 1300 * fX, (MAPA_ALTURA - LINHA_DA_AGUA) * fY);
 
             const nós = [
                 { x: 4200, y: 450 }, { x: 4600, y: 350 }, { x: 5100, y: 320 },
