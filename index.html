@@ -1124,6 +1124,24 @@
         }
         #btn-salvar:hover { background: rgba(46, 204, 113, 1); transform: scale(1.05); }
 
+        #btn-reiniciar {
+            position: absolute;
+            bottom: 15px;
+            left: 140px;
+            background: rgba(231, 76, 60, 0.85);
+            border: 2px solid #e74c3c;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+        #btn-reiniciar:hover { background: rgba(231, 76, 60, 1); transform: scale(1.05); }
+
         #indicador-barco {
             position: absolute;
             bottom: 200px;
@@ -1211,6 +1229,7 @@
                 <div><span class="tecla">B</span> Baú de armazenamento</div>
                 <div><span class="tecla">Clique</span> Coletar / Atacar</div>
                 <div style="color:#2ecc71;">💾 Botão SALVAR no canto inferior</div>
+                <div style="color:#ff6b6b;">🔄 Botão REINICIAR no canto inferior</div>
                 <div style="color:#ff6b6b;">⚔️ Modo GUERRA no painel ADM</div>
             </div>
         </div>
@@ -1442,6 +1461,9 @@
         <!-- BOTÃO SALVAR -->
         <button id="btn-salvar" onclick="salvarJogo()">💾 Salvar</button>
 
+        <!-- BOTÃO REINICIAR -->
+        <button id="btn-reiniciar" onclick="reiniciarJogoCompleto()">🔄 Reiniciar</button>
+
         <!-- HOTBAR -->
         <div id="hotbar">
             <div class="slot active" id="slot-0" onclick="selecionarSlot(0)"><span class="tecla">1</span><span class="nome">Machado</span><span class="qtd">-</span></div>
@@ -1479,9 +1501,10 @@
     <script>
         // =====================================================
         // CÓDIGO JAVASCRIPT COMPLETO - CORRIGIDO
-        // BARCO: DESEMBARQUE NA ILHA INIMIGA SEM TELEPORTE
-        // GUERRA: FUNCIONANDO CORRETAMENTE
-        // ILHA INIMIGA: CONSTRUÇÕES ADICIONADAS
+        // BARCO: DESEMBARQUE SEM TELEPORTE
+        // VELOCIDADE: REDUZIDA
+        // REINICIAR: BOTÃO ADICIONADO
+        // DURABILIDADE MACHADO: AUMENTADA
         // =====================================================
         
         const canvas = document.getElementById("gameCanvas");
@@ -1638,7 +1661,8 @@
         // ===================== JOGADOR =====================
         const jogador = {
             x: 500, y: 750,
-            vel: 4.5, raio: 17,
+            vel: 2.8, // Velocidade reduzida (antes era 4.5)
+            raio: 17,
             vida: 100, fome: 100, sede: 100,
             inventario: { madeira: 15, agua: 1, comida: 1, chave: 0, chaveCasa: 0 },
             machadoNivel: 1,
@@ -1657,7 +1681,7 @@
             bonusDefesa: 1,
             bonusColeta: 1,
             bonusCura: 1,
-            desembarqueX: 500,  // Posição onde desembarcou
+            desembarqueX: 500,
             desembarqueY: 750
         };
 
@@ -1746,7 +1770,6 @@
         function gerarConstrucoesInimigas() {
             construcoesInimigas = [];
             
-            // Barracas
             const posicoesBarracas = [
                 { x: 4400, y: 700 }, { x: 4700, y: 550 }, { x: 5100, y: 600 },
                 { x: 5300, y: 900 }, { x: 4800, y: 1600 }, { x: 5200, y: 1400 },
@@ -1766,7 +1789,6 @@
                 }
             });
             
-            // Fogueiras
             const posicoesFogueiras = [
                 { x: 4350, y: 780 }, { x: 4780, y: 630 }, { x: 5150, y: 680 },
                 { x: 4750, y: 1680 }, { x: 5250, y: 1500 }, { x: 4550, y: 1850 }
@@ -1784,7 +1806,6 @@
                 }
             });
             
-            // Totens
             const posicoesTotens = [
                 { x: 4300, y: 550 }, { x: 5450, y: 500 }, { x: 5000, y: 450 },
                 { x: 4300, y: 1600 }, { x: 5400, y: 1800 }
@@ -1918,7 +1939,6 @@
 
             for (let i = 0; i < 3; i++) spawnarPirata();
             
-            // GERAR CONSTRUÇÕES NA ILHA INIMIGA
             gerarConstrucoesInimigas();
         }
 
@@ -1962,9 +1982,6 @@
             }
             bgCtx.closePath();
             bgCtx.fill();
-            
-            // Adicionar construções no background estático (desenho básico)
-            // As construções serão renderizadas no loop principal para animação
         }
 
         // ===================== UI E CONTROLES =====================
@@ -2018,7 +2035,7 @@
 
             document.getElementById("personagem-select").style.display = "none";
             adicionarMensagem(`Você escolheu ${tipo}!`, "#f1c40f");
-            jogador.vel = 4.5 * jogador.bonusVelocidade;
+            jogador.vel = 2.8 * jogador.bonusVelocidade;
             
             dicaCasa.style.display = "block";
             setTimeout(() => dicaCasa.style.display = "none", 5000);
@@ -2141,7 +2158,7 @@
                 
                 document.getElementById("item-chave-casa").style.display = temChaveCasa ? "none" : "flex";
                 document.getElementById("personagem-select").style.display = "none";
-                if (personagemSelecionado) jogador.vel = 4.5 * jogador.bonusVelocidade;
+                if (personagemSelecionado) jogador.vel = 2.8 * jogador.bonusVelocidade;
                 
                 if (!podeNavegar(barcoJogador.x, barcoJogador.y)) {
                     barcoJogador.x = POSICAO_BARCO_PADRAO.x;
@@ -2150,7 +2167,6 @@
                     barcoJogador.angulo = 0;
                 }
                 
-                // Recarregar construções
                 gerarConstrucoesInimigas();
                 
                 atualizarHUD();
@@ -2238,17 +2254,18 @@
                         jogador.y = novoY;
                     } else {
                         // Tenta outras direções
+                        let encontrou = false;
                         for (let ang = 0; ang < Math.PI * 2; ang += Math.PI / 4) {
                             let testX = barcoJogador.x + Math.cos(ang) * 55;
                             let testY = barcoJogador.y + Math.sin(ang) * 55;
                             if (podeAndar(testX, testY) || estaNaPraia(testX, testY)) {
                                 jogador.x = testX;
                                 jogador.y = testY;
+                                encontrou = true;
                                 break;
                             }
                         }
-                        // Se ainda não encontrou, coloca na posição atual do barco (pode ficar na água)
-                        if (!podeAndar(jogador.x, jogador.y) && !estaNaPraia(jogador.x, jogador.y)) {
+                        if (!encontrou) {
                             jogador.x = barcoJogador.x;
                             jogador.y = barcoJogador.y - 30;
                         }
@@ -2301,7 +2318,6 @@
                 jogador.inventario.madeira += 99;
                 adicionarMensagem("+99 Madeiras!", "#f1c40f");
             } else if (tipo === 'guerra') {
-                // FORÇA A GUERRA IMEDIATAMENTE
                 if (!emGuerra) {
                     tempoParaGuerra = 0;
                     emGuerra = true;
@@ -2332,7 +2348,7 @@
                 modoVoo = !modoVoo;
                 jogador.invencivel = modoVoo;
                 adicionarMensagem(`🕊️ Modo Voo: ${modoVoo ? 'ATIVADO' : 'DESATIVADO'}`, "#9b59b6");
-                jogador.vel = modoVoo ? 12 : 4.5 * jogador.bonusVelocidade;
+                jogador.vel = modoVoo ? 12 : 2.8 * jogador.bonusVelocidade;
             }
         }
 
@@ -2670,7 +2686,7 @@
         function repararMachado() {
             if (jogador.inventario.madeira >= 5) {
                 jogador.inventario.madeira -= 5;
-                jogador.machadoDurabilidade = Math.min(100 + (jogador.machadoNivel * 10), jogador.machadoDurabilidade + 30);
+                jogador.machadoDurabilidade = Math.min(100 + (jogador.machadoNivel * 20), jogador.machadoDurabilidade + 50);
                 adicionarMensagem("Machado reparado! Durabilidade: " + jogador.machadoDurabilidade + "%", "#f1c40f");
                 atualizarHUD();
             } else { adicionarMensagem("Madeira insuficiente!", "#e74c3c"); }
@@ -2681,7 +2697,7 @@
             if (jogador.inventario.madeira >= custo && jogador.machadoNivel < 5) {
                 jogador.inventario.madeira -= custo;
                 jogador.machadoNivel++;
-                jogador.machadoDurabilidade = 100 + (jogador.machadoNivel * 10);
+                jogador.machadoDurabilidade = 100 + (jogador.machadoNivel * 20);
                 adicionarMensagem(`Machado Nível ${jogador.machadoNivel}!`, "#f1c40f");
                 document.getElementById("ferreiro-nv-atual").innerText = jogador.machadoNivel;
                 document.getElementById("ferreiro-custo-melhoria").innerText = jogador.machadoNivel * 15;
@@ -2854,7 +2870,7 @@
             if (jogador.inventario.madeira >= custo) {
                 jogador.inventario.madeira -= custo;
                 jogador.machadoNivel = nv;
-                jogador.machadoDurabilidade = 100 + (nv * 10);
+                jogador.machadoDurabilidade = 100 + (nv * 20);
                 document.getElementById(`item-machado-${nv}`).style.display = "none";
                 if (nv < 5) document.getElementById(`item-machado-${nv + 1}`).style.display = "flex";
                 txtMachado.innerText = "Nível " + nv;
@@ -3329,7 +3345,7 @@
                                 if (jogador.armaduraNivel === 5) absorcao = 0.85 * jogador.bonusDefesa;
                                 jogador.vida -= inim.dano * (1 - Math.min(absorcao, 0.95));
                                 if (jogador.armaduraNivel > 0) {
-                                    jogador.armaduraDurabilidade -= 3;
+                                    jogador.armaduraDurabilidade -= 1;
                                     if (jogador.armaduraDurabilidade <= 0) {
                                         jogador.armaduraNivel = 0;
                                         jogador.armaduraDurabilidade = 0;
@@ -3463,7 +3479,6 @@
                     saqueado: false
                 });
             }
-            // Adiciona mais inimigos se nível for alto
             if (nivelIlha > 2) {
                 for (let i = 0; i < 3 + Math.floor(nivelIlha / 3); i++) {
                     let vidaBase = 120 + (nivelIlha * 8);
@@ -3493,7 +3508,7 @@
                         if (jogador.machadoDurabilidade > 0) {
                             let rendimento = (jogador.machadoNivel * 2) * jogador.bonusColeta;
                             arv.vida -= 20;
-                            jogador.machadoDurabilidade = Math.max(0, jogador.machadoDurabilidade - 2);
+                            jogador.machadoDurabilidade = Math.max(0, jogador.machadoDurabilidade - 1);
                             criarParticulasColheita(arv.x, arv.y, '#5c3d24');
                             if (arv.vida <= 0) {
                                 arv.viva = false;
@@ -3563,75 +3578,83 @@
             }
         }
 
+        // ===================== REINICIAR JOGO =====================
         function reiniciarJogoCompleto() {
-            document.getElementById("personagem-select").style.display = "flex";
-            jogador.vida = 100;
-            jogador.fome = 100;
-            jogador.sede = 100;
-            jogador.inventario = { madeira: 15, agua: 1, comida: 1, chave: 0, chaveCasa: 0 };
-            jogador.machadoNivel = 1;
-            jogador.machadoDurabilidade = 110;
-            jogador.temEspada = false;
-            jogador.espadaNivel = 0;
-            jogador.temArco = false;
-            jogador.pilotando = false;
-            jogador.invencivel = false;
-            jogador.armaduraNivel = 0;
-            jogador.armaduraDurabilidade = 0;
-            jogador.bonusVelocidade = 1;
-            jogador.bonusDano = 1;
-            jogador.bonusDefesa = 1;
-            jogador.bonusColeta = 1;
-            jogador.bonusCura = 1;
-            armaduraBarContainer.style.display = "none";
-            temChaveCasa = false;
-            modoVoo = false;
-            barcoJogador.x = POSICAO_BARCO_PADRAO.x;
-            barcoJogador.y = POSICAO_BARCO_PADRAO.y;
-            barcoJogador.vel = 0;
-            barcoJogador.angulo = 0;
-            jogador.x = 500;
-            jogador.y = 750;
-            jogador.desembarqueX = 500;
-            jogador.desembarqueY = 750;
-            document.getElementById("status-espada").innerText = "Não";
-            document.getElementById("status-arco").innerText = "Não";
-            document.getElementById("txt-armadura-hud").innerText = "Nenhuma";
-            document.getElementById("item-chave-casa").style.display = "flex";
-            aliados = [];
-            flechas = [];
-            flechasPiratas = [];
-            tempoParaGuerra = 300;
-            emGuerra = false;
-            temChaveTesouro = false;
-            bauTesouroUnico = null;
-            casaConstruida = false;
-            construcaoItens = { parede: 0, teto: 0, porta: 0, janela: 0 };
-            dentroDaCasa = false;
-            document.getElementById("casa-interna").style.display = "none";
-            nivelIlha = 1;
-            piratas = [];
-            bauTesouroAberto = false;
-            bauPirataAberto = false;
-            document.getElementById("bau-tesouro-menu").style.display = "none";
-            document.getElementById("bau-pirata-menu").style.display = "none";
-            document.getElementById("bau-casa-menu").style.display = "none";
-            casaPosicao = null;
-            bauCasaItens = { madeira: 0, agua: 0, comida: 0 };
-            dormindo = false;
-            camaElement.classList.remove('dormindo');
-            camaElement.innerHTML = '🛏️ Dormir';
-            progressoSono.style.display = 'none';
-            btnAcordar.style.display = 'none';
-            barraSono.style.width = '0%';
-            tempoDia = 360;
-            inicializarAmbiente();
-            atualizarHUD();
-            atualizarNivelLoja();
-            atualizarRelogio();
-            adicionarMensagem("🔄 Jogo reiniciado!", "#f1c40f");
-            dicaCasa.style.display = "block";
-            setTimeout(() => dicaCasa.style.display = "none", 5000);
+            if (confirm("Tem certeza que deseja reiniciar o jogo? Todo progresso será perdido!")) {
+                localStorage.removeItem('pernambuco_save');
+                
+                jogador.vida = 100;
+                jogador.fome = 100;
+                jogador.sede = 100;
+                jogador.inventario = { madeira: 15, agua: 1, comida: 1, chave: 0, chaveCasa: 0 };
+                jogador.machadoNivel = 1;
+                jogador.machadoDurabilidade = 110;
+                jogador.temEspada = false;
+                jogador.espadaNivel = 0;
+                jogador.temArco = false;
+                jogador.pilotando = false;
+                jogador.invencivel = false;
+                jogador.armaduraNivel = 0;
+                jogador.armaduraDurabilidade = 0;
+                jogador.bonusVelocidade = 1;
+                jogador.bonusDano = 1;
+                jogador.bonusDefesa = 1;
+                jogador.bonusColeta = 1;
+                jogador.bonusCura = 1;
+                jogador.vel = 2.8;
+                armaduraBarContainer.style.display = "none";
+                temChaveCasa = false;
+                modoVoo = false;
+                barcoJogador.x = POSICAO_BARCO_PADRAO.x;
+                barcoJogador.y = POSICAO_BARCO_PADRAO.y;
+                barcoJogador.vel = 0;
+                barcoJogador.angulo = 0;
+                jogador.x = 500;
+                jogador.y = 750;
+                jogador.desembarqueX = 500;
+                jogador.desembarqueY = 750;
+                document.getElementById("status-espada").innerText = "Não";
+                document.getElementById("status-arco").innerText = "Não";
+                document.getElementById("txt-armadura-hud").innerText = "Nenhuma";
+                document.getElementById("item-chave-casa").style.display = "flex";
+                aliados = [];
+                flechas = [];
+                flechasPiratas = [];
+                tempoParaGuerra = 300;
+                emGuerra = false;
+                temChaveTesouro = false;
+                bauTesouroUnico = null;
+                casaConstruida = false;
+                construcaoItens = { parede: 0, teto: 0, porta: 0, janela: 0 };
+                dentroDaCasa = false;
+                document.getElementById("casa-interna").style.display = "none";
+                nivelIlha = 1;
+                piratas = [];
+                bauTesouroAberto = false;
+                bauPirataAberto = false;
+                document.getElementById("bau-tesouro-menu").style.display = "none";
+                document.getElementById("bau-pirata-menu").style.display = "none";
+                document.getElementById("bau-casa-menu").style.display = "none";
+                casaPosicao = null;
+                bauCasaItens = { madeira: 0, agua: 0, comida: 0 };
+                dormindo = false;
+                camaElement.classList.remove('dormindo');
+                camaElement.innerHTML = '🛏️ Dormir';
+                progressoSono.style.display = 'none';
+                btnAcordar.style.display = 'none';
+                barraSono.style.width = '0%';
+                tempoDia = 360;
+                
+                document.getElementById("personagem-select").style.display = "flex";
+                
+                inicializarAmbiente();
+                atualizarHUD();
+                atualizarNivelLoja();
+                atualizarRelogio();
+                adicionarMensagem("🔄 Jogo reiniciado!", "#f1c40f");
+                dicaCasa.style.display = "block";
+                setTimeout(() => dicaCasa.style.display = "none", 5000);
+            }
         }
 
         // ===================== RENDERIZAÇÃO =====================
@@ -3679,26 +3702,21 @@
             // ========== CONSTRUÇÕES DA ILHA INIMIGA ==========
             construcoesInimigas.forEach(c => {
                 if (c.tipo === 'barraca') {
-                    // Corpo da barraca
                     ctx.fillStyle = c.cor;
                     ctx.fillRect(c.x - c.larg/2, c.y - c.alt/2, c.larg, c.alt);
-                    // Teto
                     ctx.fillStyle = c.corTeto;
                     ctx.beginPath();
                     ctx.moveTo(c.x - c.larg/2 - 8, c.y - c.alt/2);
                     ctx.lineTo(c.x, c.y - c.alt/2 - 18);
                     ctx.lineTo(c.x + c.larg/2 + 8, c.y - c.alt/2);
                     ctx.fill();
-                    // Entrada
                     ctx.fillStyle = '#3d2412';
                     ctx.fillRect(c.x - 10, c.y + 5, 20, 15);
-                    // Sombra
                     ctx.fillStyle = 'rgba(0,0,0,0.2)';
                     ctx.fillRect(c.x - c.larg/2, c.y + c.alt/2, c.larg, 5);
                 } else if (c.tipo === 'fogueira') {
                     c.timerAnim += 0.08;
                     let tamanho = 16 + Math.sin(c.timerAnim) * 4;
-                    // Base de pedras
                     ctx.fillStyle = '#555';
                     for (let i = 0; i < 6; i++) {
                         let ang = (i / 6) * Math.PI * 2 + c.timerAnim * 0.3;
@@ -3706,7 +3724,6 @@
                         ctx.arc(c.x + Math.cos(ang) * 15, c.y + Math.sin(ang) * 10 + 5, 6, 0, Math.PI * 2);
                         ctx.fill();
                     }
-                    // Fogo
                     let grad = ctx.createRadialGradient(c.x, c.y - 5, 2, c.x, c.y - 5, tamanho);
                     grad.addColorStop(0, '#ff6b00');
                     grad.addColorStop(0.4, '#ff4500');
@@ -3716,7 +3733,6 @@
                     ctx.beginPath();
                     ctx.ellipse(c.x, c.y - 5, tamanho * 0.7, tamanho, 0, 0, Math.PI * 2);
                     ctx.fill();
-                    // Chamas
                     ctx.fillStyle = 'rgba(255,200,50,0.6)';
                     ctx.beginPath();
                     ctx.ellipse(c.x - 3, c.y - 12, 6, 12 + Math.sin(c.timerAnim * 0.7) * 4, -0.2, 0, Math.PI * 2);
@@ -3724,22 +3740,18 @@
                     ctx.beginPath();
                     ctx.ellipse(c.x + 5, c.y - 10, 5, 10 + Math.sin(c.timerAnim * 0.5 + 1) * 3, 0.2, 0, Math.PI * 2);
                     ctx.fill();
-                    // Luz
                     ctx.fillStyle = `rgba(255,150,50,${0.03 + Math.sin(c.timerAnim) * 0.01})`;
                     ctx.beginPath();
                     ctx.arc(c.x, c.y, 60, 0, Math.PI * 2);
                     ctx.fill();
                 } else if (c.tipo === 'totem') {
-                    // Tronco
                     ctx.fillStyle = '#5c3d24';
                     ctx.fillRect(c.x - c.larg/2, c.y - c.alt/2, c.larg, c.alt);
-                    // Decorações (3 cores alternadas)
                     for (let i = 0; i < 4; i++) {
                         let yPos = c.y - c.alt/2 + 6 + i * 8;
                         ctx.fillStyle = c.cores[i % c.cores.length];
                         ctx.fillRect(c.x - c.larg/2 + 2, yPos, c.larg - 4, 5);
                     }
-                    // Olhos
                     ctx.fillStyle = '#fff';
                     ctx.beginPath();
                     ctx.arc(c.x - 4, c.y - 6, 3, 0, Math.PI * 2);
@@ -3754,10 +3766,8 @@
                     ctx.beginPath();
                     ctx.arc(c.x + 5, c.y - 5, 1.5, 0, Math.PI * 2);
                     ctx.fill();
-                    // Boca
                     ctx.fillStyle = '#c0392b';
                     ctx.fillRect(c.x - 5, c.y + 3, 10, 3);
-                    // Penas no topo
                     ctx.fillStyle = '#f1c40f';
                     for (let i = 0; i < 3; i++) {
                         let ang = -Math.PI/2 + i * Math.PI/3 - 0.3;
@@ -4106,7 +4116,6 @@
             mctx.closePath();
             mctx.fill();
 
-            // Construções no minimapa
             construcoesInimigas.forEach(c => {
                 mctx.fillStyle = c.tipo === 'barraca' ? '#8B6914' : c.tipo === 'fogueira' ? '#ff4500' : '#c0392b';
                 mctx.fillRect(c.x * fX - 2, c.y * fY - 2, 4, 4);
