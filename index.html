@@ -1468,9 +1468,18 @@
         <button id="btn-salvar" onclick="salvarJogo()">💾 Salvar</button>
 
         <!-- BOTÃO REINICIAR - CORRIGIDO E VISÍVEL -->
-        <button id="btn-reiniciar" onclick="reiniciarJogoCompleto()">🔄 Reiniciar</button>
+        <!-- BOTÃO REINICIAR - SOLUÇÃO DEFINITIVA -->
+<button onclick="reiniciarJogoCompleto()" 
+        style="position:absolute; bottom:15px; left:160px; 
+               background:#e74c3c; border:2px solid #c0392b; 
+               color:white; padding:6px 12px; border-radius:4px; 
+               cursor:pointer; font-family:Arial,sans-serif; 
+               font-size:10px; font-weight:bold; z-index:9999;
+               box-shadow: 0 0 15px rgba(231,76,60,0.5);">
+    🔄 Reiniciar
+</button>
 
-        <!-- HOTBAR -->
+                <!-- HOTBAR -->
         <div id="hotbar">
             <div class="slot active" id="slot-0" onclick="selecionarSlot(0)"><span class="tecla">1</span><span class="nome">Machado</span><span class="qtd">-</span></div>
             <div class="slot" id="slot-1" onclick="selecionarSlot(1)"><span class="tecla">2</span><span class="nome">Água</span><span class="qtd" id="qtd-agua">0</span></div>
@@ -1478,6 +1487,17 @@
             <div class="slot" id="slot-3" onclick="selecionarSlot(3)"><span class="tecla">4</span><span class="nome">Espada</span><span class="qtd" id="status-espada">Não</span></div>
             <div class="slot" id="slot-4" onclick="selecionarSlot(4)"><span class="tecla">5</span><span class="nome">Arco</span><span class="qtd" id="status-arco">Não</span></div>
         </div>
+
+        <!-- BOTÃO REINICIAR - DEPOIS DA HOTBAR (VISÍVEL) -->
+        <button onclick="reiniciarJogoCompleto()" 
+                style="position:absolute; bottom:70px; left:50%; transform:translateX(-50%);
+                       background:#e74c3c; border:2px solid #c0392b; 
+                       color:white; padding:8px 20px; border-radius:6px; 
+                       cursor:pointer; font-family:Arial,sans-serif; 
+                       font-size:14px; font-weight:bold; z-index:9999;
+                       box-shadow: 0 0 20px rgba(231,76,60,0.6);">
+            🔄 REINICIAR JOGO
+        </button>
 
         <!-- ADM -->
         <div id="adm-auth-modal">
