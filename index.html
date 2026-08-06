@@ -1119,28 +1119,34 @@
             font-family: Arial, sans-serif;
             font-size: 10px;
             font-weight: bold;
-            z-index: 10;
+            z-index: 20;
             transition: all 0.3s;
         }
         #btn-salvar:hover { background: rgba(46, 204, 113, 1); transform: scale(1.05); }
 
+        /* BOTÃO REINICIAR CORRIGIDO - VISÍVEL AO LADO DO SALVAR */
         #btn-reiniciar {
             position: absolute;
             bottom: 15px;
-            left: 140px;
-            background: rgba(231, 76, 60, 0.85);
+            left: 160px;
+            background: rgba(231, 76, 60, 0.9);
             border: 2px solid #e74c3c;
             color: #fff;
-            padding: 6px 10px;
+            padding: 6px 12px;
             border-radius: 4px;
             cursor: pointer;
             font-family: Arial, sans-serif;
             font-size: 10px;
             font-weight: bold;
-            z-index: 10;
+            z-index: 999;
             transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
         }
-        #btn-reiniciar:hover { background: rgba(231, 76, 60, 1); transform: scale(1.05); }
+        #btn-reiniciar:hover { 
+            background: rgba(231, 76, 60, 1); 
+            transform: scale(1.05);
+            box-shadow: 0 2px 12px rgba(231, 76, 60, 0.6);
+        }
 
         #indicador-barco {
             position: absolute;
@@ -1229,7 +1235,7 @@
                 <div><span class="tecla">B</span> Baú de armazenamento</div>
                 <div><span class="tecla">Clique</span> Coletar / Atacar</div>
                 <div style="color:#2ecc71;">💾 Botão SALVAR no canto inferior</div>
-                <div style="color:#ff6b6b;">🔄 Botão REINICIAR no canto inferior</div>
+                <div style="color:#ff6b6b;">🔄 Botão REINICIAR ao lado do SALVAR</div>
                 <div style="color:#ff6b6b;">⚔️ Modo GUERRA no painel ADM</div>
             </div>
         </div>
@@ -1461,7 +1467,7 @@
         <!-- BOTÃO SALVAR -->
         <button id="btn-salvar" onclick="salvarJogo()">💾 Salvar</button>
 
-        <!-- BOTÃO REINICIAR -->
+        <!-- BOTÃO REINICIAR - CORRIGIDO E VISÍVEL -->
         <button id="btn-reiniciar" onclick="reiniciarJogoCompleto()">🔄 Reiniciar</button>
 
         <!-- HOTBAR -->
@@ -1503,7 +1509,7 @@
         // CÓDIGO JAVASCRIPT COMPLETO - CORRIGIDO
         // BARCO: DESEMBARQUE SEM TELEPORTE
         // VELOCIDADE: REDUZIDA
-        // REINICIAR: BOTÃO ADICIONADO
+        // REINICIAR: BOTÃO CORRIGIDO E VISÍVEL
         // DURABILIDADE MACHADO: AUMENTADA
         // =====================================================
         
